@@ -31,7 +31,9 @@ Requires Node 22.18+ (the art tools and tests use Node's native TypeScript strip
 **Poki SDK.** The SDK loads by default. Set `VITE_POKI=off` (for example
 `VITE_POKI=off npm run dev`) to skip it during local QA.
 
-**Upload to Poki.** Zip the contents of `dist/`. All paths are relative (`base: "./"`).
+**Upload to Poki.** Run `npm run release`. It builds with the Poki SDK and writes
+`release/spellbound-arena-v<version>.zip` (version from `package.json`, `index.html` at the zip root).
+All paths are relative (`base: "./"`).
 
 ## Controls
 

@@ -1,6 +1,6 @@
 {
   "name": "spellbound-arena",
-  "version": "2.0.0",
+  "version": "1.1.0",
   "private": true,
   "type": "module",
   "description": "Portrait-first pixel-art rune-drawing survival shooter (Poki).",
@@ -10,7 +10,8 @@
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
-    "test": "node --test \"tests/*.test.ts\""
+    "test": "node --test \"tests/*.test.ts\"",
+    "release": "npm run build && node tools/release/zip.mjs"
   },
   "dependencies": {
     "phaser": "3.90.0"
