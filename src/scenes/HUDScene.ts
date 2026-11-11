@@ -236,6 +236,7 @@ export class HUDScene extends Phaser.Scene {
     this.tweens.add({ targets: s.c, scale: 1, duration: 500, ease: "Back.easeOut" });
     this.tweens.add({ targets: s.glow, alpha: { from: 1, to: 0 }, duration: 500, repeat: 3 });
     this.time.delayedCall(500, () => this.scene.launch("Tutorial", { mode: "demo", spell: id }));
+    if (id === "nova") this.time.delayedCall(4200, () => this.showHint("TIP: FREEZE WITH ICE, THEN HIT WITH FIRE = SHATTER (x2)!", 4500));
   }
 
   // ---------------------------------------------------------------- banners & hints

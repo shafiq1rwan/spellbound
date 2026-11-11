@@ -38,17 +38,19 @@ export const GAME = {
 
   combo: {
     windowMs: 4000,
-    perStack: 0.03,
+    perStack: 0.035,
     maxStacks: 20,
-    varietyBonus: 1,
+    /** extra combo stacks for switching to a different element (rewards mixing spells) */
+    varietyBonus: 2,
   },
 
   feel: {
     hitstopSmallMs: 0,
     hitstopHeavyMs: 55,
     hitstopKillHeavyMs: 70,
-    shakeSmall: 0.0025,
-    shakeHeavy: 0.006,
+    /** screen shake peaks, in art pixels */
+    shakeSmall: 1,
+    shakeHeavy: 2,
   },
 
   spawn: {

@@ -246,7 +246,7 @@ export class Enemy implements Target {
       case "golem": {
         Audio.play("golem_die");
         g.hitstop(70);
-        g.vfx.shake(0.008, 260);
+        g.vfx.shake(2.5, 240);
         s.setTintFill(0xffffff);
         g.time.delayedCall(90, () => {
           s.setVisible(false);
@@ -466,7 +466,7 @@ export class Enemy implements Target {
     } else {
       const r = ((this.def.attackRange ?? 30) + 8) * (this.elite ? 1.25 : 1);
       Audio.play("golem_slam");
-      g.vfx.shake(0.006, 180);
+      g.vfx.shake(2, 180);
       g.vfx.play("shock", this.x, this.y, { scale: r / 30, depth: DEPTH.fxLow, tint: 0xd8cfb6 });
       g.vfx.burst("chip", this.x, this.y - 2, 10, { speed: [40, 110] });
       g.vfx.decal("decal_scorch", this.x, this.y, 1.2, 2500, 0.5);

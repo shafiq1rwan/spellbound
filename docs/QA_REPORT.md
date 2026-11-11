@@ -30,6 +30,9 @@ All checks below were **actually executed**. Browser checks used headless Micros
 | Production build with the live Poki SDK | 390×844 | SDK loads and the game plays. Console warnings and requests come from Poki's ad stack only |
 | XP orb travel (after the speed-up) | 390×844 | 60 px: 1.3 s, 100 px: 1.9 s, 150 px: 2.8 s |
 | Wave 5 elite | 390×844 | guaranteed elite spawns |
+| Hard human circles (open, overdrawn, egg-shaped, wobbly), 200 strokes | test suite | 199/200 recognised (the previous recognizer managed 137/200) |
+| Ice → Fire Shatter (`tools/qa/ice-combo.mjs`) | 390×844 | a sloppy oval hits all 8 enemies; a fireball on a frozen enemy does double damage (50 instead of 25) |
+| Screen shake | 390×844, 1920×1080 | peaks 1–2 art px, then the camera returns exactly to rest |
 
 ## Bugs found by QA and fixed
 

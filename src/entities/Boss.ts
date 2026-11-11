@@ -55,7 +55,7 @@ export class Boss implements Target {
     this.line = g.add.graphics().setDepth(DEPTH.fxHigh).setBlendMode(Phaser.BlendModes.ADD);
     g.vfx.play("portal", this.home.x, this.home.y + this.height, { scale: 3, depth: DEPTH.sigil });
     Audio.play("boss_roar");
-    g.vfx.shake(0.006, 600);
+    g.vfx.shake(2, 500);
     g.tweens.add({ targets: this, y: this.home.y, duration: 1600, ease: "Cubic.easeOut", onComplete: () => { this.act = "idle"; this.actT = 0; } });
     bus.emit(EV.BOSS_HP, 1, "ANCIENT GUARDIAN");
   }
@@ -88,7 +88,7 @@ export class Boss implements Target {
   private enterPhase2() {
     this.phase2 = true;
     Audio.play("boss_roar", { rate: 1.15 });
-    this.g.vfx.shake(0.008, 500);
+    this.g.vfx.shake(2.5, 450);
     this.g.vfx.play("shock", this.x, this.cy, { scale: 3, add: true, tint: PAL.violet });
     this.glow.setTint(PAL.pink);
     bus.emit(EV.WAVE_BANNER, "THE GUARDIAN AWAKENS", "PHASE 2", PAL.pink);
@@ -180,7 +180,7 @@ export class Boss implements Target {
           this.act = "beam";
           this.actT = 0;
           Audio.play("beam");
-          g.vfx.shake(0.007, 250);
+          g.vfx.shake(2, 250);
           g.vfx.bolt(this.x, this.cy, w.x, w.y - 12, { color: PAL.pink, ms: 380 });
           g.vfx.bolt(this.x, this.cy, w.x, w.y - 12, { color: PAL.violet, ms: 380 });
           g.vfx.illuminate(PAL.pink, 0.1);
@@ -237,7 +237,7 @@ export class Boss implements Target {
         const ex = this.x + (Math.random() - 0.5) * 60, ey = this.cy + (Math.random() - 0.5) * 50;
         g.vfx.play(i % 3 === 2 ? "explosion_big" : "explosion", ex, ey, { tint: i % 2 ? 0xe0b0ff : undefined });
         Audio.play("fire_boom", { rate: 0.8 + Math.random() * 0.3, maxConcurrent: 3 });
-        g.vfx.shake(0.005, 120);
+        g.vfx.shake(1.5, 120);
       });
     }
     g.time.delayedCall(1400, () => {

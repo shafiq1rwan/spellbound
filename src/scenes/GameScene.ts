@@ -131,6 +131,7 @@ export class GameScene extends Phaser.Scene {
     const dy = Layout.portrait ? 12 : 4;
     const dx = Layout.portrait ? 0 : -10;
     cam.centerOn(dx, -dy);
+    this.vfx?.setShakeBase();
   }
   viewHalfH() {
     return this.cameras.main.worldView.height / 2;

@@ -48,24 +48,24 @@ export interface SpellLevel {
 export const SPELLS: Record<SpellId, SpellDef> = {
   fireball: {
     id: "fireball", rune: "triangle", element: "fire", name: "Fireball", runeName: "Triangle",
-    icon: "ic_fireball", runeIcon: "rune_fire", cooldown: 260, unlockWave: 1,
+    icon: "ic_fireball", runeIcon: "rune_fire", cooldown: 450, unlockWave: 1,
     levels: [
-      { desc: "Hurl a blazing fireball.", damage: 22, count: 1, scale: 1, splash: 18, knockback: 26 },
-      { desc: "Bigger fireball, hotter trail.", damage: 30, count: 1, scale: 1.35, splash: 22, knockback: 32 },
-      { desc: "Splits into three fireballs.", damage: 28, count: 3, scale: 1.35, splash: 22, knockback: 32 },
-      { desc: "Explodes for heavy splash damage.", damage: 32, count: 3, scale: 1.45, splash: 36, knockback: 40 },
-      { desc: "METEOR: a colossal fireball.", damage: 48, count: 3, scale: 1, splash: 50, knockback: 55, meteor: true },
+      { desc: "Hurl a blazing fireball.", damage: 22, count: 1, scale: 1, splash: 16, knockback: 26 },
+      { desc: "Bigger fireball, hotter trail.", damage: 28, count: 1, scale: 1.35, splash: 20, knockback: 32 },
+      { desc: "Splits into three fireballs.", damage: 22, count: 3, scale: 1.35, splash: 20, knockback: 32 },
+      { desc: "Explodes for heavy splash damage.", damage: 25, count: 3, scale: 1.45, splash: 30, knockback: 40 },
+      { desc: "METEOR: a colossal fireball.", damage: 38, count: 3, scale: 1, splash: 42, knockback: 55, meteor: true },
     ],
   },
   nova: {
     id: "nova", rune: "circle", element: "ice", name: "Ice Nova", runeName: "Circle",
-    icon: "ic_nova", runeIcon: "rune_ice", cooldown: 2800, unlockWave: 2,
+    icon: "ic_nova", runeIcon: "rune_ice", cooldown: 2000, unlockWave: 2,
     levels: [
-      { desc: "Frost ring that slows foes.", damage: 12, radius: 54, slow: 0.5, slowMs: 2500 },
-      { desc: "Wider, colder ring.", damage: 16, radius: 66, slow: 0.55, slowMs: 3000 },
-      { desc: "Freezes enemies solid.", damage: 18, radius: 70, slow: 0.55, slowMs: 3000, freezeMs: 1300 },
-      { desc: "Launches ice shards outward.", damage: 20, radius: 78, slow: 0.6, slowMs: 3000, freezeMs: 1500, shards: 8 },
-      { desc: "ABSOLUTE ZERO: double pulse.", damage: 24, radius: 92, slow: 0.6, slowMs: 3500, freezeMs: 2000, shards: 12, pulses: 2 },
+      { desc: "Big frost ring: freezes, pushes foes back.", damage: 20, radius: 70, slow: 0.5, slowMs: 2500, freezeMs: 1500, knockback: 34 },
+      { desc: "Wider ring, longer freeze.", damage: 26, radius: 82, slow: 0.55, slowMs: 3000, freezeMs: 1800, knockback: 38 },
+      { desc: "Launches ice shards outward.", damage: 30, radius: 90, slow: 0.55, slowMs: 3000, freezeMs: 2100, shards: 8, knockback: 40 },
+      { desc: "Huge ring, more shards.", damage: 36, radius: 102, slow: 0.6, slowMs: 3200, freezeMs: 2400, shards: 12, knockback: 44 },
+      { desc: "ABSOLUTE ZERO: double pulse.", damage: 42, radius: 116, slow: 0.6, slowMs: 3500, freezeMs: 3000, shards: 16, pulses: 2, knockback: 50 },
     ],
   },
   lightning: {

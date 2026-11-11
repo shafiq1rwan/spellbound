@@ -11,6 +11,7 @@ export interface Features {
   netTurn: number;   // |signed turning| in degrees
   totalTurn: number; // sum |turning| in degrees
   corners: number;   // sharp direction changes
+  radial: number;    // inner/outer radius ratio around the centroid (circle ~0.8, spiral ~0.2)
   length: number;    // path length (input units)
   size: number;      // bbox max side (input units)
 }
@@ -149,16 +150,22 @@ export function features(points: Pt[]): Features {
   for (let i = 1; i < turn.length - 1; i++) {
     if (turn[i] > T && turn[i] >= turn[i - 1] && turn[i] >= turn[i + 1] && i - last > 4) { corners++; last = i; }
   }
+  // radial consistency: 15th / 85th percentile distance from the centroid (aspect-normalised)
+  const c = centroid(p);
+  const sx = Math.max(b.w, 1e-6), sy = Math.max(b.h, 1e-6);
+  const radii = p.map((q) => Math.hypot((q.x - c.x) / sx, (q.y - c.y) / sy)).sort((u, v) => u - v);
+  const radial = radii[Math.floor(radii.length * 0.15)] / Math.max(1e-6, radii[Math.floor(radii.length * 0.85)]);
   const deg = 180 / Math.PI;
-  return { closure, netTurn: Math.abs(net) * deg, totalTurn: total * deg, corners, length, size };
+  return { closure, netTurn: Math.abs(net) * deg, totalTurn: total * deg, corners, radial, length, size };
 }
 
 function gate(r: RuneName, f: Features): boolean {
   switch (r) {
     case "triangle": return f.closure < 0.5 && f.netTurn > 200 && f.netTurn < 480 && f.corners >= 2 && f.corners <= 4;
-    case "circle": return f.closure < 0.5 && f.netTurn > 250 && f.netTurn < 500 && f.corners <= 2;
+    // forgiving: open gaps, overdrawn loops, ovals and wobble are all fine as long as the radius stays roughly constant
+    case "circle": return f.closure < 0.7 && f.netTurn > 220 && f.netTurn < 640 && f.corners <= 3 && f.radial > 0.45;
     case "zigzag": return f.closure > 0.3 && f.netTurn < 230 && f.corners >= 2 && f.totalTurn > 150;
-    case "spiral": return f.netTurn >= 470 && f.closure > 0.12;
+    case "spiral": return f.netTurn >= 470 && f.closure > 0.12 && f.radial < 0.55;
   }
 }
 
@@ -195,17 +202,18 @@ export function templatePaths(): Record<RuneName, Pt[][]> {
         const v = rotations(dir > 0 ? t : [...t].reverse(), s);
         out.triangle.push(poly(v, true, 0.08));
       }
-  // circles: four start angles, both directions, two aspects
-  for (const aspect of [1, 0.75])
-    for (let s = 0; s < 4; s++)
-      for (const dir of [1, -1]) {
-        const pts: Pt[] = [];
-        for (let i = 0; i <= 48; i++) {
-          const a = (s * Math.PI) / 2 + dir * (i / 48) * (Math.PI * 2 + 0.25);
-          pts.push({ x: Math.cos(a), y: Math.sin(a) * aspect });
+  // circles: four start angles, both directions, two aspects, open / closed / overdrawn sweeps
+  for (const aspect of [1, 0.72])
+    for (const sweep of [0.85, 1.04, 1.25])
+      for (let s = 0; s < 4; s++)
+        for (const dir of [1, -1]) {
+          const pts: Pt[] = [];
+          for (let i = 0; i <= 48; i++) {
+            const a = (s * Math.PI) / 2 + dir * (i / 48) * Math.PI * 2 * sweep;
+            pts.push({ x: Math.cos(a), y: Math.sin(a) * aspect });
+          }
+          out.circle.push(pts);
         }
-        out.circle.push(pts);
-      }
   // zigzags: Z, N, W/M, lightning bolt; each also reversed
   const zz = [
     [[0, 0], [1, 0], [0, 1], [1, 1]],

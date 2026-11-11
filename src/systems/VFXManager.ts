@@ -26,6 +26,12 @@ export class VFXManager {
   private flashRect: Phaser.GameObjects.Rectangle;
   q = 1;
   reduced = false;
+  // screen shake in ART pixels (Phaser's built-in shake scales with canvas size x zoom = far too strong here)
+  private shakeAmp = 0;
+  private shakeMs = 0;
+  private shakeMax = 1;
+  private shakeTick = 0;
+  private baseScroll: { x: number; y: number } | null = null;
 
   constructor(scene: Phaser.Scene) {
     this.scene = scene;
@@ -223,13 +229,41 @@ export class VFXManager {
     return pts;
   }
 
-  shake(intensity: number, ms = 120) {
-    const k = this.reduced ? 0.35 : 1;
-    if (intensity * k <= 0) return;
-    this.scene.cameras.main.shake(ms, intensity * k, false);
+  /** remember the camera's resting scroll (call after layout/centerOn) */
+  setShakeBase() {
+    const cam = this.scene.cameras.main;
+    this.baseScroll = { x: cam.scrollX, y: cam.scrollY };
+  }
+  /** px: peak offset in art pixels (1 = subtle, 3 = huge); decays to zero over ms */
+  shake(px: number, ms = 120) {
+    const amp = px * (this.reduced ? 0.4 : 1);
+    if (amp <= 0) return;
+    if (!this.baseScroll) this.setShakeBase();
+    // keep the stronger of the running and new shake
+    if (amp * ms >= this.shakeAmp * this.shakeMs) {
+      this.shakeAmp = amp;
+      this.shakeMs = ms;
+      this.shakeMax = ms;
+    }
+  }
+  private updateShake(dtMs: number) {
+    if (!this.baseScroll) return;
+    const cam = this.scene.cameras.main;
+    if (this.shakeMs <= 0) {
+      cam.setScroll(this.baseScroll.x, this.baseScroll.y);
+      return;
+    }
+    this.shakeMs -= dtMs;
+    this.shakeTick -= dtMs;
+    if (this.shakeTick > 0) return;
+    this.shakeTick = 40;
+    const a = this.shakeAmp * Math.max(0, this.shakeMs / this.shakeMax);
+    const ox = Math.round((Math.random() * 2 - 1) * a), oy = Math.round((Math.random() * 2 - 1) * a);
+    cam.setScroll(this.baseScroll.x + ox, this.baseScroll.y + oy);
   }
 
   update(dtMs: number) {
+    this.updateShake(dtMs);
     const dt = dtMs / 1000;
     for (const b of this.bits) {
       if (!b.active) continue;

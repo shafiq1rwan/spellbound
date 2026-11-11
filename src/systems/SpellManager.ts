@@ -146,9 +146,9 @@ export class SpellManager {
     g.vfx.burst("spark", x, y, meteor ? 10 : 4, { tint: PAL.fireYellow });
     g.vfx.decal("decal_scorch", x, y + 4, meteor ? 2.4 : 0.8 + splash / 40, meteor ? 6000 : 4000);
     Audio.play(meteor ? "big_boom" : "fire_boom", { rate: 0.9 + Math.random() * 0.2, maxConcurrent: 4 });
-    if (meteor) { g.vfx.shake(0.009, 260); g.vfx.illuminate(PAL.fireOrange, 0.12, 320); g.hitstop(60); }
-    else if (lvl >= 4) g.vfx.shake(0.004, 120);
-    else g.vfx.shake(0.002, 80);
+    if (meteor) { g.vfx.shake(3, 260); g.vfx.illuminate(PAL.fireOrange, 0.12, 320); g.hitstop(60); }
+    else if (lvl >= 4) g.vfx.shake(1.5, 110);
+    else g.vfx.shake(1, 60);
     g.shockwaveGrass(x, y, splash * 2 + 20);
     const heavy = meteor || lvl >= 4;
     if (direct && direct.alive) g.combat.damage(direct, p.damage, { element: "fire", dx: p.vx, dy: p.vy, kb: kb, heavy });
@@ -177,13 +177,13 @@ export class SpellManager {
         this.g.vfx.burst("shard", w.tip().x, w.tip().y, 6);
         Audio.play(k ? "ice_wave" : "ice_cast");
         if (!k) Audio.play("ice_wave", { vol: 0.8 });
-        this.g.vfx.shake(0.003, 120);
+        this.g.vfx.shake(1, 100);
         this.g.shockwaveGrass(w.x, w.y, maxR + 30);
         // shards fly outward
         const shards = L.shards ?? 0;
         for (let i = 0; i < shards; i++) {
           const a = (i / shards) * Math.PI * 2 + k * 0.2;
-          this.proj().launch("shard", w.x, w.y - 8, a, 170, { damage: 10, radius: 4, life: 700, tex: "p_shard", glow: PAL.iceCyan, glowSize: 14, pierce: 2 });
+          this.proj().launch("shard", w.x, w.y - 8, a, 180, { damage: 14, radius: 4, life: 800, tex: "p_shard", glow: PAL.iceCyan, glowSize: 14, pierce: 2 });
         }
       });
     }
@@ -202,7 +202,7 @@ export class SpellManager {
           if (L.freezeMs) t.freeze(L.freezeMs);
           else t.slow(L.slow ?? 0.5, L.slowMs ?? 2000);
           if (L.freezeMs) t.slow(L.slow ?? 0.5, (L.slowMs ?? 2000) + L.freezeMs);
-          this.g.combat.damage(t, L.damage, { element: "ice", dx: t.x - n.x, dy: t.y - n.y, kb: 16, heavy: false, noShatter: true });
+          this.g.combat.damage(t, L.damage, { element: "ice", dx: t.x - n.x, dy: t.y - n.y, kb: L.knockback ?? 30, heavy: false, noShatter: true });
           this.g.vfx.burst("snow", t.x, t.y - t.height, 4);
         }
       }

@@ -6,12 +6,13 @@ spells at monsters closing in from every side.
 | Rune | Spell | Role |
 |---|---|---|
 | Triangle | **Fireball** | Single-target projectile with splash. At level 3 it splits into 3; at level 5 it becomes a meteor. |
-| Circle | **Ice Nova** | Ring centred on the wizard. Damages, slows, and freezes from level 3 (with shards at 4 and a double pulse at 5). |
+| Circle | **Ice Nova** | Big ring centred on the wizard: damages, freezes and pushes foes back from level 1 (shards from level 3, a double pulse at 5). |
 | Zigzag | **Lightning Chain** | Instant bolt that jumps between enemies. Stuns from level 3; every bolt forks at level 5. |
 | Spiral | **Arcane Barrage** | Homing missiles with knockback. Pierce from level 3; summons a vortex at level 5. |
 
-The runes unlock on waves 1 to 4. **Spell combination:** hitting a frozen enemy with any non-ice spell
-*shatters* it for double damage. **Aiming:** draw the rune on top of a monster to target it.
+The runes unlock on waves 1 to 4. **Spell combination:** freeze enemies with Ice Nova, then hit them with any other spell to
+*shatter* them for double damage. Switching elements also builds the combo meter 3× faster than
+repeating one spell. **Aiming:** draw the rune on top of a monster to target it.
 Otherwise the spell goes for the nearest enemy.
 
 ## Run it

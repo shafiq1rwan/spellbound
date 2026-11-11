@@ -87,6 +87,31 @@ for (const rune of Object.keys(makers) as RuneName[]) {
   });
 }
 
+test("accepts hard human circles: open gaps, overdrawn loops, eggs, wobble (>= 92%)", () => {
+  const R = rng(4242);
+  let ok = 0;
+  const wrong: Record<string, number> = {};
+  const N = 200;
+  for (let i = 0; i < N; i++) {
+    const s = R() * Math.PI * 2, dir = R() < 0.5 ? 1 : -1;
+    const sweep = Math.PI * 2 * (0.78 + R() * 0.52);           // 0.78 .. 1.30 turns
+    const asp = 0.6 + R() * 0.45;                             // ovals
+    const egg = (R() - 0.5) * 0.35;                           // one end fatter
+    const w1 = R() * 6.28, w2 = R() * 6.28, wob = 0.04 + R() * 0.08;
+    const pts: Pt[] = [];
+    for (let k = 0; k <= 60; k++) {
+      const a = s + dir * (k / 60) * sweep;
+      const r = 1 + wob * Math.sin(a * 2 + w1) + wob * 0.6 * Math.sin(a * 3 + w2) + egg * Math.cos(a);
+      pts.push({ x: Math.cos(a) * r, y: Math.sin(a) * r * asp });
+    }
+    const res = rec.recognize(humanize(pts, R, { rot: 0.6, jitter: 0.03 }));
+    if (res.rune === "circle") ok++;
+    else wrong[String(res.rune)] = (wrong[String(res.rune)] ?? 0) + 1;
+  }
+  console.log("hard circles", ok, N, JSON.stringify(wrong));
+  assert.ok(ok / N >= 0.92, `hard circles: ${ok}/${N}, misses ${JSON.stringify(wrong)}`);
+});
+
 test("rejects straight lines, dots and random scribbles", () => {
   const R = rng(99);
   let accepted = 0;
