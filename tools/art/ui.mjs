@@ -167,20 +167,33 @@ export function panel({ size = 24, bg = C.uiBg[1], bg2 = C.uiBg[0], border = C.u
   }
   return im;
 }
+/**
+ * 24x24 9-slice button with EXACT geometry (the runtime centres labels on the face from this):
+ *   up/over: row 0 outline | rows 1..H-5 face | rows H-4..H-2 lip (3) | row H-1 outline
+ *   down:    rows 0-1 empty | row 2 outline | rows 3..H-3 face | row H-2 lip (1) | row H-1 outline
+ * So the face is always H-5 rows tall and the pressed face sits exactly 2px lower.
+ */
 export function button(state = "up") {
   const im = new Img(24, 24);
   const fill = state === "down" ? ["#3A2470", "#4D3394"] : state === "over" ? ["#6A48C8", "#8463E0"] : ["#4E33A0", "#6446C0"];
-  const dy = state === "down" ? 1 : 0;
-  im.rect(1, 2, 22, 21, C.outline);
-  im.rect(2, 20, 20, 2, "#22163F"); // bottom lip
-  im.rect(2, 2 + dy, 20, 18, C.uiGold[0]);
-  im.rect(3, 3 + dy, 18, 16, fill[0]);
-  im.rect(3, 3 + dy, 18, 7, fill[1]);
-  im.hline(3, 3 + dy, 18, state === "over" ? "#B9A0FF" : "#8E74E8");
-  im.hline(2, 2 + dy, 20, C.uiGold[2]);
-  im.vline(2, 2 + dy, 18, C.uiGold[1]);
-  im.vline(21, 2 + dy, 18, C.uiGold[0]);
-  im.hline(2, 19 + dy, 20, C.uiGold[0]);
+  const down = state === "down";
+  const top = down ? 2 : 0;          // outline row
+  const f0 = top + 1, f1 = down ? 21 : 19; // face rows (inclusive)
+  // silhouette: outline with clipped corners
+  im.rect(1, top, 22, 24 - top, C.outline);
+  im.rect(0, top + 1, 24, 22 - top, C.outline);
+  // lip (3D depth)
+  im.rect(1, f1 + 1, 22, 22 - f1, "#22163F");
+  im.hline(2, f1 + 1, 20, "#30205A");
+  // face: gold frame + two-tone fill + top highlight
+  im.rect(1, f0, 22, f1 - f0 + 1, C.uiGold[0]);
+  im.rect(2, f0 + 1, 20, f1 - f0 - 1, fill[0]);
+  im.rect(2, f0 + 1, 20, Math.floor((f1 - f0) / 2), fill[1]);
+  im.hline(2, f0 + 1, 20, state === "over" ? "#B9A0FF" : "#8E74E8");
+  im.hline(1, f0, 22, C.uiGold[2]);
+  im.vline(1, f0, f1 - f0 + 1, C.uiGold[1]);
+  im.vline(22, f0, f1 - f0 + 1, C.uiGold[0]);
+  im.hline(1, f1, 22, C.uiGold[0]);
   return im;
 }
 export function card(rarity = 0) {

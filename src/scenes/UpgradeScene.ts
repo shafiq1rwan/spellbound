@@ -33,21 +33,26 @@ export class UpgradeScene extends Phaser.Scene {
     this.cameras.main.setZoom(Layout.S).setOrigin(0, 0);
     const bd = backdrop(this, W, H, 0).setDepth(-1);
     this.tweens.add({ targets: bd, fillAlpha: 0.72, duration: 250 });
-    const title = txt(this, W / 2, sf.top + (Layout.portrait ? 40 : 22), "LEVEL UP!", { scale: 2, color: PAL.gold });
-    const sub = txt(this, W / 2, title.y + 15, `LEVEL ${this.level}  -  CHOOSE A BLESSING`, { color: PAL.lavender });
+    const n = this.choices.length;
+    const portrait = Layout.portrait;
+    const cw = portrait ? Math.min(W - 20, 204) : Math.min(Math.floor((W - 40) / n), 128);
+    const ch = portrait ? 58 : Math.min(H - 70, 120);
+    const cardsH = portrait ? n * ch + (n - 1) * 8 : ch;
+    // stack: title (14) | 6 | subtitle (7) | 14 | cards — vertically centred in the safe area
+    const stackH = 14 + 6 + 7 + 14 + cardsH;
+    const top = Math.max(sf.top + 6, Math.round(sf.top + (H - sf.top - sf.bottom) / 2 - stackH / 2));
+    const title = txt(this, W / 2, top + 7, "LEVEL UP!", { scale: 2, color: PAL.gold });
+    const sub = txt(this, W / 2, top + 14 + 6, `LEVEL ${this.level}  -  CHOOSE A BLESSING`, { color: PAL.lavender, oy: 0, maxWidth: W - 16 });
+    const cardsTop = top + 14 + 6 + 7 + 14;
     title.setScale(0.3);
     this.tweens.add({ targets: title, scale: 1, duration: 350, ease: "Back.easeOut" });
     const glow = this.add.image(W / 2, title.y, "glow_big").setTint(PAL.gold).setBlendMode(Phaser.BlendModes.ADD).setAlpha(0.35).setDisplaySize(160, 50).setDepth(-0.5);
     this.tweens.add({ targets: glow, alpha: 0.15, duration: 700, yoyo: true, repeat: -1 });
     void sub;
 
-    const n = this.choices.length;
-    const portrait = Layout.portrait;
-    const cw = portrait ? Math.min(W - 20, 200) : Math.min(Math.floor((W - 40) / n), 128);
-    const ch = portrait ? 52 : Math.min(H - 80, 118);
     this.choices.forEach((c, i) => {
       const x = portrait ? W / 2 : W / 2 + (i - (n - 1) / 2) * (cw + 8);
-      const y = portrait ? title.y + 46 + i * (ch + 8) + ch / 2 : H / 2 + 14;
+      const y = portrait ? cardsTop + i * (ch + 8) + ch / 2 : cardsTop + ch / 2;
       const card = this.makeCard(c, Math.round(x), Math.round(y), cw, ch, portrait, i);
       this.cards.push(card);
       card.setAlpha(0).setY(card.y + 20);
@@ -66,26 +71,40 @@ export class UpgradeScene extends Phaser.Scene {
     const bg = slice(this, `card${c.rarity}`, 0, 0, w, h);
     const rc = RARITY_COLORS[c.rarity];
     const items: Phaser.GameObjects.GameObject[] = [bg];
+    const P = 8;
+    const L = -w / 2 + P, R = w / 2 - P, T = -h / 2 + P, B = h / 2 - P;
+    const addIcon = (cx: number, cy: number) => {
+      items.push(this.add.image(cx, cy, "glow").setTint(rc).setBlendMode(Phaser.BlendModes.ADD).setAlpha(0.35).setDisplaySize(40, 40));
+      const icon = this.add.image(0, 0, c.icon).setScale(2).setOrigin(0, 0);
+      icon.setPosition(Math.round(cx - icon.displayWidth / 2), Math.round(cy - icon.displayHeight / 2));
+      items.push(icon);
+    };
     if (portrait) {
-      const ix = -w / 2 + 22;
-      const iconBg = this.add.image(ix, 0, "glow").setTint(rc).setBlendMode(Phaser.BlendModes.ADD).setAlpha(0.35).setDisplaySize(40, 40);
-      const icon = this.add.image(ix, 0, c.icon).setScale(2);
-      const name = txt(this, ix + 22, -h / 2 + 11, c.name.toUpperCase(), { ox: 0, color: 0xfff8ec });
-      const lv = txt(this, w / 2 - 8, -h / 2 + 11, c.levelText || "NEW", { ox: 1, color: rc });
-      const desc = txt(this, ix + 22, -h / 2 + 23, c.desc.toUpperCase(), { ox: 0, oy: 0, color: 0xc8bce8, maxWidth: w - 54, align: 0 });
-      const rar = txt(this, w / 2 - 8, h / 2 - 9, RARITY_NAMES[c.rarity], { ox: 1, color: rc });
-      items.push(iconBg, icon, name, lv, desc, rar);
+      // [icon 32] | name ............ LV
+      //           | description (wraps)
+      //  key      |               RARITY
+      const iconCx = L + 16;
+      addIcon(iconCx, 0);
+      const tx = L + 32 + 8;
+      items.push(txt(this, tx, T, c.name.toUpperCase(), { ox: 0, oy: 0, color: 0xfff8ec }));
+      items.push(txt(this, R, T, c.levelText || "NEW", { ox: 1, oy: 0, color: rc }));
+      items.push(txt(this, tx, T + 7 + 6, c.desc.toUpperCase(), { ox: 0, oy: 0, color: 0xc8bce8, maxWidth: R - tx, align: 0 }));
+      items.push(txt(this, R, B, RARITY_NAMES[c.rarity], { ox: 1, oy: 1, color: rc }));
     } else {
-      const iconBg = this.add.image(0, -h / 2 + 30, "glow").setTint(rc).setBlendMode(Phaser.BlendModes.ADD).setAlpha(0.35).setDisplaySize(44, 44);
-      const icon = this.add.image(0, -h / 2 + 30, c.icon).setScale(2);
-      const name = txt(this, 0, -h / 2 + 58, c.name.toUpperCase(), { color: 0xfff8ec, maxWidth: w - 10 });
-      const lv = txt(this, 0, -h / 2 + 10, c.levelText || "NEW", { color: rc });
-      const desc = txt(this, 0, -h / 2 + 68, c.desc.toUpperCase(), { oy: 0, color: 0xc8bce8, maxWidth: w - 14 });
-      const rar = txt(this, 0, h / 2 - 9, RARITY_NAMES[c.rarity], { color: rc });
-      items.push(iconBg, icon, name, lv, desc, rar);
+      //      LV
+      //    [icon]
+      //     NAME
+      //  description
+      //    RARITY
+      items.push(txt(this, 0, T, c.levelText || "NEW", { oy: 0, color: rc }));
+      addIcon(0, T + 7 + 8 + 16);
+      const nameT = T + 7 + 8 + 32 + 8;
+      const name = txt(this, 0, nameT, c.name.toUpperCase(), { oy: 0, color: 0xfff8ec, maxWidth: w - 2 * P });
+      items.push(name);
+      items.push(txt(this, 0, nameT + name.ink().h + 6, c.desc.toUpperCase(), { oy: 0, color: 0xc8bce8, maxWidth: w - 2 * P }));
+      items.push(txt(this, 0, B, RARITY_NAMES[c.rarity], { oy: 1, color: rc }));
     }
-    const key = txt(this, -w / 2 + 8, h / 2 - 9, `${i + 1}`, { color: 0x6d5c98 });
-    items.push(key);
+    items.push(txt(this, L, B, `${i + 1}`, { ox: 0, oy: 1, color: 0x6d5c98 }));
     ct.add(items);
     bg.setInteractive({ useHandCursor: true });
     bg.on("pointerover", () => { if (!this.picked) { this.tweens.add({ targets: ct, scale: 1.04, duration: 90 }); Audio.play("ui_hover", { vol: 0.5 }); } });

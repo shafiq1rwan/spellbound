@@ -6,7 +6,7 @@ import { bus, EV } from "../core/bus";
 import { Save, fmtTime } from "../core/Save";
 import { PAL, ELEMENT_COLORS } from "../config/palette";
 import { SPELLS, SPELL_ORDER, type SpellId } from "../config/spells";
-import { Button, txt, slice } from "../ui/widgets";
+import { Button, txt, slice, type PixelText } from "../ui/widgets";
 import type { GameScene } from "./GameScene";
 import type { RecognizeResult } from "../rune/RuneRecognizer";
 
@@ -17,7 +17,7 @@ export class HUDScene extends Phaser.Scene {
   private hearts: Phaser.GameObjects.Image[] = [];
   private heartRow!: Phaser.GameObjects.Container;
   private wavePanel!: Phaser.GameObjects.NineSlice;
-  private waveText!: Phaser.GameObjects.BitmapText;
+  private waveText!: PixelText;
   private timeText!: Phaser.GameObjects.BitmapText;
   private pauseBtn!: Button;
   private slots: Slot[] = [];
@@ -57,11 +57,10 @@ export class HUDScene extends Phaser.Scene {
     this.vignette = this.add.image(0, 0, "vignette").setOrigin(0).setTint(PAL.hpRed).setAlpha(0).setDepth(-10);
     this.hurtFlash = this.add.image(0, 0, "vignette").setOrigin(0).setTint(PAL.hpRed).setAlpha(0).setDepth(-9);
     this.heartRow = this.add.container(0, 0);
-    this.wavePanel = slice(this, "panel_dark", 0, 0, 58, 17);
+    this.wavePanel = slice(this, "panel_dark", 0, 0, 58, 19);
     this.waveText = txt(this, 0, 0, "WAVE 1", { color: PAL.gold });
     this.timeText = txt(this, 0, 0, "0:00", { color: 0xd8d0f0 });
-    this.pauseBtn = new Button(this, 0, 0, 20, 20, "", () => bus.emit(EV.PAUSE_REQ), { icon: "ic_pause" });
-    this.pauseBtn.icon?.setScale(0.75);
+    this.pauseBtn = new Button(this, 0, 0, "", () => bus.emit(EV.PAUSE_REQ), { icon: "ic_pause" });
     // boss bar
     this.bossC = this.add.container(0, 0).setVisible(false);
     const bf = slice(this, "bar", 0, 0, this.bossW + 4, 8);
@@ -73,9 +72,10 @@ export class HUDScene extends Phaser.Scene {
       const c = this.add.container(0, 0);
       const glow = this.add.image(0, 0, "glow").setBlendMode(Phaser.BlendModes.ADD).setTint(ELEMENT_COLORS[SPELLS[id].element].main).setAlpha(0).setDisplaySize(40, 40);
       const frame = slice(this, "panel_dark", 0, 0, 24, 24);
-      const icon = this.add.image(0, -1, SPELLS[id].runeIcon);
+      const icon = this.add.image(0, 0, SPELLS[id].runeIcon).setOrigin(0, 0);
+      icon.setPosition(-Math.floor(icon.width / 2), -Math.floor(icon.height / 2) - 1);
       const cd = this.add.rectangle(-9, -10, 18, 18, 0x07061a, 0.7).setOrigin(0, 0);
-      const lock = txt(this, 0, -1, "?", { color: 0x6d5c98 });
+      const lock = txt(this, 0, -1.5, "?", { color: 0x6d5c98 });
       const pips = [0, 1, 2, 3, 4].map((i) => this.add.rectangle(-6 + i * 3, 9, 2, 1, 0x3a2f66).setOrigin(0, 0));
       c.add([glow, frame, icon, cd, lock, ...pips]);
       this.slots.push({ id, c, frame, icon, cd, pips, glow, lock, wasReady: true, x: 0, y: 0 });
@@ -93,7 +93,7 @@ export class HUDScene extends Phaser.Scene {
     this.offLayout = Layout.onChange(() => this.layout());
     this.listen(EV.HP, (hp: number, max: number, delta: number) => this.setHp(hp, max, delta));
     this.listen(EV.XP, (xp: number, need: number, lvl: number) => { this.xpFrac = xp / need; this.lvText.setText(`LV ${lvl}`); });
-    this.listen(EV.WAVE, (n: number) => { this.waveText.setText(`WAVE ${n}`); this.pop(this.waveText); });
+    this.listen(EV.WAVE, (n: number) => { this.waveText.setText(`WAVE ${n}`); this.fitWavePanel(); this.pop(this.waveText); });
     this.listen(EV.WAVE_BANNER, (a: string, b: string, c: number) => this.showBanner(a, b, c));
     this.listen(EV.UNLOCK, (id: SpellId) => this.onUnlock(id));
     this.listen(EV.HINT, (s: string | null, ms: number) => this.showHint(s, ms));
@@ -137,11 +137,14 @@ export class HUDScene extends Phaser.Scene {
     this.vignette.setDisplaySize(W, H);
     this.hurtFlash.setDisplaySize(W, H);
     const top = sf.top + 4;
-    this.heartRow.setPosition(Math.round(sf.left + 8), Math.round(top + 6));
-    this.wavePanel.setPosition(Math.round(W / 2), Math.round(top + 8));
-    this.waveText.setPosition(Math.round(W / 2), Math.round(top + 8));
-    this.timeText.setPosition(Math.round(W / 2), Math.round(top + 22));
-    this.pauseBtn.setPosition(Math.round(W - sf.right - 14), Math.round(top + 9));
+    // top bar: everything centred on one line (y = top + 10)
+    const barY = top + 10;
+    this.heartRow.setPosition(Math.round(sf.left + 8), barY - 3);
+    this.wavePanel.setPosition(Math.round(W / 2), barY - 9);
+    this.fitWavePanel();
+    this.waveText.setPosition(Math.round(W / 2), barY + 0.5);
+    this.timeText.setPosition(Math.round(W / 2), barY + 18);
+    this.pauseBtn.setPosition(Math.round(W - sf.right - 6 - this.pauseBtn.bw / 2), barY);
     this.bossC.setPosition(Math.round(W / 2), Math.round(top + 42));
     this.debugText.setPosition(sf.left + 4, top + 30);
     const n = this.slots.length;
@@ -170,6 +173,13 @@ export class HUDScene extends Phaser.Scene {
     }
     this.bannerSub.setPosition(this.banner.x, this.banner.y + 16);
   }
+  /** wave plate: 6px of padding around the text, sized so the text lands on whole pixels */
+  private fitWavePanel() {
+    const iw = this.waveText.ink().w;
+    let w = iw + 2 * 9;
+    if ((w - iw) % 2) w += 1;
+    this.wavePanel.setOrigin(0.5, 0).setSize(w, 19);
+  }
   private placeXp(cx: number, y: number, w: number) {
     this.xpFrame.setPosition(cx, y).setSize(w + 4, 8);
     this.xpFrame.width = w + 4;
@@ -184,7 +194,7 @@ export class HUDScene extends Phaser.Scene {
     this.hp = hp;
     this.maxHp = max;
     while (this.hearts.length < max) {
-      const h = this.add.image(this.hearts.length * 10, 0, "heart_full");
+      const h = this.add.image(this.hearts.length * 9, 0, "heart_full").setOrigin(0, 0);
       this.hearts.push(h);
       this.heartRow.add(h);
     }

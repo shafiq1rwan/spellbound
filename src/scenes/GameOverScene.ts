@@ -4,7 +4,7 @@ import { Audio } from "../core/Audio";
 import { Poki } from "../core/Poki";
 import { Save, fmtTime } from "../core/Save";
 import { PAL } from "../config/palette";
-import { Button, slice, txt } from "../ui/widgets";
+import { Button, UI, panelBox, txt } from "../ui/widgets";
 
 interface Data { kills: number; score: number; timeMs: number; wave: number; casts: number; beat: { time: boolean; wave: boolean; score: boolean } }
 
@@ -28,10 +28,7 @@ export class GameOverScene extends Phaser.Scene {
       tint: [PAL.violet, PAL.lavender, PAL.iceCyan], alpha: { start: 0.9, end: 0 }, blendMode: Phaser.BlendModes.ADD,
     });
     void motes;
-    const cx = Math.round(W / 2), cy = Math.round(H / 2);
-    const pw = Math.min(W - 20, 180), ph = 170;
-    const panel = slice(this, "panel", cx, cy + 6, pw, ph).setAlpha(0);
-    const title = txt(this, cx, cy - ph / 2 - 10, "YOUR LIGHT FADES", { scale: 2, color: PAL.lavender }).setAlpha(0);
+    const cx = Math.round(W / 2);
     const rows: [string, string, boolean][] = [
       ["SURVIVED", fmtTime(d.timeMs), d.beat.time],
       ["WAVE", String(d.wave), d.beat.wave],
@@ -39,23 +36,40 @@ export class GameOverScene extends Phaser.Scene {
       ["SPELLS CAST", String(d.casts), false],
       ["SCORE", String(d.score), d.beat.score],
     ];
+    const rowH = 13;
+    const pw = Math.min(W - 20, 190);
+    const btnW = pw - UI.panelPad * 2 - 12;
+    // title (may wrap on narrow screens) sits above the panel; panel is a padded stack
+    const title = txt(this, cx, 0, "YOUR LIGHT FADES", { scale: 2, color: PAL.lavender, oy: 0, maxWidth: W - 16 }).setAlpha(0);
+    const titleH = title.ink().h;
+    const ph = UI.panelPad * 2 + rows.length * rowH - (rowH - 7) + 10 + 7 + 12 + 2 * UI.btnH + UI.gap;
+    const total = titleH + 10 + ph;
+    const top = Math.max(4, Math.round(H / 2 - total / 2));
+    title.setY(top);
+    const box = panelBox(this, "panel", cx, top + titleH + 10, pw, ph);
+    box.panel.setAlpha(0);
     const items: Phaser.GameObjects.GameObject[] = [];
-    rows.forEach(([k, v, best], i) => {
-      const y = cy - ph / 2 + 22 + i * 15;
-      items.push(txt(this, cx - pw / 2 + 14, y, k, { ox: 0, color: 0xb9a8e0 }).setAlpha(0));
-      items.push(txt(this, cx + pw / 2 - 14, y, v, { ox: 1, color: best ? PAL.gold : 0xfff8ec }).setAlpha(0));
+    let y = box.inner.top;
+    rows.forEach(([k, v, best]) => {
+      items.push(txt(this, box.inner.left, y, k, { ox: 0, oy: 0, color: 0xb9a8e0 }).setAlpha(0));
+      const val = txt(this, box.inner.right, y, v, { ox: 1, oy: 0, color: best ? PAL.gold : 0xfff8ec }).setAlpha(0);
+      items.push(val);
       if (best) {
-        const b = txt(this, cx + pw / 2 - 14 - v.length * 6 - 8, y, "NEW!", { ox: 1, color: PAL.gold }).setAlpha(0);
+        const b = txt(this, box.inner.right - val.ink().w - 6, y + 3.5, "NEW!", { ox: 1, color: PAL.gold }).setAlpha(0);
         items.push(b);
         this.tweens.add({ targets: b, scale: 1.2, duration: 400, yoyo: true, repeat: -1, delay: 1200 });
       }
+      y += rowH;
     });
+    y += 10 - (rowH - 7);
     const sd = Save.data;
-    items.push(txt(this, cx, cy + 6 + ph / 2 - 62, `BEST: WAVE ${sd.bestWave}  ${fmtTime(sd.bestTimeMs)}  ${sd.bestScore}`, { color: 0x8e7cc3 }).setAlpha(0));
-    this.tweens.add({ targets: [panel, title], alpha: 1, delay: 400, duration: 400 });
+    items.push(txt(this, box.cx, y, `BEST: WAVE ${sd.bestWave}  ${fmtTime(sd.bestTimeMs)}  ${sd.bestScore}`, { oy: 0, color: 0x8e7cc3 }).setAlpha(0));
+    y += 7 + 12;
+    this.tweens.add({ targets: [box.panel, title], alpha: 1, delay: 400, duration: 400 });
     this.tweens.add({ targets: items, alpha: 1, delay: (_t: unknown, _k: unknown, _v: unknown, i: number) => 600 + i * 60, duration: 250 });
-    const retry = new Button(this, cx, cy + 6 + ph / 2 - 40, 110, 20, "TRY AGAIN", () => this.retry(), { scale: 1 });
-    const menu = new Button(this, cx, cy + 6 + ph / 2 - 16, 110, 18, "MAIN MENU", () => this.menu());
+    const retry = new Button(this, box.cx, y + Math.floor(UI.btnH / 2), "TRY AGAIN", () => this.retry(), { minW: btnW });
+    y += UI.btnH + UI.gap;
+    const menu = new Button(this, box.cx, y + Math.floor(UI.btnH / 2), "MAIN MENU", () => this.menu(), { minW: btnW });
     [retry, menu].forEach((b) => { b.setAlpha(0); b.setEnabled(false); });
     this.time.delayedCall(1100, () => {
       [retry, menu].forEach((b) => { b.setEnabled(true); this.tweens.add({ targets: b, alpha: 1, duration: 250 }); });

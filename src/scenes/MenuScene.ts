@@ -41,8 +41,8 @@ export class MenuScene extends Phaser.Scene {
     this.crystal = this.add.image(0, 0, "glow").setTint(PAL.iceCyan).setBlendMode(Phaser.BlendModes.ADD).setAlpha(0.6).setDisplaySize(40, 40);
     this.wiz.on(Phaser.Animations.Events.ANIMATION_COMPLETE, () => this.wiz.play("wizard:idle"));
     this.logo = this.add.image(0, 0, "logo").setDepth(100);
-    this.play = new Button(this, 0, 0, 92, 26, "PLAY", () => this.startRun(), { scale: 2 });
-    this.settings = new Button(this, 0, 0, 92, 18, "SETTINGS", () => { this.scene.pause(); this.scene.launch("Settings", { from: "Menu" }); });
+    this.play = new Button(this, 0, 0, "PLAY", () => this.startRun(), { scale: 2, minW: 112 });
+    this.settings = new Button(this, 0, 0, "SETTINGS", () => { this.scene.pause(); this.scene.launch("Settings", { from: "Menu" }); }, { minW: 112 });
     this.play.setDepth(100);
     this.settings.setDepth(100);
     const d = Save.data;
@@ -73,9 +73,13 @@ export class MenuScene extends Phaser.Scene {
     this.glow.setPosition(wx, wy - 30);
     const ux = portrait ? cx : Math.round(W * 0.68);
     this.logo.setPosition(ux, Math.round(portrait ? sf.top + H * 0.17 : H * 0.24));
-    this.play.setPosition(ux, Math.round(portrait ? H * 0.76 : H * 0.55));
-    this.settings.setPosition(ux, Math.round(portrait ? H * 0.76 + 26 : H * 0.55 + 26));
-    this.best.setPosition(ux, Math.round(portrait ? H - sf.bottom - 12 : H * 0.55 + 46)).setMaxWidth(W - 16);
+    // stacked: PLAY, 8px gap, SETTINGS (positions from real button heights)
+    const py = Math.round(portrait ? H * 0.74 : H * 0.52);
+    this.play.setPosition(ux, py);
+    const sy = py + Math.ceil(this.play.bh / 2) + 8 + Math.floor(this.settings.bh / 2);
+    this.settings.setPosition(ux, sy);
+    this.best.setMaxWidth(portrait ? W - 16 : W * 0.6);
+    this.best.setPosition(ux, Math.round(portrait ? H - sf.bottom - 14 : sy + Math.ceil(this.settings.bh / 2) + 14));
   }
 
   private async startRun() {
