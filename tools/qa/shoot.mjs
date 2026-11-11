@@ -174,6 +174,21 @@ try {
     await sleep(2500);
     await shot("retry");
     console.log(JSON.stringify(await game()));
+  } else if (scenario === "pause-tutorial") {
+    // first-run tutorial on screen, then pause via the HUD button: the menu must be on top and the tutorial hidden
+    await startGame(false);
+    await sleep(1200);
+    await shot("1_tutorial");
+    const btn = await page.evaluate(() => { const h = window.__game.scene.getScene("HUD"); const S = h.cameras.main.zoom / window.devicePixelRatio; return { x: h.pauseBtn.x * S, y: h.pauseBtn.y * S }; });
+    await page.mouse.click(btn.x, btn.y);
+    await sleep(600);
+    await shot("2_paused");
+    const st = await page.evaluate(() => { const sc = window.__game.scene; const order = sc.getScenes(false).map((x) => x.sys.settings.key); return { tutorialVisible: sc.getScene("Tutorial").sys.settings.visible, tutorialPaused: sc.isPaused("Tutorial"), pauseAboveTutorial: order.indexOf("Pause") > order.indexOf("Tutorial") }; });
+    console.log("while paused:", JSON.stringify(st));
+    await page.keyboard.press("Escape");
+    await sleep(600);
+    await shot("3_resumed");
+    console.log("after resume:", JSON.stringify(await page.evaluate(() => { const sc = window.__game.scene; return { tutorialVisible: sc.getScene("Tutorial").sys.settings.visible, tutorialRunning: sc.isActive("Tutorial"), gameRunning: sc.isActive("Game") }; })));
   } else if (scenario === "pause") {
     await startGame(true);
     await sleep(300);

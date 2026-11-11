@@ -12,6 +12,7 @@ export class PauseScene extends Phaser.Scene {
   }
   create() {
     const W = Layout.w, H = Layout.h;
+    this.scene.bringToTop();
     this.cameras.main.setZoom(Layout.S).setOrigin(0, 0);
     backdrop(this, W, H, 0.7);
     const g = this.scene.get("Game") as GameScene;
@@ -35,6 +36,7 @@ export class PauseScene extends Phaser.Scene {
   private resume() {
     this.scene.stop();
     this.scene.resume("Game");
+    (this.scene.get("Game") as GameScene).restoreOverlays();
     Poki.gameplayStart();
   }
   private quit() {

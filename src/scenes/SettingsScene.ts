@@ -15,6 +15,7 @@ export class SettingsScene extends Phaser.Scene {
   }
   create() {
     const W = Layout.w, H = Layout.h;
+    this.scene.bringToTop();
     this.cameras.main.setZoom(Layout.S).setOrigin(0, 0);
     backdrop(this, W, H, 0.75);
     const pw = Math.min(W - 16, 190), ph = 188;

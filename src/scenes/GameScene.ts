@@ -292,9 +292,24 @@ export class GameScene extends Phaser.Scene {
     this.time.delayedCall(600, () => this.spawner.startWave(1));
   }
 
+  /** pause + hide the tutorial/demo overlay while a menu is open, so it never draws over menus */
+  suspendOverlays() {
+    if (this.scene.isActive("Tutorial")) {
+      this.scene.pause("Tutorial");
+      this.scene.setVisible(false, "Tutorial");
+    }
+  }
+  restoreOverlays() {
+    if (this.scene.isPaused("Tutorial")) {
+      this.scene.resume("Tutorial");
+      this.scene.setVisible(true, "Tutorial");
+    }
+  }
+
   pauseGame() {
     if (this.over || this.levelingUp || !this.scene.isActive()) return;
     this.input2.abort();
+    this.suspendOverlays();
     this.scene.pause();
     Poki.gameplayStop();
     this.scene.launch("Pause");
@@ -314,6 +329,7 @@ export class GameScene extends Phaser.Scene {
     this.time.delayedCall(520, () => {
       if (this.over) { this.levelingUp = false; return; }
       Poki.gameplayStop();
+      this.suspendOverlays();
       this.scene.pause();
       this.scene.launch("Upgrade", { choices: this.upgrades.choices(), level: this.xp.level - this.xp.pendingLevels + 1 });
     });
@@ -323,6 +339,7 @@ export class GameScene extends Phaser.Scene {
     this.xp.pendingLevels = Math.max(0, this.xp.pendingLevels - 1);
     this.levelingUp = false;
     this.scene.resume();
+    this.restoreOverlays();
     Poki.gameplayStart();
     bus.emit(EV.COOLDOWNS);
   }

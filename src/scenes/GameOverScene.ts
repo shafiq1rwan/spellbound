@@ -16,6 +16,7 @@ export class GameOverScene extends Phaser.Scene {
   create(d: Data) {
     this.busy = false;
     const W = Layout.w, H = Layout.h;
+    this.scene.bringToTop();
     this.cameras.main.setZoom(Layout.S).setOrigin(0, 0);
     this.scene.stop("HUD");
     this.scene.stop("Tutorial");

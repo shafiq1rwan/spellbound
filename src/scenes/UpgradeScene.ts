@@ -29,6 +29,7 @@ export class UpgradeScene extends Phaser.Scene {
 
   create() {
     const W = Layout.w, H = Layout.h, sf = Layout.safe;
+    this.scene.bringToTop();
     this.cameras.main.setZoom(Layout.S).setOrigin(0, 0);
     const bd = backdrop(this, W, H, 0).setDepth(-1);
     this.tweens.add({ targets: bd, fillAlpha: 0.72, duration: 250 });
