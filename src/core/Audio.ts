@@ -2,6 +2,9 @@
 // per-sound throttling, and a mute-reason set (hidden tab, ads, pause) for Poki compliance.
 import { RECIPES, Synth, renderMusic } from "./synth";
 
+/** synthesis rate: half of typical device rates, inaudible difference for these sounds, half the CPU */
+const SYNTH_RATE = 24000;
+
 class AudioManager {
   ctx: AudioContext | null = null;
   private master!: GainNode;
@@ -32,17 +35,41 @@ class AudioManager {
     this.musicBus.connect(this.master);
     this.master.connect(c.destination);
     this.applyVolumes();
-    const synth = new Synth(c.sampleRate);
-    for (const [name, fn] of Object.entries(RECIPES)) {
-      const data = fn(synth);
-      const b = c.createBuffer(1, data.length, c.sampleRate);
+    this.synthesize();
+  }
+
+  /** render sounds in a Web Worker so loading never blocks; falls back to idle-time chunks */
+  private synthesize() {
+    const store = (name: string, data: Float32Array) => {
+      if (!this.ctx) return;
+      const b = this.ctx.createBuffer(1, data.length, SYNTH_RATE);
       b.copyToChannel(data as Float32Array<ArrayBuffer>, 0);
       this.buffers.set(name, b);
+      if (name === "__music" && this.wantMusic) this.startMusic();
+    };
+    try {
+      const w = new Worker(new URL("./synthWorker.ts", import.meta.url), { type: "module" });
+      w.onmessage = (e: MessageEvent<{ name?: string; data?: Float32Array; done?: boolean }>) => {
+        if (e.data.done) { w.terminate(); return; }
+        if (e.data.name && e.data.data) store(e.data.name, e.data.data);
+      };
+      w.onerror = () => { w.terminate(); this.synthesizeInline(store); };
+      w.postMessage({ sampleRate: SYNTH_RATE });
+    } catch {
+      this.synthesizeInline(store);
     }
-    const m = renderMusic(synth);
-    const mb = c.createBuffer(1, m.length, c.sampleRate);
-    mb.copyToChannel(m as Float32Array<ArrayBuffer>, 0);
-    this.buffers.set("__music", mb);
+  }
+  private synthesizeInline(store: (name: string, data: Float32Array) => void) {
+    const synth = new Synth(SYNTH_RATE);
+    const jobs: [string, () => Float32Array][] = Object.entries(RECIPES).map(([n, fn]) => [n, () => fn(synth)]);
+    jobs.push(["__music", () => renderMusic(synth)]);
+    const step = () => {
+      const job = jobs.shift();
+      if (!job) return;
+      if (!this.buffers.has(job[0])) store(job[0], job[1]());
+      setTimeout(step, 0);
+    };
+    setTimeout(step, 0);
   }
 
   /** must be called from a user gesture */

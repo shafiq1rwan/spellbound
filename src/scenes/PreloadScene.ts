@@ -1,14 +1,16 @@
 import Phaser from "phaser";
 import { Layout } from "../core/Layout";
-import { createAnims, queueAssets, setManifest, type Manifest } from "../core/assets";
+import { createAnims, decodeBundle, queueAssets, setManifest, type Manifest } from "../core/assets";
 import { Audio } from "../core/Audio";
 import { Poki } from "../core/Poki";
 
 export class PreloadScene extends Phaser.Scene {
+  private drawBar?: (p: number) => void;
   constructor() {
     super("Preload");
   }
   preload() {
+    performance.mark("sb:preloadStart");
     const m = this.cache.json.get("manifest") as Manifest;
     setManifest(m);
     this.cameras.main.setBackgroundColor(0x0b0c1e);
@@ -26,14 +28,24 @@ export class PreloadScene extends Phaser.Scene {
       g.fillStyle(0xe2ccff).fillRect(W / 2 - bw / 2, H / 2 - bh / 2, fw, S);
     };
     draw(0);
-    this.load.on("progress", draw);
+    this.drawBar = draw;
+    // byte-accurate progress for the single texture bundle (90%), decoding fills the rest
+    this.load.on("fileprogress", (file: Phaser.Loader.File, p: number) => { if (file.key === "gfx") draw(p * 0.9); });
     queueAssets(this.load, m);
     document.getElementById("boot")?.remove();
   }
   async create() {
+    performance.mark("sb:assetsLoaded");
+    const m = this.cache.json.get("manifest") as Manifest;
+    await decodeBundle(this.textures, m, this.cache.json.get("gfx") as Record<string, string>, (f) => this.drawBar?.(0.9 + f * 0.1));
+    this.cache.json.remove("gfx");
+    performance.mark("sb:decoded");
     createAnims(this.anims, this.cache.json.get("manifest") as Manifest);
+    performance.mark("sb:animsDone");
     Audio.init();
+    performance.mark("sb:audioDone");
     await Poki.start();
+    performance.mark("sb:pokiDone");
     Poki.loadingFinished();
     this.scene.start("Menu");
   }

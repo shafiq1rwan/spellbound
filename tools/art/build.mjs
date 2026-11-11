@@ -1,7 +1,7 @@
 // Bakes every game asset to public/assets/gfx + manifest.json, and QA previews to art-preview/.
 //   node tools/art/build.mjs
 import { writeFileSync, mkdirSync, rmSync } from "node:fs";
-import { Img, savePNG, strip, preview } from "./lib/px.mjs";
+import { Img, savePNG, encodePNG, strip, preview } from "./lib/px.mjs";
 import { C } from "./palette.mjs";
 import * as WZ from "./wizard.mjs";
 import * as EN from "./enemies.mjs";
@@ -16,9 +16,15 @@ mkdirSync("art-preview", { recursive: true });
 
 const manifest = { sheets: {}, images: {}, fonts: {}, decor: {}, nineslice: {} };
 let bytes = 0;
-function png(name, img) {
-  savePNG(`${OUT}/${name}.png`, img);
+// every texture goes into ONE bundle (gfx.json, base64 PNGs) so the game makes 1 request instead of ~100
+const bundle = {};
+function png(name, img, { file = false } = {}) {
   bytes += img.w * img.h;
+  if (file) {
+    savePNG(`${OUT}/${name}.png`, img);
+  } else {
+    bundle[name] = encodePNG(img).toString("base64");
+  }
   return `${name}.png`;
 }
 
@@ -145,7 +151,7 @@ const S = (fn, list) => list.map((p) => fn(p));
 // ======================================================== ui
 {
   const f = UI.buildFont("pixel");
-  manifest.fonts.pixel = { png: png("pixel", f.img), xml: "pixel.xml" };
+  manifest.fonts.pixel = { png: png("pixel", f.img, { file: true }), xml: "pixel.xml" };
   writeFileSync(`${OUT}/pixel.xml`, f.xml);
   image("logo", UI.buildLogo());
   image("panel", UI.panel());
@@ -165,4 +171,6 @@ const S = (fn, list) => list.map((p) => fn(p));
 }
 
 writeFileSync(`${OUT}/manifest.json`, JSON.stringify(manifest, null, 1));
+writeFileSync(`${OUT}/gfx.json`, JSON.stringify(bundle));
+console.log(`gfx.json: ${Object.keys(bundle).length} textures, ${(JSON.stringify(bundle).length / 1024).toFixed(0)} KB (base64)`);
 console.log(`baked ${Object.keys(manifest.sheets).length} sheets, ${Object.keys(manifest.images).length} images, ${(bytes / 1e6).toFixed(2)} Mpx`);

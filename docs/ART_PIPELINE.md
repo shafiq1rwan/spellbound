@@ -25,7 +25,7 @@ own build-time generator in `tools/art/`. It reimplements the ideas from both to
 | PixelFX: separate additive "light" layer | runtime additive glow sprites (`VFXManager.glow`) and the baked `glow` textures |
 | PixelFX: act timing (wind-up → release → freeze on contact → recovery) | wizard cast frames (45/45/70/90/110 ms), `CombatSystem` hit-stop |
 
-No AI or tool runs at game runtime. Every asset is a bundled PNG (about 300 KB in total).
+No AI or tool runs at game runtime. All textures ship as PNGs inside one bundle file (176 KB).
 
 **If the tools become runnable later**, either one can replace individual sheets. `build.mjs` only
 needs a PNG grid plus a frame size and per-frame durations. Every sprite is addressed through
@@ -39,7 +39,8 @@ npm run art            # node tools/art/build.mjs; deterministic, takes about 1 
 ```
 
 Outputs:
-- `public/assets/gfx/*.png`: sprite sheets and images.
+- `public/assets/gfx/gfx.json`: every texture as an embedded PNG in **one file** (176 KB, 130 KB gzipped).
+  The game makes one request and decodes the textures into their usual keys at load.
 - `manifest.json`: sheets, anims (frame indices, per-frame ms, repeat), origins, wizard crystal anchors,
   arena decor positions and 9-slice margins.
 - `pixel.png` + `pixel.xml`: the bitmap font.

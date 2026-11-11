@@ -32,6 +32,7 @@ All checks below were **actually executed**. Browser checks used headless Micros
 | Wave 5 elite | 390×844 | guaranteed elite spawns |
 | Hard human circles (open, overdrawn, egg-shaped, wobbly), 200 strokes | test suite | 199/200 recognised (the previous recognizer managed 137/200) |
 | Ice → Fire Shatter (`tools/qa/ice-combo.mjs`) | 390×844 | a sloppy oval hits all 8 enemies; a fireball on a frozen enemy does double damage (50 instead of 25) |
+| Loading time (`tools/qa/load-timing.mjs`) | 390×844, 4× CPU throttle, emulated 4G | menu appears at 2.6 s, down from 5.1 s (about 8.7 s originally). Requests went from 106 to 7. Sound generation runs in a worker, so loading never stalls at 100%. |
 | Screen shake | 390×844, 1920×1080 | peaks 1–2 art px, then the camera returns exactly to rest |
 
 ## Bugs found by QA and fixed

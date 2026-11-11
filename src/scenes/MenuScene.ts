@@ -57,7 +57,7 @@ export class MenuScene extends Phaser.Scene {
     this.input.keyboard?.on("keydown-ENTER", () => this.startRun());
     this.input.keyboard?.on("keydown-SPACE", () => this.startRun());
     Audio.startMusic();
-    cam.fadeIn(500, 11, 12, 30);
+    cam.fadeIn(250, 11, 12, 30);
   }
 
   private layout() {

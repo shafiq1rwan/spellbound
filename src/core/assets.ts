@@ -16,10 +16,26 @@ let manifest: Manifest;
 export function setManifest(m: Manifest) { manifest = m; }
 export function M(): Manifest { return manifest; }
 
+/** everything is one request: gfx.json (all textures as base64 PNG) + the bitmap font */
 export function queueAssets(load: Phaser.Loader.LoaderPlugin, m: Manifest) {
-  for (const [key, s] of Object.entries(m.sheets)) load.spritesheet(key, BASE + s.file, { frameWidth: s.fw, frameHeight: s.fh });
-  for (const [key, file] of Object.entries(m.images)) load.image(key, BASE + file);
+  load.json("gfx", BASE + "gfx.json");
   for (const [key, f] of Object.entries(m.fonts)) load.bitmapFont(key, BASE + f.png, BASE + f.xml);
+}
+
+/** decode the bundled PNGs into textures under their usual keys (one GPU texture each, as before) */
+export async function decodeBundle(textures: Phaser.Textures.TextureManager, m: Manifest, bundle: Record<string, string>, onProgress?: (f: number) => void) {
+  const keys = Object.keys(bundle);
+  let done = 0;
+  await Promise.all(keys.map(async (key) => {
+    const img = new Image();
+    img.src = "data:image/png;base64," + bundle[key];
+    try { await img.decode(); } catch { await new Promise((r) => { img.onload = r; img.onerror = r; }); }
+    const sheet = m.sheets[key];
+    if (textures.exists(key)) textures.remove(key);
+    if (sheet) textures.addSpriteSheet(key, img, { frameWidth: sheet.fw, frameHeight: sheet.fh });
+    else textures.addImage(key, img);
+    onProgress?.(++done / keys.length);
+  }));
 }
 
 /** registers "<sheet>:<anim>" animations with exact per-frame durations */

@@ -22,6 +22,8 @@ class PokiAdapter {
   ready = false;
   private playing = false;
   private inBreak = false;
+  /** loadingFinished() was requested before the SDK was ready: replay it once it is */
+  private loadedPending = false;
   private initPromise: Promise<void> | null = null;
 
   /** starts SDK init once; await it before gameLoadingFinished() */
@@ -34,17 +36,25 @@ class PokiAdapter {
     return this.ready && window.PokiSDK ? window.PokiSDK : null;
   }
 
+  /** never wait more than this for the SDK before showing the game */
+  private static MAX_WAIT_MS = 3000;
+
   async init(): Promise<void> {
     if (import.meta.env.VITE_POKI === "off") return;
+    await Promise.race([this.initInner(), new Promise<void>((r) => setTimeout(r, PokiAdapter.MAX_WAIT_MS))]);
+  }
+
+  private async initInner(): Promise<void> {
     try {
-      if (!window.PokiSDK) await this.loadScript(SDK_URL, 4000);
+      if (!window.PokiSDK) await this.loadScript(SDK_URL, PokiAdapter.MAX_WAIT_MS);
       if (!window.PokiSDK) return;
       // never let a slow/blocked SDK hold the game hostage
       const ok = await Promise.race([
         window.PokiSDK.init().then(() => true, () => true),
-        new Promise<boolean>((r) => setTimeout(() => r(false), 5000)),
+        new Promise<boolean>((r) => setTimeout(() => r(false), PokiAdapter.MAX_WAIT_MS)),
       ]);
       this.ready = true;
+      if (this.loadedPending) this.loadingFinished();
       if (!ok) console.info("[poki] init timed out; continuing");
       const local = /^(localhost|127\.|192\.168\.|\[::1\])/.test(location.hostname);
       if (local) window.PokiSDK.setDebug?.(true);
@@ -68,7 +78,9 @@ class PokiAdapter {
   }
 
   loadingFinished() {
-    try { this.sdk()?.gameLoadingFinished(); } catch { /* ignore */ }
+    const sdk = this.sdk();
+    this.loadedPending = !sdk;
+    try { sdk?.gameLoadingFinished(); } catch { /* ignore */ }
   }
   gameplayStart() {
     if (this.playing || this.inBreak) return;

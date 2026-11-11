@@ -59,4 +59,5 @@ window.addEventListener("keydown", unlock, { capture: true });
 document.addEventListener("touchmove", (e) => e.preventDefault(), { passive: false });
 document.addEventListener("gesturestart", (e) => e.preventDefault());
 
-(window as unknown as { __game: Phaser.Game }).__game = game;
+// handles for QA scripts (tools/qa)
+Object.assign(window as unknown as Record<string, unknown>, { __game: game, __audio: Audio });
