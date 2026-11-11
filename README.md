@@ -1,0 +1,69 @@
+# Spellbound Arena
+
+Portrait-first pixel-art survival shooter for Poki. You draw runes with a finger or the mouse to cast
+spells at monsters closing in from every side.
+
+| Rune | Spell | Role |
+|---|---|---|
+| Triangle | **Fireball** | Single-target projectile with splash. At level 3 it splits into 3; at level 5 it becomes a meteor. |
+| Circle | **Ice Nova** | Ring centred on the wizard. Damages, slows, and freezes from level 3 (with shards at 4 and a double pulse at 5). |
+| Zigzag | **Lightning Chain** | Instant bolt that jumps between enemies. Stuns from level 3; every bolt forks at level 5. |
+| Spiral | **Arcane Barrage** | Homing missiles with knockback. Pierce from level 3; summons a vortex at level 5. |
+
+The runes unlock on waves 1 to 4. **Spell combination:** hitting a frozen enemy with any non-ice spell
+*shatters* it for double damage. **Aiming:** draw the rune on top of a monster to target it.
+Otherwise the spell goes for the nearest enemy.
+
+## Run it
+
+```bash
+npm install
+npm run dev          # http://localhost:5173
+npm run build        # type-check + production build to dist/
+npm run preview      # serve dist/
+npm test             # rune recognizer tests (node --test)
+npm run art          # re-bake every sprite sheet into public/assets/gfx
+```
+
+Requires Node 22.18+ (the art tools and tests use Node's native TypeScript stripping).
+
+**Poki SDK.** The SDK loads by default. Set `VITE_POKI=off` (for example
+`VITE_POKI=off npm run dev`) to skip it during local QA.
+
+**Upload to Poki.** Zip the contents of `dist/`. All paths are relative (`base: "./"`).
+
+## Controls
+
+- **Mobile:** touch, drag and release anywhere on the arena. Tap a rune slot to see how to draw it.
+- **Desktop:** left mouse button, drag and release.
+- **Keyboard (optional):** Enter/Space starts a run from the menu, Esc/P closes the pause menu,
+  1, 2 and 3 pick upgrade cards, and Enter retries from the game-over screen.
+
+## Project layout
+
+```
+src/
+  main.ts                  game bootstrap, resize/orientation handling, audio unlock
+  config/                  ALL balancing data: game.ts, spells.ts, enemies.ts, waves.ts, upgrades.ts, palette.ts
+  core/                    Layout (responsive pixel scale), Audio + synth, Save, Poki adapter, assets, event bus
+  rune/                    RuneRecognizer ($1 + feature gates), RuneInput (pointer capture), RuneDrawingRenderer
+  entities/                Wizard, Enemy (slime/bat/skeleton/golem/orb), Boss, Projectile
+  systems/                 SpellManager, CombatSystem, VFXManager, EnemySpawnManager, XPSystem, UpgradeManager, Ambience
+  scenes/                  Boot, Preload, Menu, Game, HUD, Tutorial, Upgrade, Pause, Settings, GameOver
+  ui/                      pixel widgets (buttons, 9-slice panels, text), segment stroker
+tools/art/                 build-time pixel-art generator (see docs/ART_PIPELINE.md)
+tools/qa/shoot.mjs         headless-Edge QA driver (screenshots, scripted rune drawing, stress)
+tests/                     recognizer test suite
+public/assets/gfx/         baked PNG sheets + manifest.json (+ bitmap font)
+```
+
+## Tuning
+
+- **Recognizer:** `GAME.rune.threshold` and `strongThreshold` in `src/config/game.ts`. Turn on
+  Settings → **Rune Debug** to see live scores, closure, turning and corner counts for every stroke.
+- **Spells:** each level's stats and description live in `src/config/spells.ts`.
+- **Enemies and waves:** `src/config/enemies.ts` and `src/config/waves.ts`. Waves 1 to 10 are authored
+  (boss on wave 10). After that, waves scale endlessly with a boss every 10th wave.
+- **Game feel:** the hit-stop and shake values are in `GAME.feel`; XP pull speeds are in `GAME.xp`.
+
+See `docs/ART_PIPELINE.md` for how the art is made and `docs/QA_REPORT.md` for what was verified.
