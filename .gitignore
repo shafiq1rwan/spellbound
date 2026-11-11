@@ -1,0 +1,6 @@
+node_modules
+dist
+art-preview
+*.log
+.vite
+qa-shots

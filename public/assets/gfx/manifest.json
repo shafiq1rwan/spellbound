@@ -1,0 +1,1831 @@
+{
+ "sheets": {
+  "wizard": {
+   "file": "wizard.png",
+   "fw": 48,
+   "fh": 48,
+   "anims": {
+    "idle": {
+     "frames": [
+      0,
+      1,
+      2,
+      3
+     ],
+     "durations": [
+      150,
+      150,
+      150,
+      150
+     ],
+     "repeat": -1
+    },
+    "blink": {
+     "frames": [
+      4,
+      5,
+      6,
+      7
+     ],
+     "durations": [
+      150,
+      90,
+      90,
+      150
+     ],
+     "repeat": 0
+    },
+    "cast": {
+     "frames": [
+      8,
+      9,
+      10,
+      11,
+      12
+     ],
+     "durations": [
+      45,
+      45,
+      70,
+      90,
+      110
+     ],
+     "repeat": 0
+    },
+    "hurt": {
+     "frames": [
+      13,
+      14
+     ],
+     "durations": [
+      90,
+      140
+     ],
+     "repeat": 0
+    },
+    "cheer": {
+     "frames": [
+      15,
+      16
+     ],
+     "durations": [
+      140,
+      200
+     ],
+     "repeat": 0
+    },
+    "death": {
+     "frames": [
+      17,
+      18,
+      19,
+      20
+     ],
+     "durations": [
+      120,
+      160,
+      200,
+      600
+     ],
+     "repeat": 0
+    }
+   },
+   "origin": [
+    0.5,
+    0.9270833333333334
+   ],
+   "anchors": {
+    "crystal": [
+     [
+      31.5,
+      16
+     ],
+     [
+      31.5,
+      16
+     ],
+     [
+      31.5,
+      17
+     ],
+     [
+      31.5,
+      17
+     ],
+     [
+      31.5,
+      16
+     ],
+     [
+      31.5,
+      16
+     ],
+     [
+      31.5,
+      17
+     ],
+     [
+      31.5,
+      17
+     ],
+     [
+      25,
+      19.5
+     ],
+     [
+      21,
+      18.5
+     ],
+     [
+      45.5,
+      16
+     ],
+     [
+      41.5,
+      16.5
+     ],
+     [
+      35.5,
+      16
+     ],
+     [
+      22.5,
+      19.5
+     ],
+     [
+      27.5,
+      16
+     ],
+     [
+      32,
+      8
+     ],
+     [
+      32,
+      5
+     ],
+     [
+      22.5,
+      19.5
+     ],
+     [
+      45,
+      24.5
+     ],
+     null,
+     null
+    ]
+   }
+  },
+  "crystal": {
+   "file": "crystal.png",
+   "fw": 9,
+   "fh": 10,
+   "anims": {
+    "cyan": {
+     "frames": [
+      0,
+      1,
+      2,
+      3
+     ],
+     "durations": [
+      220,
+      120,
+      160,
+      220
+     ],
+     "repeat": -1
+    },
+    "fire": {
+     "frames": [
+      4,
+      5,
+      6,
+      7
+     ],
+     "durations": [
+      220,
+      120,
+      160,
+      220
+     ],
+     "repeat": -1
+    },
+    "ice": {
+     "frames": [
+      8,
+      9,
+      10,
+      11
+     ],
+     "durations": [
+      220,
+      120,
+      160,
+      220
+     ],
+     "repeat": -1
+    },
+    "bolt": {
+     "frames": [
+      12,
+      13,
+      14,
+      15
+     ],
+     "durations": [
+      220,
+      120,
+      160,
+      220
+     ],
+     "repeat": -1
+    },
+    "arcane": {
+     "frames": [
+      16,
+      17,
+      18,
+      19
+     ],
+     "durations": [
+      220,
+      120,
+      160,
+      220
+     ],
+     "repeat": -1
+    }
+   },
+   "origin": [
+    0.5,
+    0.5
+   ]
+  },
+  "slime": {
+   "file": "slime.png",
+   "fw": 32,
+   "fh": 32,
+   "anims": {
+    "idle": {
+     "frames": [
+      0,
+      1,
+      2,
+      3
+     ],
+     "durations": [
+      160,
+      160,
+      160,
+      160
+     ],
+     "repeat": -1
+    },
+    "hop": {
+     "frames": [
+      4,
+      5,
+      6,
+      7,
+      8,
+      9
+     ],
+     "durations": [
+      110,
+      80,
+      110,
+      90,
+      100,
+      120
+     ],
+     "repeat": 0
+    },
+    "hurt": {
+     "frames": [
+      10,
+      11
+     ],
+     "durations": [
+      70,
+      90
+     ],
+     "repeat": 0
+    },
+    "death": {
+     "frames": [
+      12,
+      13,
+      14
+     ],
+     "durations": [
+      70,
+      80,
+      120
+     ],
+     "repeat": 0
+    }
+   },
+   "origin": [
+    0.515625,
+    0.90625
+   ]
+  },
+  "slime_elite": {
+   "file": "slime_elite.png",
+   "fw": 32,
+   "fh": 32,
+   "anims": {
+    "idle": {
+     "frames": [
+      0,
+      1,
+      2,
+      3
+     ],
+     "durations": [
+      160,
+      160,
+      160,
+      160
+     ],
+     "repeat": -1
+    },
+    "hop": {
+     "frames": [
+      4,
+      5,
+      6,
+      7,
+      8,
+      9
+     ],
+     "durations": [
+      110,
+      80,
+      110,
+      90,
+      100,
+      120
+     ],
+     "repeat": 0
+    },
+    "hurt": {
+     "frames": [
+      10,
+      11
+     ],
+     "durations": [
+      70,
+      90
+     ],
+     "repeat": 0
+    },
+    "death": {
+     "frames": [
+      12,
+      13,
+      14
+     ],
+     "durations": [
+      70,
+      80,
+      120
+     ],
+     "repeat": 0
+    }
+   },
+   "origin": [
+    0.515625,
+    0.90625
+   ]
+  },
+  "bat": {
+   "file": "bat.png",
+   "fw": 32,
+   "fh": 32,
+   "anims": {
+    "fly": {
+     "frames": [
+      0,
+      1,
+      2,
+      3
+     ],
+     "durations": [
+      70,
+      60,
+      70,
+      60
+     ],
+     "repeat": -1
+    },
+    "hurt": {
+     "frames": [
+      4,
+      5
+     ],
+     "durations": [
+      80,
+      100
+     ],
+     "repeat": 0
+    }
+   },
+   "origin": [
+    0.5,
+    0.5
+   ]
+  },
+  "bat_elite": {
+   "file": "bat_elite.png",
+   "fw": 32,
+   "fh": 32,
+   "anims": {
+    "fly": {
+     "frames": [
+      0,
+      1,
+      2,
+      3
+     ],
+     "durations": [
+      70,
+      60,
+      70,
+      60
+     ],
+     "repeat": -1
+    },
+    "hurt": {
+     "frames": [
+      4,
+      5
+     ],
+     "durations": [
+      80,
+      100
+     ],
+     "repeat": 0
+    }
+   },
+   "origin": [
+    0.5,
+    0.5
+   ]
+  },
+  "skeleton": {
+   "file": "skeleton.png",
+   "fw": 48,
+   "fh": 48,
+   "anims": {
+    "idle": {
+     "frames": [
+      0,
+      1
+     ],
+     "durations": [
+      300,
+      300
+     ],
+     "repeat": -1
+    },
+    "walk": {
+     "frames": [
+      2,
+      3,
+      4,
+      5
+     ],
+     "durations": [
+      130,
+      130,
+      130,
+      130
+     ],
+     "repeat": -1
+    },
+    "attack": {
+     "frames": [
+      6,
+      7,
+      8
+     ],
+     "durations": [
+      260,
+      90,
+      200
+     ],
+     "repeat": 0
+    },
+    "hurt": {
+     "frames": [
+      9
+     ],
+     "durations": [
+      140
+     ],
+     "repeat": 0
+    }
+   },
+   "origin": [
+    0.5,
+    0.9270833333333334
+   ]
+  },
+  "skeleton_elite": {
+   "file": "skeleton_elite.png",
+   "fw": 48,
+   "fh": 48,
+   "anims": {
+    "idle": {
+     "frames": [
+      0,
+      1
+     ],
+     "durations": [
+      300,
+      300
+     ],
+     "repeat": -1
+    },
+    "walk": {
+     "frames": [
+      2,
+      3,
+      4,
+      5
+     ],
+     "durations": [
+      130,
+      130,
+      130,
+      130
+     ],
+     "repeat": -1
+    },
+    "attack": {
+     "frames": [
+      6,
+      7,
+      8
+     ],
+     "durations": [
+      260,
+      90,
+      200
+     ],
+     "repeat": 0
+    },
+    "hurt": {
+     "frames": [
+      9
+     ],
+     "durations": [
+      140
+     ],
+     "repeat": 0
+    }
+   },
+   "origin": [
+    0.5,
+    0.9270833333333334
+   ]
+  },
+  "golem": {
+   "file": "golem.png",
+   "fw": 64,
+   "fh": 64,
+   "anims": {
+    "idle": {
+     "frames": [
+      0,
+      1,
+      2,
+      3
+     ],
+     "durations": [
+      260,
+      260,
+      260,
+      260
+     ],
+     "repeat": -1
+    },
+    "walk": {
+     "frames": [
+      4,
+      5,
+      6,
+      7
+     ],
+     "durations": [
+      200,
+      200,
+      200,
+      200
+     ],
+     "repeat": -1
+    },
+    "attack": {
+     "frames": [
+      8,
+      9,
+      10,
+      11
+     ],
+     "durations": [
+      300,
+      400,
+      90,
+      260
+     ],
+     "repeat": 0
+    },
+    "hurt": {
+     "frames": [
+      12
+     ],
+     "durations": [
+      120
+     ],
+     "repeat": 0
+    }
+   },
+   "origin": [
+    0.5,
+    0.9453125
+   ]
+  },
+  "golem_elite": {
+   "file": "golem_elite.png",
+   "fw": 64,
+   "fh": 64,
+   "anims": {
+    "idle": {
+     "frames": [
+      0,
+      1,
+      2,
+      3
+     ],
+     "durations": [
+      260,
+      260,
+      260,
+      260
+     ],
+     "repeat": -1
+    },
+    "walk": {
+     "frames": [
+      4,
+      5,
+      6,
+      7
+     ],
+     "durations": [
+      200,
+      200,
+      200,
+      200
+     ],
+     "repeat": -1
+    },
+    "attack": {
+     "frames": [
+      8,
+      9,
+      10,
+      11
+     ],
+     "durations": [
+      300,
+      400,
+      90,
+      260
+     ],
+     "repeat": 0
+    },
+    "hurt": {
+     "frames": [
+      12
+     ],
+     "durations": [
+      120
+     ],
+     "repeat": 0
+    }
+   },
+   "origin": [
+    0.5,
+    0.9453125
+   ]
+  },
+  "boss": {
+   "file": "boss.png",
+   "fw": 96,
+   "fh": 96,
+   "anims": {
+    "idle": {
+     "frames": [
+      0,
+      1,
+      2,
+      3
+     ],
+     "durations": [
+      180,
+      180,
+      180,
+      180
+     ],
+     "repeat": -1
+    },
+    "charge": {
+     "frames": [
+      4,
+      5
+     ],
+     "durations": [
+      90,
+      90
+     ],
+     "repeat": -1
+    },
+    "hurt": {
+     "frames": [
+      6
+     ],
+     "durations": [
+      140
+     ],
+     "repeat": 0
+    }
+   },
+   "origin": [
+    0.5,
+    0.5
+   ]
+  },
+  "boss_orb": {
+   "file": "boss_orb.png",
+   "fw": 14,
+   "fh": 14,
+   "anims": {
+    "spin": {
+     "frames": [
+      0,
+      1,
+      2,
+      3
+     ],
+     "durations": [
+      90,
+      90,
+      90,
+      90
+     ],
+     "repeat": -1
+    }
+   },
+   "origin": [
+    0.5,
+    0.5
+   ]
+  },
+  "fireball": {
+   "file": "fireball.png",
+   "fw": 16,
+   "fh": 16,
+   "anims": {
+    "play": {
+     "frames": [
+      0,
+      1,
+      2,
+      3
+     ],
+     "durations": [
+      70,
+      70,
+      70,
+      70
+     ],
+     "repeat": -1
+    }
+   },
+   "origin": [
+    0.6,
+    0.5
+   ]
+  },
+  "fireball_big": {
+   "file": "fireball_big.png",
+   "fw": 26,
+   "fh": 26,
+   "anims": {
+    "play": {
+     "frames": [
+      0,
+      1,
+      2,
+      3
+     ],
+     "durations": [
+      70,
+      70,
+      70,
+      70
+     ],
+     "repeat": -1
+    }
+   },
+   "origin": [
+    0.6,
+    0.5
+   ]
+  },
+  "explosion": {
+   "file": "explosion.png",
+   "fw": 48,
+   "fh": 48,
+   "anims": {
+    "play": {
+     "frames": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7
+     ],
+     "durations": [
+      45,
+      45,
+      45,
+      45,
+      45,
+      45,
+      45,
+      45
+     ],
+     "repeat": 0
+    }
+   },
+   "origin": [
+    0.5,
+    0.5
+   ]
+  },
+  "explosion_big": {
+   "file": "explosion_big.png",
+   "fw": 84,
+   "fh": 84,
+   "anims": {
+    "play": {
+     "frames": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9
+     ],
+     "durations": [
+      50,
+      50,
+      50,
+      50,
+      50,
+      50,
+      50,
+      50,
+      50,
+      50
+     ],
+     "repeat": 0
+    }
+   },
+   "origin": [
+    0.5,
+    0.5
+   ]
+  },
+  "nova": {
+   "file": "nova.png",
+   "fw": 128,
+   "fh": 128,
+   "anims": {
+    "play": {
+     "frames": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7
+     ],
+     "durations": [
+      45,
+      45,
+      45,
+      45,
+      45,
+      45,
+      45,
+      45
+     ],
+     "repeat": 0
+    }
+   },
+   "origin": [
+    0.5,
+    0.5
+   ]
+  },
+  "missile": {
+   "file": "missile.png",
+   "fw": 14,
+   "fh": 14,
+   "anims": {
+    "play": {
+     "frames": [
+      0,
+      1,
+      2,
+      3
+     ],
+     "durations": [
+      60,
+      60,
+      60,
+      60
+     ],
+     "repeat": -1
+    }
+   },
+   "origin": [
+    0.5,
+    0.5
+   ]
+  },
+  "starburst": {
+   "file": "starburst.png",
+   "fw": 24,
+   "fh": 24,
+   "anims": {
+    "play": {
+     "frames": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5
+     ],
+     "durations": [
+      45,
+      45,
+      45,
+      45,
+      45,
+      45
+     ],
+     "repeat": 0
+    }
+   },
+   "origin": [
+    0.5,
+    0.5
+   ]
+  },
+  "vortex": {
+   "file": "vortex.png",
+   "fw": 48,
+   "fh": 48,
+   "anims": {
+    "play": {
+     "frames": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5
+     ],
+     "durations": [
+      60,
+      60,
+      60,
+      60,
+      60,
+      60
+     ],
+     "repeat": -1
+    }
+   },
+   "origin": [
+    0.5,
+    0.5
+   ]
+  },
+  "hitflash": {
+   "file": "hitflash.png",
+   "fw": 16,
+   "fh": 16,
+   "anims": {
+    "play": {
+     "frames": [
+      0,
+      1,
+      2,
+      3
+     ],
+     "durations": [
+      35,
+      35,
+      35,
+      35
+     ],
+     "repeat": 0
+    }
+   },
+   "origin": [
+    0.5,
+    0.5
+   ]
+  },
+  "zap": {
+   "file": "zap.png",
+   "fw": 24,
+   "fh": 24,
+   "anims": {
+    "play": {
+     "frames": [
+      0,
+      1,
+      2,
+      3,
+      4
+     ],
+     "durations": [
+      40,
+      40,
+      40,
+      40,
+      40
+     ],
+     "repeat": 0
+    }
+   },
+   "origin": [
+    0.5,
+    0.5
+   ]
+  },
+  "smoke": {
+   "file": "smoke.png",
+   "fw": 16,
+   "fh": 16,
+   "anims": {
+    "play": {
+     "frames": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5
+     ],
+     "durations": [
+      70,
+      70,
+      70,
+      70,
+      70,
+      70
+     ],
+     "repeat": 0
+    }
+   },
+   "origin": [
+    0.5,
+    0.5
+   ]
+  },
+  "portal": {
+   "file": "portal.png",
+   "fw": 32,
+   "fh": 16,
+   "anims": {
+    "play": {
+     "frames": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5
+     ],
+     "durations": [
+      90,
+      90,
+      90,
+      90,
+      90,
+      90
+     ],
+     "repeat": 0
+    }
+   },
+   "origin": [
+    0.5,
+    0.5
+   ]
+  },
+  "shock": {
+   "file": "shock.png",
+   "fw": 64,
+   "fh": 64,
+   "anims": {
+    "play": {
+     "frames": [
+      0,
+      1,
+      2,
+      3,
+      4
+     ],
+     "durations": [
+      50,
+      50,
+      50,
+      50,
+      50
+     ],
+     "repeat": 0
+    }
+   },
+   "origin": [
+    0.5,
+    0.5
+   ]
+  },
+  "shock_ice": {
+   "file": "shock_ice.png",
+   "fw": 64,
+   "fh": 64,
+   "anims": {
+    "play": {
+     "frames": [
+      0,
+      1,
+      2,
+      3,
+      4
+     ],
+     "durations": [
+      50,
+      50,
+      50,
+      50,
+      50
+     ],
+     "repeat": 0
+    }
+   },
+   "origin": [
+    0.5,
+    0.5
+   ]
+  },
+  "xp": {
+   "file": "xp.png",
+   "fw": 11,
+   "fh": 11,
+   "anims": {
+    "play": {
+     "frames": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5
+     ],
+     "durations": [
+      90,
+      90,
+      90,
+      90,
+      90,
+      90
+     ],
+     "repeat": -1
+    }
+   },
+   "origin": [
+    0.5,
+    0.5
+   ]
+  },
+  "xp_big": {
+   "file": "xp_big.png",
+   "fw": 11,
+   "fh": 11,
+   "anims": {
+    "play": {
+     "frames": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5
+     ],
+     "durations": [
+      90,
+      90,
+      90,
+      90,
+      90,
+      90
+     ],
+     "repeat": -1
+    }
+   },
+   "origin": [
+    0.5,
+    0.5
+   ]
+  },
+  "sigil_fire": {
+   "file": "sigil_fire.png",
+   "fw": 56,
+   "fh": 28,
+   "anims": {
+    "play": {
+     "frames": [
+      0,
+      1,
+      2,
+      3
+     ],
+     "durations": [
+      90,
+      90,
+      90,
+      90
+     ],
+     "repeat": -1
+    }
+   },
+   "origin": [
+    0.5,
+    0.5
+   ]
+  },
+  "sigil_ice": {
+   "file": "sigil_ice.png",
+   "fw": 56,
+   "fh": 28,
+   "anims": {
+    "play": {
+     "frames": [
+      0,
+      1,
+      2,
+      3
+     ],
+     "durations": [
+      90,
+      90,
+      90,
+      90
+     ],
+     "repeat": -1
+    }
+   },
+   "origin": [
+    0.5,
+    0.5
+   ]
+  },
+  "sigil_bolt": {
+   "file": "sigil_bolt.png",
+   "fw": 56,
+   "fh": 28,
+   "anims": {
+    "play": {
+     "frames": [
+      0,
+      1,
+      2,
+      3
+     ],
+     "durations": [
+      90,
+      90,
+      90,
+      90
+     ],
+     "repeat": -1
+    }
+   },
+   "origin": [
+    0.5,
+    0.5
+   ]
+  },
+  "sigil_arcane": {
+   "file": "sigil_arcane.png",
+   "fw": 56,
+   "fh": 28,
+   "anims": {
+    "play": {
+     "frames": [
+      0,
+      1,
+      2,
+      3
+     ],
+     "durations": [
+      90,
+      90,
+      90,
+      90
+     ],
+     "repeat": -1
+    }
+   },
+   "origin": [
+    0.5,
+    0.5
+   ]
+  },
+  "sigil_level": {
+   "file": "sigil_level.png",
+   "fw": 56,
+   "fh": 28,
+   "anims": {
+    "play": {
+     "frames": [
+      0,
+      1,
+      2,
+      3
+     ],
+     "durations": [
+      90,
+      90,
+      90,
+      90
+     ],
+     "repeat": -1
+    }
+   },
+   "origin": [
+    0.5,
+    0.5
+   ]
+  }
+ },
+ "images": {
+  "boss_hand": "boss_hand.png",
+  "boss_frag0": "boss_frag0.png",
+  "boss_frag1": "boss_frag1.png",
+  "boss_frag2": "boss_frag2.png",
+  "bone0": "bone0.png",
+  "bone1": "bone1.png",
+  "bone2": "bone2.png",
+  "bone3": "bone3.png",
+  "rock0": "rock0.png",
+  "rock1": "rock1.png",
+  "rock2": "rock2.png",
+  "p_ember": "p_ember.png",
+  "p_spark": "p_spark.png",
+  "p_dot": "p_dot.png",
+  "p_twinkle": "p_twinkle.png",
+  "p_snow": "p_snow.png",
+  "p_shard": "p_shard.png",
+  "p_drop": "p_drop.png",
+  "p_chip": "p_chip.png",
+  "p_feather": "p_feather.png",
+  "decal_scorch": "decal_scorch.png",
+  "decal_frost": "decal_frost.png",
+  "decal_goo": "decal_goo.png",
+  "glow": "glow.png",
+  "glow_big": "glow_big.png",
+  "shadow0": "shadow0.png",
+  "shadow1": "shadow1.png",
+  "shadow2": "shadow2.png",
+  "shadow3": "shadow3.png",
+  "shadow4": "shadow4.png",
+  "floor": "floor.png",
+  "tuft": "tuft.png",
+  "glyph0": "glyph0.png",
+  "glyph1": "glyph1.png",
+  "glyph2": "glyph2.png",
+  "glyph3": "glyph3.png",
+  "logo": "logo.png",
+  "panel": "panel.png",
+  "panel_dark": "panel_dark.png",
+  "btn_up": "btn_up.png",
+  "btn_over": "btn_over.png",
+  "btn_down": "btn_down.png",
+  "card0": "card0.png",
+  "card1": "card1.png",
+  "card2": "card2.png",
+  "bar": "bar.png",
+  "heart_full": "heart_full.png",
+  "heart_half": "heart_half.png",
+  "heart_empty": "heart_empty.png",
+  "rune_fire": "rune_fire.png",
+  "rune_ice": "rune_ice.png",
+  "rune_bolt": "rune_bolt.png",
+  "rune_arcane": "rune_arcane.png",
+  "ic_fireball": "ic_fireball.png",
+  "ic_meteor": "ic_meteor.png",
+  "ic_nova": "ic_nova.png",
+  "ic_bolt": "ic_bolt.png",
+  "ic_arcane": "ic_arcane.png",
+  "ic_haste": "ic_haste.png",
+  "ic_heart": "ic_heart.png",
+  "ic_magnet": "ic_magnet.png",
+  "ic_potion": "ic_potion.png",
+  "ic_xp": "ic_xp.png",
+  "ic_pause": "ic_pause.png",
+  "ic_skull": "ic_skull.png",
+  "ic_clock": "ic_clock.png",
+  "hand": "hand.png"
+ },
+ "fonts": {
+  "pixel": {
+   "png": "pixel.png",
+   "xml": "pixel.xml"
+  }
+ },
+ "decor": {
+  "size": 640,
+  "mushrooms": [
+   [
+    292,
+    76
+   ],
+   [
+    290,
+    72
+   ],
+   [
+    293,
+    72
+   ],
+   [
+    360,
+    105
+   ],
+   [
+    365,
+    106
+   ],
+   [
+    156,
+    345
+   ],
+   [
+    148,
+    345
+   ],
+   [
+    161,
+    351
+   ],
+   [
+    148,
+    345
+   ],
+   [
+    174,
+    345
+   ],
+   [
+    165,
+    348
+   ],
+   [
+    70,
+    306
+   ],
+   [
+    63,
+    309
+   ],
+   [
+    60,
+    316
+   ],
+   [
+    433,
+    135
+   ],
+   [
+    443,
+    133
+   ],
+   [
+    434,
+    137
+   ],
+   [
+    580,
+    325
+   ],
+   [
+    583,
+    327
+   ],
+   [
+    450,
+    442
+   ],
+   [
+    462,
+    439
+   ],
+   [
+    434,
+    181
+   ],
+   [
+    439,
+    181
+   ],
+   [
+    436,
+    181
+   ],
+   [
+    478,
+    278
+   ],
+   [
+    473,
+    285
+   ],
+   [
+    361,
+    133
+   ],
+   [
+    364,
+    128
+   ],
+   [
+    362,
+    136
+   ],
+   [
+    491,
+    318
+   ],
+   [
+    483,
+    312
+   ],
+   [
+    491,
+    320
+   ],
+   [
+    497,
+    316
+   ]
+  ],
+  "runes": [
+   [
+    364,
+    338,
+    0
+   ],
+   [
+    338,
+    364,
+    1
+   ],
+   [
+    302,
+    364,
+    2
+   ],
+   [
+    276,
+    338,
+    3
+   ],
+   [
+    276,
+    302,
+    0
+   ],
+   [
+    302,
+    276,
+    1
+   ],
+   [
+    338,
+    276,
+    2
+   ],
+   [
+    364,
+    302,
+    3
+   ]
+  ],
+  "tufts": [
+   [
+    426,
+    446
+   ],
+   [
+    458,
+    239
+   ],
+   [
+    316,
+    157
+   ],
+   [
+    149,
+    456
+   ],
+   [
+    506,
+    218
+   ],
+   [
+    194,
+    459
+   ],
+   [
+    325,
+    476
+   ],
+   [
+    467,
+    179
+   ],
+   [
+    159,
+    255
+   ],
+   [
+    365,
+    188
+   ],
+   [
+    512,
+    433
+   ],
+   [
+    493,
+    468
+   ],
+   [
+    181,
+    201
+   ],
+   [
+    170,
+    402
+   ],
+   [
+    463,
+    152
+   ],
+   [
+    464,
+    236
+   ],
+   [
+    328,
+    505
+   ],
+   [
+    237,
+    517
+   ],
+   [
+    246,
+    175
+   ],
+   [
+    451,
+    198
+   ],
+   [
+    255,
+    143
+   ],
+   [
+    112,
+    317
+   ],
+   [
+    258,
+    457
+   ],
+   [
+    250,
+    135
+   ],
+   [
+    299,
+    191
+   ],
+   [
+    254,
+    126
+   ],
+   [
+    217,
+    138
+   ],
+   [
+    134,
+    294
+   ],
+   [
+    524,
+    276
+   ],
+   [
+    261,
+    532
+   ],
+   [
+    258,
+    524
+   ],
+   [
+    411,
+    116
+   ],
+   [
+    463,
+    186
+   ],
+   [
+    480,
+    260
+   ],
+   [
+    491,
+    370
+   ],
+   [
+    468,
+    148
+   ],
+   [
+    215,
+    117
+   ],
+   [
+    537,
+    288
+   ],
+   [
+    530,
+    361
+   ],
+   [
+    209,
+    427
+   ]
+  ],
+  "flowers": []
+ },
+ "nineslice": {
+  "panel": 6,
+  "panel_dark": 6,
+  "btn_up": 6,
+  "btn_over": 6,
+  "btn_down": 6,
+  "card0": 8,
+  "card1": 8,
+  "card2": 8,
+  "bar": 3
+ }
+}
