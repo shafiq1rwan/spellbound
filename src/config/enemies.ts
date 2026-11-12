@@ -26,10 +26,10 @@ export const ENEMIES: Record<EnemyKind, EnemyDef> = {
     attackRange: 24, attackWindupMs: 420, attackCooldownMs: 1500, attackDamage: 1, scoreWeight: 3,
   },
   golem: {
-    kind: "golem", hp: 170, speed: 9, radius: 15, contactDamage: 1, xp: 8, knockbackResist: 0.9, shadow: 3, shadowOffset: 0,
+    kind: "golem", hp: 140, speed: 9, radius: 15, contactDamage: 1, xp: 8, knockbackResist: 0.9, shadow: 3, shadowOffset: 0,
     attackRange: 36, attackWindupMs: 780, attackCooldownMs: 2600, attackDamage: 2, scoreWeight: 8,
   },
   boss: { kind: "boss", hp: 1600, speed: 12, radius: 26, contactDamage: 1, xp: 60, knockbackResist: 1, shadow: 4, shadowOffset: 44, scoreWeight: 60 },
 };
 
-export const ELITE = { hpMul: 3.5, speedMul: 1.15, xpMul: 4, scale: 1.2 };
+export const ELITE = { hpMul: 2.5, speedMul: 1.15, xpMul: 4, scale: 1.2 };

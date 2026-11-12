@@ -795,6 +795,110 @@
     0.5
    ]
   },
+  "pet_fire": {
+   "file": "pet_fire.png",
+   "fw": 16,
+   "fh": 16,
+   "anims": {
+    "idle": {
+     "frames": [
+      0,
+      1,
+      2,
+      3
+     ],
+     "durations": [
+      140,
+      140,
+      140,
+      140
+     ],
+     "repeat": -1
+    }
+   },
+   "origin": [
+    0.5,
+    0.5
+   ]
+  },
+  "pet_ice": {
+   "file": "pet_ice.png",
+   "fw": 16,
+   "fh": 16,
+   "anims": {
+    "idle": {
+     "frames": [
+      0,
+      1,
+      2,
+      3
+     ],
+     "durations": [
+      140,
+      140,
+      140,
+      140
+     ],
+     "repeat": -1
+    }
+   },
+   "origin": [
+    0.5,
+    0.5
+   ]
+  },
+  "pet_bolt": {
+   "file": "pet_bolt.png",
+   "fw": 16,
+   "fh": 16,
+   "anims": {
+    "idle": {
+     "frames": [
+      0,
+      1,
+      2,
+      3
+     ],
+     "durations": [
+      140,
+      140,
+      140,
+      140
+     ],
+     "repeat": -1
+    }
+   },
+   "origin": [
+    0.5,
+    0.5
+   ]
+  },
+  "pet_arcane": {
+   "file": "pet_arcane.png",
+   "fw": 16,
+   "fh": 16,
+   "anims": {
+    "idle": {
+     "frames": [
+      0,
+      1,
+      2,
+      3
+     ],
+     "durations": [
+      140,
+      140,
+      140,
+      140
+     ],
+     "repeat": -1
+    }
+   },
+   "origin": [
+    0.5,
+    0.5
+   ]
+  },
   "fireball": {
    "file": "fireball.png",
    "fw": 16,

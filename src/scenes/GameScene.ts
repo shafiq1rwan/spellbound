@@ -20,6 +20,7 @@ import { EnemySpawnManager } from "../systems/EnemySpawnManager";
 import { XPSystem } from "../systems/XPSystem";
 import { UpgradeManager } from "../systems/UpgradeManager";
 import { Ambience } from "../systems/Ambience";
+import { FamiliarSystem } from "../systems/FamiliarSystem";
 import { RuneRecognizer, type Pt } from "../rune/RuneRecognizer";
 import { RuneInput, type StrokePoint } from "../rune/RuneInput";
 import { RuneDrawingRenderer } from "../rune/RuneDrawingRenderer";
@@ -51,6 +52,7 @@ export class GameScene extends Phaser.Scene {
   xp!: XPSystem;
   upgrades!: UpgradeManager;
   ambience!: Ambience;
+  familiars!: FamiliarSystem;
   private renderer2!: RuneDrawingRenderer;
   private recognizer!: RuneRecognizer;
   private input2!: RuneInput;
@@ -84,6 +86,7 @@ export class GameScene extends Phaser.Scene {
     this.wizard = new Wizard(this, 0, 0, this.vfx);
     this.combat = new CombatSystem(this);
     this.spells = new SpellManager(this);
+    this.familiars = new FamiliarSystem(this);
     this.spawner = new EnemySpawnManager(this);
     this.xp = new XPSystem(this);
     this.upgrades = new UpgradeManager(this);
@@ -418,6 +421,7 @@ export class GameScene extends Phaser.Scene {
     if (this.enemies.length > 64 || Math.random() < 0.02) this.enemies = this.enemies.filter((e) => e.alive);
     this.boss?.update(dt);
     this.spells.update(dt);
+    this.familiars.update(dt);
     this.xp.update(dt);
     if (!this.tutorial) this.spawner.update(dt);
     this.vfx.update(dt);

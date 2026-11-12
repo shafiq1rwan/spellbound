@@ -11,6 +11,7 @@ import { M } from "../core/assets";
 export class PixelText extends Phaser.GameObjects.BitmapText {
   declare ax: number;
   declare ay: number;
+
   constructor(scene: Phaser.Scene, x: number, y: number, s: string, size: number, align: number, ox: number, oy: number) {
     super(scene, x, y, "pixel", s, size, align);
     this.ax = ox;
@@ -51,6 +52,21 @@ export class PixelText extends Phaser.GameObjects.BitmapText {
   setFontSize(size: number) {
     super.setFontSize(size);
     this.refreshOrigin?.();
+    return this;
+  }
+  /**
+   * Phaser re-wraps text against its CURRENT display scale, so text that pops in from a small scale
+   * re-flows mid-animation. This wraps once at full scale and bakes the line breaks into the text.
+   */
+  setTextWrapped(value: string, maxWidth: number) {
+    const sx = this.scaleX, sy = this.scaleY;
+    this.setScale(1);
+    super.setMaxWidth(maxWidth);
+    super.setText(value);
+    const wrapped = (this.getTextBounds(false) as unknown as { wrappedText?: string }).wrappedText ?? value;
+    super.setMaxWidth(0);
+    this.setText(wrapped);
+    this.setScale(sx, sy);
     return this;
   }
 }

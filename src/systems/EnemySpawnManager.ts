@@ -1,7 +1,7 @@
 // Waves: spawns just outside the visible camera rect (consistent relative to the viewport),
 // never too close to the wizard, honours spawn caps and eases off while the player is drawing.
 import { GAME } from "../config/game";
-import { waveDef, type WaveDef } from "../config/waves";
+import { waveDef, spawnIntervalMs, type WaveDef } from "../config/waves";
 import { PAL } from "../config/palette";
 import { SPELLS, SPELL_ORDER } from "../config/spells";
 import type { EnemyKind } from "../config/enemies";
@@ -105,13 +105,18 @@ export class EnemySpawnManager {
       this.inBreak = true;
       this.breakT = GAME.waveBreakMs;
       this.g.xp.vacuum();
+      // breather: clearing a wave restores a heart
+      if (GAME.healOnWaveClear > 0 && this.g.hp < this.g.maxHp) {
+        this.g.heal(GAME.healOnWaveClear);
+        bus.emit(EV.WAVE_BANNER, "WAVE CLEAR", `+${GAME.healOnWaveClear} HEART`, PAL.xpMint);
+      } else bus.emit(EV.WAVE_BANNER, "WAVE CLEAR", "", PAL.xpMint);
       return;
     }
     if (this.waveT >= this.def.durationMs) return; // boss wave: wait for the boss
     this.nextSpawn -= dtMs * (this.g.drawing ? 0.5 : 1); // ease off while the player draws
     if (this.nextSpawn > 0 || alive >= this.def.maxAlive) return;
-    const [a, b] = this.def.interval;
-    this.nextSpawn = a + Math.random() * (b - a);
+    // interval comes from the wave's pressure target (HP/s), with +/-25% jitter so it doesn't feel metronomic
+    this.nextSpawn = spawnIntervalMs(this.def) * (0.75 + Math.random() * 0.5);
     const [g0, g1] = this.def.group;
     const n = Math.min(this.def.maxAlive - alive, g0 + Math.floor(Math.random() * (g1 - g0 + 1)));
     const p = this.edgePoint();

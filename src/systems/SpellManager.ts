@@ -140,6 +140,16 @@ export class SpellManager {
     const g = this.g, x = p.x, y = p.y;
     const meteor = !!p.data.meteor, splash = Number(p.data.splash), kb = Number(p.data.kb), lvl = Number(p.data.lvl);
     p.kill();
+    if (p.data.pet) {
+      g.vfx.play("explosion", x, y, { scale: 0.55, depth: DEPTH.fx });
+      g.vfx.burst("ember", x, y, 4, { speed: [20, 60] });
+      Audio.play("fire_boom", { vol: 0.35, rate: 1.3, maxConcurrent: 2, minGapMs: 80 });
+      for (const t of g.targets()) {
+        const d = Math.hypot(t.x - x, t.y - t.height * 0.5 - y);
+        if (t === direct || d <= splash + t.radius) g.combat.damage(t, t === direct ? p.damage : p.damage * 0.5, { element: "fire", dx: t.x - x, dy: t.y - y, kb, heavy: false, quiet: t !== direct });
+      }
+      return;
+    }
     g.vfx.play(meteor ? "explosion_big" : "explosion", x, y, { scale: meteor ? 1.1 : Math.max(0.8, splash / 26), depth: DEPTH.fx });
     g.vfx.glow(x, y, PAL.fireOrange, meteor ? 160 : 60 + splash, meteor ? 500 : 280, 0.8);
     g.vfx.burst("ember", x, y, meteor ? 26 : 10, { speed: [30, meteor ? 140 : 90] });
@@ -314,6 +324,50 @@ export class SpellManager {
       }
     }
     this.vortices = this.vortices.filter((v) => v.t < v.dur);
+  }
+
+  // ---------------------------------------------------------------- familiar casts (weaker, quieter)
+  petFireball(x: number, y: number, target: Target, damage: number) {
+    const a = Math.atan2(target.y - target.height - y, target.x - x);
+    this.proj().launch("fireball", x, y, a, 200, {
+      damage, radius: 4, life: 1400, tex: "fireball", anim: "fireball:play", scale: 0.6, glow: PAL.fireOrange, glowSize: 14,
+      target, turn: 3, data: { splash: 12, kb: 10, lvl: 1, pet: true },
+    });
+    Audio.play("fire_cast", { vol: 0.25, rate: 1.4, maxConcurrent: 2, minGapMs: 80 });
+  }
+  petPulse(x: number, y: number, radius: number, damage: number, slow: number, freezeMs: number) {
+    const g = this.g;
+    g.vfx.play("shock_ice", x, y + 4, { scale: radius / 30, depth: DEPTH.fxLow, add: true, alpha: 0.7 });
+    g.vfx.ring("snow", x, y, radius * 0.8, 6);
+    Audio.play("ice_wave", { vol: 0.3, rate: 1.3, maxConcurrent: 2, minGapMs: 120 });
+    for (const t of g.targets()) {
+      if (Math.hypot(t.x - x, t.y - y) > radius + t.radius) continue;
+      if (freezeMs) t.freeze(freezeMs);
+      t.slow(slow, 1800);
+      g.combat.damage(t, damage, { element: "ice", dx: t.x - x, dy: t.y - y, kb: 10, heavy: false, noShatter: true, quiet: true });
+    }
+  }
+  petZap(x: number, y: number, target: Target, damage: number, chains: number) {
+    const g = this.g;
+    let fx = x, fy = y, cur: Target | null = target;
+    const hit = new Set<Target>();
+    for (let i = 0; i <= chains && cur; i++) {
+      hit.add(cur);
+      g.vfx.bolt(fx, fy, cur.x, cur.y - cur.height, { width: 1, ms: 140 });
+      g.vfx.play("zap", cur.x, cur.y - cur.height, { add: true, scale: 0.7 });
+      g.combat.damage(cur, damage * Math.pow(0.8, i), { element: "bolt", dx: cur.x - fx, dy: cur.y - fy, kb: 4, heavy: false });
+      fx = cur.x; fy = cur.y - cur.height;
+      cur = this.nearest(cur.x, cur.y, 60, hit);
+    }
+    Audio.play("bolt_hit", { vol: 0.4, rate: 1.2, maxConcurrent: 2, minGapMs: 80 });
+  }
+  petMissile(x: number, y: number, target: Target, damage: number) {
+    const a = -Math.PI / 2 + (Math.random() - 0.5);
+    this.proj().launch("missile", x, y, a, 60, {
+      damage, radius: 4, life: 2400, tex: "missile", anim: "missile:play", scale: 0.8, glow: PAL.violet, glowSize: 14,
+      target, pierce: 1, maxSpeed: 230, accel: 400, turn: 5, data: { kb: 10 },
+    });
+    Audio.play("arcane_pulse", { vol: 0.35, rate: 1.2, maxConcurrent: 2, minGapMs: 80 });
   }
 
   // ---------------------------------------------------------------- update

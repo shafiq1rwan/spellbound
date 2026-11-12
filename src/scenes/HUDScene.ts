@@ -32,9 +32,10 @@ export class HUDScene extends Phaser.Scene {
   private bossFill!: Phaser.GameObjects.Rectangle;
   private bossName!: Phaser.GameObjects.BitmapText;
   private bossW = 140;
-  private banner!: Phaser.GameObjects.BitmapText;
-  private bannerSub!: Phaser.GameObjects.BitmapText;
-  private hint!: Phaser.GameObjects.BitmapText;
+  private banner!: PixelText;
+  private bannerSub!: PixelText;
+  private hint!: PixelText;
+  private hintW = 180;
   private vignette!: Phaser.GameObjects.Image;
   private hurtFlash!: Phaser.GameObjects.Image;
   private debugText!: Phaser.GameObjects.BitmapText;
@@ -159,7 +160,8 @@ export class HUDScene extends Phaser.Scene {
       });
       const bw = Math.round(Math.min(W - 60, 150));
       this.placeXp(Math.round(W / 2 + 12), by - 21, bw);
-      this.hint.setPosition(Math.round(W / 2), by - 36).setMaxWidth(W - 20);
+      this.hint.setPosition(Math.round(W / 2), by - 36);
+      this.hintW = W - 20;
       this.banner.setPosition(Math.round(W / 2), Math.round(H * 0.3));
     } else {
       const cx = Math.round(sf.left + 18);
@@ -170,10 +172,11 @@ export class HUDScene extends Phaser.Scene {
       });
       const bw = Math.round(Math.min(W * 0.45, 190));
       this.placeXp(Math.round(W / 2 + 12), Math.round(H - sf.bottom - 9), bw);
-      this.hint.setPosition(Math.round(W / 2), Math.round(H - sf.bottom - 24)).setMaxWidth(W * 0.6);
+      this.hint.setPosition(Math.round(W / 2), Math.round(H - sf.bottom - 24));
+      this.hintW = Math.round(W * 0.6);
       this.banner.setPosition(Math.round(W / 2), Math.round(H * 0.3));
     }
-    this.bannerSub.setPosition(this.banner.x, this.banner.y + 16);
+    this.stackBanner();
   }
   /** wave plate: 6px of padding around the text, sized so the text lands on whole pixels */
   private fitWavePanel() {
@@ -254,17 +257,24 @@ export class HUDScene extends Phaser.Scene {
   // ---------------------------------------------------------------- banners & hints
   private showBanner(a: string, b: string, color: number) {
     this.tweens.killTweensOf([this.banner, this.bannerSub]);
-    this.banner.setText(a).setTint(color).setAlpha(1).setScale(0.4);
-    this.bannerSub.setText(b).setAlpha(0);
+    // wrap at full size first (Phaser re-wraps at the current scale), then start the pop-in
+    this.banner.setScale(1).setTextWrapped(a, Layout.w - 16).setTint(color).setAlpha(1);
+    this.bannerSub.setTextWrapped(b, Layout.w - 16).setAlpha(0);
+    this.stackBanner();
+    this.banner.setScale(0.4);
     this.tweens.add({ targets: this.banner, scale: 1, duration: 300, ease: "Back.easeOut" });
     this.tweens.add({ targets: this.bannerSub, alpha: 1, delay: 150, duration: 200 });
     this.tweens.add({ targets: [this.banner, this.bannerSub], alpha: 0, delay: 1900, duration: 400 });
+  }
+  /** long banners wrap onto two lines; keep the subtitle 8px under the banner's last line */
+  private stackBanner() {
+    this.bannerSub.setPosition(this.banner.x, Math.round(this.banner.y + this.banner.ink().h / 2 + 8 + 3.5));
   }
   private showHint(s: string | null, ms = 2500) {
     this.hintTimer?.remove();
     this.tweens.killTweensOf(this.hint);
     if (!s) { this.hint.setAlpha(0); return; }
-    this.hint.setText(s).setAlpha(1);
+    this.hint.setScale(1).setTextWrapped(s, this.hintW).setAlpha(1);
     this.pop(this.hint, 1.15);
     if (ms > 0) this.hintTimer = this.time.delayedCall(ms, () => this.tweens.add({ targets: this.hint, alpha: 0, duration: 300 }));
   }

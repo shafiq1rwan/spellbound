@@ -8,6 +8,7 @@ import * as EN from "./enemies.mjs";
 import * as FX from "./fx.mjs";
 import * as ENV from "./env.mjs";
 import * as UI from "./ui.mjs";
+import { PETS } from "./pets.mjs";
 
 const OUT = "public/assets/gfx";
 rmSync(OUT, { recursive: true, force: true });
@@ -108,6 +109,11 @@ const S = (fn, list) => list.map((p) => fn(p));
   sheet("boss_orb", { spin: bp.orb }, { durations: { spin: [90, 90, 90, 90] } });
   EN.boneBits().forEach((b, i) => image(`bone${i}`, b));
   EN.rockBits().forEach((b, i) => image(`rock${i}`, b));
+}
+
+// ======================================================== familiars
+for (const [key, fn] of Object.entries(PETS)) {
+  sheet(key, { idle: [0, 1, 2, 3].map((f) => fn(f)) }, { durations: { idle: [140, 140, 140, 140] }, origin: [0.5, 0.5] });
 }
 
 // ======================================================== vfx

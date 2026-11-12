@@ -10,7 +10,9 @@ spells at monsters closing in from every side.
 | Zigzag | **Lightning Chain** | Instant bolt that jumps between enemies. Stuns from level 3; every bolt forks at level 5. |
 | V (or ✓) | **Arcane Barrage** | A homing missile for each nearby enemy, with knockback. Pierce from level 3; summons a vortex at level 5. |
 
-The runes unlock on waves 1 to 4. **Spell combination:** freeze enemies with Ice Nova, then hit them with any other spell to
+The runes unlock on waves 1 to 4. **Familiars:** a spell's first upgrade (level 2) summons an elemental
+pet (Ember Wisp, Frost Sprite, Spark Imp, Arcane Owl) that auto-casts a weaker version of the spell.
+Difficulty rises a steady ~30% per wave (see `docs/DIFFICULTY.md`). **Spell combination:** freeze enemies with Ice Nova, then hit them with any other spell to
 *shatter* them for double damage. Switching elements also builds the combo meter 3× faster than
 repeating one spell. **Aiming:** draw the rune on top of a monster to target it.
 Otherwise the spell goes for the nearest enemy.

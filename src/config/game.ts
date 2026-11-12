@@ -62,4 +62,6 @@ export const GAME = {
   },
 
   waveBreakMs: 2600,
+  /** hearts restored when a wave is cleared */
+  healOnWaveClear: 1,
 };

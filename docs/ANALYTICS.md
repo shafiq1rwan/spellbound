@@ -28,6 +28,7 @@ before the SDK is ready are queued and flushed once it is.
 | `drawing` | `recharging`, `not-learned` | `reached` *(once/run)* | A valid rune drawn while on cooldown / before it's unlocked | Do players understand cooldowns and unlocks? |
 | `death` | `slime`, `bat`, `skeleton`, `golem`, `*-elite`, `boss-orb`, `boss-beam` | `reached` | What dealt the killing blow | **What kills players?** |
 | `survival` | `30s`, `60s`, `120s`, `180s`, `300s`, `600s` | `reached` *(once/run)* | Time alive in a run | Session depth |
+| `familiar` | `ember-wisp`, `frost-sprite`, `spark-imp`, `arcane-owl` | `reached` *(once/run)* | Pet summoned (spell reaches level 2) | How many runs get each pet? |
 | `level` | `2` … `15+` | `reached` *(once/run)* | Each level-up | Progression pace |
 | `upgrade` | e.g. `spell:fireball`, `haste`, `vitality` | `picked` | Upgrade card chosen | Which upgrades are popular? |
 | `combo` | `x10`, `x20`, `shatter` | `reached` *(once/run)* | Combo milestones; first Ice→other Shatter | Do players discover spell mixing? |
