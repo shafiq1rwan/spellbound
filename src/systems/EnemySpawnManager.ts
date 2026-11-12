@@ -108,8 +108,8 @@ export class EnemySpawnManager {
       // breather: clearing a wave restores a heart
       if (GAME.healOnWaveClear > 0 && this.g.hp < this.g.maxHp) {
         this.g.heal(GAME.healOnWaveClear);
-        bus.emit(EV.WAVE_BANNER, "WAVE CLEAR", `+${GAME.healOnWaveClear} HEART`, PAL.xpMint);
-      } else bus.emit(EV.WAVE_BANNER, "WAVE CLEAR", "", PAL.xpMint);
+        bus.emit(EV.WAVE_BANNER, `WAVE ${this.wave} ✓`, `+${GAME.healOnWaveClear} ♥`, PAL.xpMint);
+      } else bus.emit(EV.WAVE_BANNER, `WAVE ${this.wave} ✓`, "", PAL.xpMint);
       return;
     }
     if (this.waveT >= this.def.durationMs) return; // boss wave: wait for the boss

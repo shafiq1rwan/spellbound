@@ -1,5 +1,6 @@
-// Onboarding overlay (never blocks input). "intro": first-run guided fireball with a ghost hand
-// drawing the triangle over a single harmless slime. "demo": shows how to draw a given rune.
+// Onboarding overlay (never blocks input), wordless so it works in any language.
+// "intro": first-run guided fireball — pictogram [triangle] -> [fireball] + a ghost hand drawing it
+// over a single harmless slime. "demo": pictogram + ghost drawing for any rune.
 import Phaser from "phaser";
 import { Layout } from "../core/Layout";
 import { bus, EV } from "../core/bus";
@@ -16,8 +17,8 @@ export class TutorialScene extends Phaser.Scene {
   private spell: SpellId = "fireball";
   private ghost!: Phaser.GameObjects.Graphics;
   private hand!: Phaser.GameObjects.Image;
-  private label!: Phaser.GameObjects.BitmapText;
-  private sub!: Phaser.GameObjects.BitmapText;
+  private picto!: Phaser.GameObjects.Container;
+  private mark!: Phaser.GameObjects.BitmapText;
   private path: Pt[] = [];
   private t = 0;
   private loops = 0;
@@ -46,21 +47,28 @@ export class TutorialScene extends Phaser.Scene {
     const col = ELEMENT_COLORS[def.element];
     this.ghost = this.add.graphics().setBlendMode(Phaser.BlendModes.ADD);
     this.hand = this.add.image(0, 0, "hand").setOrigin(0.25, 0.05);
-    this.label = txt(this, 0, 0, "", { color: col.light, maxWidth: Layout.w - 24 });
-    this.sub = txt(this, 0, 0, "", { color: 0xd8d0f0, maxWidth: Layout.w - 24 });
+    // pictogram: [rune shape] -> [spell]
+    this.picto = this.add.container(0, 0);
+    const runeIcon = this.add.image(0, 0, def.runeIcon).setScale(2);
+    const arrow = txt(this, 0, 0, "→", { scale: 2, color: 0xd8d0f0 });
+    const spellIcon = this.add.image(0, 0, def.icon).setScale(2);
+    const glow = this.add.image(0, 0, "glow_big").setTint(col.main).setBlendMode(Phaser.BlendModes.ADD).setAlpha(0.25).setDisplaySize(130, 50);
+    const gap = 8, wR = runeIcon.displayWidth, wA = arrow.ink().w, wS = spellIcon.displayWidth;
+    const total = wR + gap + wA + gap + wS;
+    runeIcon.setX(Math.round(-total / 2 + wR / 2));
+    arrow.setX(Math.round(-total / 2 + wR + gap + wA / 2));
+    spellIcon.setX(Math.round(total / 2 - wS / 2));
+    this.picto.add([glow, runeIcon, arrow, spellIcon]);
+    // big check / cross for feedback
+    this.mark = txt(this, 0, 0, "", { scale: 3, color: PAL.gold }).setAlpha(0);
     const size = Math.min(70, Layout.w * 0.32);
     this.path = idealGlyph(def.rune).map((p) => ({ x: p.x * size, y: p.y * size }));
     if (this.mode === "intro") {
-      this.label.setText("DRAW A TRIANGLE!");
-      this.sub.setText("ONE STROKE ANYWHERE = FIREBALL");
       // a single harmless slime walks in
       this.g.time.delayedCall(400, () => this.g.spawner.spawnAt("slime", this.g.wizard.x + 30, this.g.wizard.y - Math.min(110, this.g.viewHalfH() - 40), false));
       this.listen(EV.CAST, () => this.onCast());
-      this.listen(EV.FAIL, () => { if (this.step === 0) this.sub.setText("TRY AGAIN: 3 CORNERS, 1 STROKE").setTint(PAL.fireYellow); this.stack(); });
+      this.listen(EV.FAIL, () => { if (this.step === 0) this.feedback(false); });
       this.listen(EV.STROKE, (on: boolean) => this.setHidden(on));
-    } else {
-      this.label.setText(`${def.runeName.toUpperCase()} = ${def.name.toUpperCase()}`);
-      this.sub.setText("");
     }
     this.layout();
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
@@ -78,14 +86,22 @@ export class TutorialScene extends Phaser.Scene {
   }
 
   private layout() {
-    const W = Layout.w, H = Layout.h;
-    this.label.setPosition(Math.round(W / 2), Math.round(Layout.safe.top + (Layout.portrait ? 62 : 44)));
-    void H;
-    this.stack();
+    const y = Math.round(Layout.safe.top + (Layout.portrait ? 66 : 48));
+    this.picto.setPosition(Math.round(Layout.w / 2), y);
+    this.mark.setPosition(Math.round(Layout.w / 2), y);
   }
-  /** keep the subtitle directly under the (possibly wrapped) label */
-  private stack() {
-    this.sub.setPosition(Math.round(Layout.w / 2), Math.round(this.label.y + this.label.height / 2 + 7));
+  /** wordless feedback: red cross + shake on a miss, gold check on success */
+  private feedback(ok: boolean) {
+    this.tweens.killTweensOf(this.mark);
+    this.mark.setText(ok ? "✓" : "✗").setTint(ok ? PAL.gold : PAL.hpRed).setAlpha(1).setScale(ok ? 0.5 : 1);
+    if (ok) {
+      this.picto.setAlpha(0);
+      this.tweens.add({ targets: this.mark, scale: 1, duration: 260, ease: "Back.easeOut" });
+    } else {
+      this.picto.setAlpha(0.35);
+      this.tweens.add({ targets: this.picto, x: this.picto.x + 4, duration: 50, yoyo: true, repeat: 3 });
+      this.tweens.add({ targets: this.mark, alpha: 0, delay: 500, duration: 250, onComplete: () => this.picto.setAlpha(1) });
+    }
   }
 
   private onCast() {
@@ -93,12 +109,10 @@ export class TutorialScene extends Phaser.Scene {
     this.step = 1;
     this.ghost.clear();
     this.hand.setVisible(false);
-    this.label.setText("GREAT! DRAW ON A FOE TO AIM").setTint(PAL.gold);
-    this.sub.setText("SURVIVE. LEARN NEW RUNES.").clearTint();
-    this.stack();
-    this.time.delayedCall(2600, () => {
+    this.feedback(true);
+    this.time.delayedCall(1600, () => {
       this.tweens.add({
-        targets: [this.label, this.sub], alpha: 0, duration: 300,
+        targets: [this.mark, this.picto], alpha: 0, duration: 300,
         onComplete: () => { this.g.tutorialDone(); this.scene.stop(); },
       });
     });
@@ -119,7 +133,7 @@ export class TutorialScene extends Phaser.Scene {
     if (this.t > (this.loops + 1) * (dur + pause)) {
       this.loops++;
       if (this.mode === "demo" && this.loops >= 2) {
-        this.tweens.add({ targets: [this.ghost, this.hand, this.label, this.sub], alpha: 0, duration: 250, onComplete: () => this.scene.stop() });
+        this.tweens.add({ targets: [this.ghost, this.hand, this.picto, this.mark], alpha: 0, duration: 250, onComplete: () => this.scene.stop() });
         this.mode = "intro";
         this.step = 2;
         return;
@@ -137,7 +151,7 @@ export class TutorialScene extends Phaser.Scene {
     pass(1, 0xffffff, 0.8 * fade);
     const tip = this.path[Math.min(n, this.path.length) - 1];
     this.hand.setPosition(Math.round(a.x + tip.x), Math.round(a.y + tip.y)).setAlpha(this.hidden ? 0 : k >= 1 ? 0.5 : 1);
-    // pulse the instruction text
-    this.label.setScale(1 + Math.sin(this.t / 180) * 0.03);
+    // gentle pulse on the pictogram
+    this.picto.setScale(1 + Math.sin(this.t / 180) * 0.04);
   }
 }

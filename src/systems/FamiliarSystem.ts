@@ -50,7 +50,7 @@ export class FamiliarSystem {
     g.vfx.burst("twinkle", w.x, w.y - 20, 12, { tint: col.light, speed: [20, 70] });
     g.vfx.glow(w.x, w.y - 20, col.main, 60, 500, 0.8);
     Audio.play("levelup", { vol: 0.5, rate: 1.3 });
-    bus.emit(EV.WAVE_BANNER, `${def.name} JOINS YOU!`, "IT CASTS ON ITS OWN", col.main);
+    bus.emit(EV.WAVE_BANNER, `+ ${def.name}`, "", col.main);
     Analytics.track("familiar", def.tag, "reached", "run");
     this.pets.push({ id, s, glow, shadow, t: Math.random() * 6, ready: g.now + 900, x: w.x, y: w.y - 20 });
   }

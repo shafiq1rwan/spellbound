@@ -101,6 +101,19 @@ export class RuneDrawingRenderer {
     return { x: x0, y: y0, w: x1 - x0, h: y1 - y0, cx: (x0 + x1) / 2, cy: (y0 + y1) / 2 };
   }
 
+  /** swipe: the trail itself flashes bright and sheds sparks — the trail IS the attack */
+  slash() {
+    this.drawing = false;
+    this.tip.setVisible(false);
+    this.color = 0xffffff;
+    this.glow = PAL.lavender;
+    this.redraw();
+    this.scene.tweens.add({ targets: this.g, alpha: 0, duration: 220, ease: "Quad.easeIn" });
+    const p = this.pts;
+    const step = Math.max(1, Math.floor(p.length / 10));
+    for (let i = 0; i < p.length; i += step) this.vfx.burst(i % 2 ? "twinkle" : "spark", p[i].x, p[i].y, 1, { tint: i % 3 ? PAL.lavender : 0xffffff, speed: [10, 40] });
+  }
+
   /** recognised: flash, snap to clean glyph, collapse into particles */
   success(rune: RuneName, color: number, light: number) {
     this.drawing = false;

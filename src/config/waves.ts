@@ -21,25 +21,25 @@ export interface WaveDef {
 }
 
 /**
- * Difficulty curve. Pressure starts low and grows a steady ~30% per wave, so each wave is a small
+ * Difficulty curve. Pressure starts low and grows a steady ~33% per wave, so each wave is a small
  * step up rather than a wall. Measured with tools/qa/sim-run.mjs (see docs/DIFFICULTY.md).
  */
-export const PRESSURE_BASE = 7;
-export const PRESSURE_GROWTH = 1.3;
+export const PRESSURE_BASE = 9;
+export const PRESSURE_GROWTH = 1.33;
 export const pressureFor = (wave: number) =>
   wave <= 10 ? PRESSURE_BASE * Math.pow(PRESSURE_GROWTH, wave - 1)
              : PRESSURE_BASE * Math.pow(PRESSURE_GROWTH, 9) * Math.pow(1.15, wave - 10); // gentler in endless
 
 const AUTHORED: Omit<WaveDef, "pressure">[] = [
-  { durationMs: 30000, weights: { slime: 1 }, maxAlive: 5, group: [1, 1], elites: 0, hpMul: 1 },
-  { durationMs: 32000, weights: { slime: 3, bat: 1 }, maxAlive: 7, group: [1, 2], elites: 0, hpMul: 1 },
-  { durationMs: 34000, weights: { slime: 3, bat: 2, skeleton: 1 }, maxAlive: 8, group: [1, 2], elites: 0, hpMul: 1 },
-  { durationMs: 36000, weights: { slime: 3, bat: 2, skeleton: 1.5 }, maxAlive: 10, group: [1, 2], elites: 0, hpMul: 1.03 },
-  { durationMs: 38000, weights: { slime: 2, bat: 2, skeleton: 2 }, maxAlive: 12, group: [1, 3], elites: 1, hpMul: 1.06 },
-  { durationMs: 38000, weights: { slime: 2, bat: 2, skeleton: 2, golem: 0.4 }, maxAlive: 14, group: [1, 3], elites: 1, hpMul: 1.1 },
-  { durationMs: 40000, weights: { slime: 2, bat: 2.5, skeleton: 2, golem: 0.6 }, maxAlive: 16, group: [2, 3], elites: 1, hpMul: 1.14 },
-  { durationMs: 40000, weights: { slime: 2, bat: 3, skeleton: 2.5, golem: 0.8 }, maxAlive: 18, group: [2, 3], elites: 2, hpMul: 1.18 },
-  { durationMs: 42000, weights: { slime: 2, bat: 3, skeleton: 3, golem: 1 }, maxAlive: 20, group: [2, 4], elites: 2, hpMul: 1.22 },
+  { durationMs: 30000, weights: { slime: 1 }, maxAlive: 6, group: [1, 1], elites: 0, hpMul: 1 },
+  { durationMs: 32000, weights: { slime: 3, bat: 1 }, maxAlive: 8, group: [1, 2], elites: 0, hpMul: 1 },
+  { durationMs: 34000, weights: { slime: 3, bat: 2, skeleton: 1 }, maxAlive: 10, group: [1, 2], elites: 0, hpMul: 1 },
+  { durationMs: 36000, weights: { slime: 3, bat: 2, skeleton: 1.5 }, maxAlive: 12, group: [1, 2], elites: 0, hpMul: 1.03 },
+  { durationMs: 38000, weights: { slime: 2, bat: 2, skeleton: 2 }, maxAlive: 14, group: [1, 3], elites: 1, hpMul: 1.06 },
+  { durationMs: 38000, weights: { slime: 2, bat: 2, skeleton: 2, golem: 0.4 }, maxAlive: 16, group: [1, 3], elites: 1, hpMul: 1.1 },
+  { durationMs: 40000, weights: { slime: 2, bat: 2.5, skeleton: 2, golem: 0.6 }, maxAlive: 19, group: [2, 3], elites: 1, hpMul: 1.14 },
+  { durationMs: 40000, weights: { slime: 2, bat: 3, skeleton: 2.5, golem: 0.8 }, maxAlive: 22, group: [2, 3], elites: 2, hpMul: 1.18 },
+  { durationMs: 42000, weights: { slime: 2, bat: 3, skeleton: 3, golem: 1 }, maxAlive: 25, group: [2, 4], elites: 2, hpMul: 1.22 },
   { durationMs: 30000, weights: { slime: 2, bat: 2 }, maxAlive: 7, group: [1, 2], elites: 0, boss: true, hpMul: 1.25 },
 ];
 

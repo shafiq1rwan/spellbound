@@ -1,11 +1,12 @@
 // Difficulty check: a simulated "average" player casts through the real spell system about once a
 // second (drawing a rune takes ~0.6-1s on a phone), fumbles 20% of runes, picks sensible spells and
 // takes upgrade cards. Prints a per-wave timeline (hearts, enemies alive) until death or the time limit.
-//   QA_URL=http://localhost:5174/ node tools/qa/sim-run.mjs [maxSeconds] [castMs] [missRate]
+//   QA_URL=http://localhost:5174/ node tools/qa/sim-run.mjs [maxSeconds] [castMs] [missRate] [smart 0|1]
+// smart=1 picks the best spell for the situation; smart=0 draws a random known rune (a real casual player).
 import { chromium } from "playwright-core";
 
 const URL = process.env.QA_URL ?? "http://localhost:5173/";
-const maxSec = Number(process.argv[2] ?? 420), castMs = Number(process.argv[3] ?? 950), miss = Number(process.argv[4] ?? 0.2);
+const maxSec = Number(process.argv[2] ?? 420), castMs = Number(process.argv[3] ?? 950), miss = Number(process.argv[4] ?? 0.2), smart = Number(process.argv[5] ?? 1);
 const b = await chromium.launch({ executablePath: "C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe", headless: true });
 const p = await (await b.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 1 })).newPage();
 p.on("pageerror", (e) => console.log("PAGE ERROR", e.message));
@@ -17,7 +18,7 @@ await p.keyboard.press("Enter");
 await p.waitForFunction(() => window.__game?.scene.isActive("Game"), null, { timeout: 20000 });
 
 // the bot runs inside the page on a real-time interval
-await p.evaluate(({ castMs, miss }) => {
+await p.evaluate(({ castMs, miss, smart }) => {
   const game = window.__game;
   const log = (window.__sim = { waves: {}, events: [] });
   let lastWave = 0;
@@ -31,7 +32,11 @@ await p.evaluate(({ castMs, miss }) => {
     const near = (r) => ts.filter((t) => Math.hypot(t.x - w.x, t.y - w.y) < r).length;
     const ready = (s) => g.spells.levels[s] > 0 && g.spells.cooldownFrac(s) === 0;
     let id = "fireball";
-    if (ready("nova") && near(70) >= 3) id = "nova";
+    if (!smart) {
+      const known = ["fireball", "nova", "lightning", "arcane"].filter((s) => g.spells.levels[s] > 0);
+      id = known[Math.floor(Math.random() * known.length)];
+      if (!ready(id)) return;                               // drew a rune that was still recharging
+    } else if (ready("nova") && near(70) >= 3) id = "nova";
     else if (ready("arcane") && near(110) >= 3) id = "arcane";
     else if (ready("lightning") && ts.length >= 2) id = "lightning";
     else if (ready("nova") && near(40) >= 1) id = "nova";
@@ -46,7 +51,7 @@ await p.evaluate(({ castMs, miss }) => {
       u.pick(pref >= 0 ? pref : 0);
     }
   }, 300);
-}, { castMs, miss });
+}, { castMs, miss, smart });
 
 const t0 = Date.now();
 let last = "";

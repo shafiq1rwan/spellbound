@@ -12,6 +12,7 @@ export interface Features {
   totalTurn: number; // sum |turning| in degrees
   corners: number;   // sharp direction changes
   radial: number;    // inner/outer radius ratio around the centroid (circle ~0.8)
+  straight: number;  // end-to-end distance / path length (1 = perfectly straight swipe)
   dip: number;       // V-ness: shorter arm's climb / taller arm's climb (0..1); 0 if the low point isn't mid-stroke
   length: number;    // path length (input units)
   size: number;      // bbox max side (input units)
@@ -168,7 +169,8 @@ export function features(points: Pt[]): Features {
   const dip = loFrac > 0.12 && loFrac < 0.88 && Math.max(rise0, rise1) / size >= 0.22
     ? Math.min(rise0, rise1) / Math.max(rise0, rise1, 1e-6) : 0;
   const deg = 180 / Math.PI;
-  return { closure, netTurn: Math.abs(net) * deg, totalTurn: total * deg, corners, radial, dip, length, size };
+  const straight = Math.hypot(p[p.length - 1].x - p[0].x, p[p.length - 1].y - p[0].y) / Math.max(length, 1e-6);
+  return { closure, netTurn: Math.abs(net) * deg, totalTurn: total * deg, corners, radial, straight, dip, length, size };
 }
 
 function gate(r: RuneName, f: Features): boolean {
@@ -258,6 +260,11 @@ export function templatePaths(): Record<RuneName, Pt[][]> {
   return out;
 }
 
+/** a straight (or gently curved) one-way stroke: no corners, little turning */
+export function isSwipe(f: Features) {
+  return f.straight >= 0.85 && f.corners === 0 && f.netTurn < 75;
+}
+
 /** non-rune shapes that would otherwise be read as a rune */
 export function rejectPaths(): Pt[][] {
   const out: Pt[][] = [];
@@ -318,6 +325,8 @@ export class RuneRecognizer {
     // (never for the V: without its orientation gate a caret / half-drawn triangle would cast it)
     if (best !== "vee" && enabled.includes(best) && scores[best] >= this.opts.strongThreshold && gated.length === 0)
       return { rune: best, score: scores[best], best, bestScore: scores[best], gated, scores, features: f };
+    // not a rune: a (nearly) straight line is a swipe, which the game turns into a light slash attack
+    if (isSwipe(f)) return { rune: null, score: 0, best, bestScore: scores[best], gated, scores, features: f, reason: "swipe" };
     return { rune: null, score: pick ? scores[pick] : scores[best], best, bestScore: scores[best], gated, scores, features: f, reason: pick ? "low score" : "no shape match" };
   }
 }

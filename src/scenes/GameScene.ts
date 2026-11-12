@@ -3,7 +3,7 @@
 import Phaser from "phaser";
 import { GAME } from "../config/game";
 import { PAL, ELEMENT_COLORS } from "../config/palette";
-import { RUNE_TO_SPELL, SPELLS } from "../config/spells";
+import { RUNE_TO_SPELL, SPELLS, SPELL_ORDER } from "../config/spells";
 import { Layout } from "../core/Layout";
 import { Audio } from "../core/Audio";
 import { Save } from "../core/Save";
@@ -41,6 +41,9 @@ export class GameScene extends Phaser.Scene {
   private misses = 0;
   private tutorialMisses = 0;
   private survivalMark = 0;
+  private swipeReadyAt = 0;
+  private castThisRun = new Set<string>();
+  private demoShown = new Set<string>();
 
   wizard!: Wizard;
   enemies: Enemy[] = [];
@@ -73,7 +76,8 @@ export class GameScene extends Phaser.Scene {
       now: 0, over: false, wave: 0, hp: GAME.player.maxHp, maxHp: GAME.player.maxHp,
       stats: { kills: 0, score: 0, timeMs: 0, casts: 0 }, drawing: false, levelingUp: false,
       enemies: [], boss: null, stroke: [], hitstopUntil: 0, frozenTime: false, slowmo: 1,
-      lastHurtBy: "unknown", misses: 0, tutorialMisses: 0, survivalMark: 0,
+      lastHurtBy: "unknown", misses: 0, tutorialMisses: 0, survivalMark: 0, swipeReadyAt: 0,
+      castThisRun: new Set<string>(), demoShown: new Set<string>(),
     });
   }
 
@@ -105,6 +109,14 @@ export class GameScene extends Phaser.Scene {
     });
 
     this.on(EV.COMBO, (n) => this.showCombo(n as number));
+    // waves 2-4: a short ghost demo of a rune the player hasn't cast yet this run
+    this.on(EV.WAVE, (n) => {
+      if ((n as number) < 2 || (n as number) > 4 || this.tutorial) return;
+      const next = SPELL_ORDER.find((s) => s !== "fireball" && !this.castThisRun.has(s) && !this.demoShown.has(s));
+      if (!next) return;
+      this.demoShown.add(next);
+      this.time.delayedCall(1200, () => !this.over && !this.levelingUp && this.scene.launch("Tutorial", { mode: "demo", spell: next }));
+    });
     this.on(EV.PAUSE_REQ, () => this.pauseGame());
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => this.cleanup());
     this.game.events.on(Phaser.Core.Events.HIDDEN, this.onHidden, this);
@@ -114,7 +126,7 @@ export class GameScene extends Phaser.Scene {
     bus.emit(EV.HP, this.hp, this.maxHp, 0);
     bus.emit(EV.XP, 0, this.xp.toNext, 1);
     Analytics.newRun();
-    Analytics.track("rune", "triangle", "visible", "run");
+    for (const id of SPELL_ORDER) Analytics.track("rune", SPELLS[id].rune, "visible", "run");
     if (!Save.data.tutorialDone) {
       this.tutorial = true;
       Analytics.track("tutorial", "intro", "start", "run");
@@ -196,10 +208,15 @@ export class GameScene extends Phaser.Scene {
     if (Save.settings.debugRunes) bus.emit(EV.DEBUG, res);
     const b = this.renderer2.bounds();
     if (!res.rune) {
+      if (res.reason === "swipe") {
+        this.slash();
+        return;
+      }
       if (res.reason === "square") {
         // a neat square looks a lot like a triangle to the matcher: explain instead of silently fizzling
         this.trackMiss("square");
-        this.failCast("TRIANGLE = 3 CORNERS");
+        this.failCast("");
+        this.vfx.floatIcon("rune_fire", this.wizard.x, this.wizard.y - 50, 1.5, 1100); // "a triangle, not a square"
         return;
       }
       this.trackMiss(res.bestScore >= 0.6 ? res.best : "unclear");
@@ -210,16 +227,51 @@ export class GameScene extends Phaser.Scene {
     const why = this.spells.cast(id, b.cx, b.cy);
     if (why === null) {
       Analytics.track("rune", res.rune, "interact", "run");
+      this.castThisRun.add(id);
       this.stats.casts++;
       const c = ELEMENT_COLORS[SPELLS[id].element];
       this.renderer2.success(res.rune, c.main, c.light);
       this.ambience.flareRunes(c.main);
     } else {
       Analytics.track("drawing", why === "locked" ? "not-learned" : "recharging", "reached", "run");
-      this.failCast(why === "locked" ? "NOT YET LEARNED" : "RECHARGING...");
+      this.failCast("");
+      this.vfx.floatIcon("ic_clock", this.wizard.x, this.wizard.y - 50, 1, 800);           // "recharging"
     }
   }
   /** a stroke that wasn't recognised: how often, and which rune they were most likely attempting */
+  /** straight swipe: light damage to every enemy the trail passes through */
+  private slash() {
+    const cfg = GAME.swipe;
+    if (this.now < this.swipeReadyAt) { this.renderer2.cancel(); return; }
+    this.swipeReadyAt = this.now + cfg.cooldownMs;
+    const pts = this.renderer2.points();
+    const a = pts[0], b = pts[pts.length - 1];
+    const dx = b.x - a.x, dy = b.y - a.y;
+    this.renderer2.slash();
+    Audio.play("skel_swing", { vol: 0.6, rate: 1.5 + Math.random() * 0.2, maxConcurrent: 2 });
+    Analytics.track("drawing", "swipe", "reached", "run");
+    const segDist = (px: number, py: number) => {
+      let best = Infinity;
+      for (let i = 1; i < pts.length; i++) {
+        const p0 = pts[i - 1], p1 = pts[i];
+        const vx = p1.x - p0.x, vy = p1.y - p0.y, L = vx * vx + vy * vy || 1;
+        const t = Math.max(0, Math.min(1, ((px - p0.x) * vx + (py - p0.y) * vy) / L));
+        best = Math.min(best, Math.hypot(px - (p0.x + vx * t), py - (p0.y + vy * t)));
+      }
+      return best;
+    };
+    let hits = 0;
+    for (const t of this.targets()) {
+      if (segDist(t.x, t.y - t.height) > cfg.reach + t.radius) continue;
+      hits++;
+      this.combat.damage(t, cfg.damage, { element: "arcane", dx, dy, kb: cfg.knockback, heavy: false });
+    }
+    if (hits) {
+      Analytics.track("swipe", "hit", "reached", "run");
+      this.wizard.face(b.x);
+    }
+  }
+
   private trackMiss(attempt: string) {
     this.misses++;
     if ([1, 3, 5, 10, 20].includes(this.misses)) Analytics.track("drawing", "misses", String(this.misses), "run");

@@ -156,6 +156,14 @@ export class VFXManager {
     return t;
   }
 
+  /** wordless hint: an icon pops up, bobs and fades (e.g. a triangle rune, a clock for cooldown) */
+  floatIcon(key: string, x: number, y: number, scale = 1.5, ms = 900) {
+    const im = this.scene.add.image(Math.round(x), Math.round(y), key).setDepth(DEPTH.numbers + 1).setScale(scale * 0.4);
+    this.scene.tweens.add({ targets: im, scale, duration: 180, ease: "Back.easeOut" });
+    this.scene.tweens.add({ targets: im, y: y - 8, alpha: 0, delay: ms * 0.55, duration: ms * 0.45, onComplete: () => im.destroy() });
+    return im;
+  }
+
   // ------------------------------------------------------------ decals
   decal(key: string, x: number, y: number, scale = 1, ms = 4000, alpha = 0.85) {
     if (this.q < 1 && this.decals.filter((d) => d.active).length > 10) return;

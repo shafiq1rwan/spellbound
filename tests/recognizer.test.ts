@@ -165,6 +165,22 @@ test("squares and rectangles do NOT cast any spell (>= 92%)", () => {
   assert.ok(asTri / N <= 0.08, `${asTri}/${N} squares cast a spell`);
 });
 
+test("straight and gently curved swipes are read as swipes, not runes (>= 95%)", () => {
+  const R = rng(9090);
+  let swipes = 0;
+  const N = 150;
+  for (let i = 0; i < N; i++) {
+    const bend = (R() - 0.5) * 0.35; // slight arc
+    const pts: Pt[] = [];
+    for (let k = 0; k <= 30; k++) { const t = k / 30; pts.push({ x: t, y: Math.sin(t * Math.PI) * bend + (R() - 0.5) * 0.01 }); }
+    const a = R() * Math.PI * 2, c = Math.cos(a), s = Math.sin(a); // any direction
+    const r = rec.recognize(pts.map((q) => ({ x: (q.x * c - q.y * s) * 150 + 200, y: (q.x * s + q.y * c) * 150 + 300 })));
+    if (r.rune === null && r.reason === "swipe") swipes++;
+  }
+  console.log("swipes", swipes, N);
+  assert.ok(swipes / N >= 0.95, `${swipes}/${N} swipes detected`);
+});
+
 test("rejects straight lines, dots and random scribbles", () => {
   const R = rng(99);
   let accepted = 0;

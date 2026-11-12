@@ -36,9 +36,18 @@ export const GAME = {
     toNext: (lvl: number) => Math.round(4 + lvl * 3 + Math.pow(lvl, 1.6)),
   },
 
+  /** straight swipe = light slash on every enemy the trail crosses (a basic attack; runes stay stronger) */
+  swipe: {
+    damage: 9,
+    cooldownMs: 550,
+    /** how close (world px) to the trail an enemy must be to get hit, on top of its radius */
+    reach: 9,
+    knockback: 18,
+  },
+
   combo: {
     windowMs: 4000,
-    perStack: 0.035,
+    perStack: 0.025,
     maxStacks: 20,
     /** extra combo stacks for switching to a different element (rewards mixing spells) */
     varietyBonus: 2,

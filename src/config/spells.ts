@@ -59,9 +59,9 @@ export const SPELLS: Record<SpellId, SpellDef> = {
   },
   nova: {
     id: "nova", rune: "circle", element: "ice", name: "Ice Nova", runeName: "Circle",
-    icon: "ic_nova", runeIcon: "rune_ice", cooldown: 2000, unlockWave: 2,
+    icon: "ic_nova", runeIcon: "rune_ice", cooldown: 2300, unlockWave: 1,
     levels: [
-      { desc: "Big frost ring: freezes, pushes foes back.", damage: 20, radius: 70, slow: 0.5, slowMs: 2500, freezeMs: 1500, knockback: 34 },
+      { desc: "Big frost ring: freezes, pushes foes back.", damage: 20, radius: 70, slow: 0.5, slowMs: 2500, freezeMs: 1100, knockback: 34 },
       { desc: "Wider ring. Summons a FROST SPRITE pet.", damage: 26, radius: 82, slow: 0.55, slowMs: 3000, freezeMs: 1800, knockback: 38 },
       { desc: "Launches ice shards outward.", damage: 30, radius: 90, slow: 0.55, slowMs: 3000, freezeMs: 2100, shards: 8, knockback: 40 },
       { desc: "Huge ring, more shards.", damage: 36, radius: 102, slow: 0.6, slowMs: 3200, freezeMs: 2400, shards: 12, knockback: 44 },
@@ -70,7 +70,7 @@ export const SPELLS: Record<SpellId, SpellDef> = {
   },
   lightning: {
     id: "lightning", rune: "zigzag", element: "bolt", name: "Lightning Chain", runeName: "Zigzag",
-    icon: "ic_bolt", runeIcon: "rune_bolt", cooldown: 1000, unlockWave: 3,
+    icon: "ic_bolt", runeIcon: "rune_bolt", cooldown: 1000, unlockWave: 1,
     levels: [
       { desc: "Bolt that jumps between foes.", damage: 26, chains: 2, chainRange: 62 },
       { desc: "+1 chain. Summons a SPARK IMP pet.", damage: 30, chains: 3, chainRange: 66 },
@@ -81,7 +81,7 @@ export const SPELLS: Record<SpellId, SpellDef> = {
   },
   arcane: {
     id: "arcane", rune: "vee", element: "arcane", name: "Arcane Barrage", runeName: "V",
-    icon: "ic_arcane", runeIcon: "rune_arcane", cooldown: 1100, unlockWave: 4,
+    icon: "ic_arcane", runeIcon: "rune_arcane", cooldown: 1100, unlockWave: 1,
     levels: [
       { desc: "Missiles hit every foe near you.", damage: 13, missiles: 6, pierce: 1, knockback: 22 },
       { desc: "+2 missiles. Summons an ARCANE OWL pet.", damage: 14, missiles: 8, pierce: 1, knockback: 24 },
