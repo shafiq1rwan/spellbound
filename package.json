@@ -1,6 +1,6 @@
 {
   "name": "spellbound-arena",
-  "version": "1.6.0",
+  "version": "1.6.1",
   "private": true,
   "type": "module",
   "description": "Portrait-first pixel-art rune-drawing survival shooter (Poki).",

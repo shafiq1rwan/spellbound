@@ -1,6 +1,6 @@
 import type { SpellId } from "./spells";
 
-export type UpgradeId = `spell:${SpellId}` | "haste" | "vitality" | "magnet" | "potion" | "power" | "wisdom";
+export type UpgradeId = `spell:${SpellId}` | "haste" | "vitality" | "magnet" | "potion" | "power" | "wisdom" | "mastery";
 
 export interface UpgradeDef {
   id: UpgradeId;
@@ -21,6 +21,13 @@ export const GENERIC_UPGRADES: UpgradeDef[] = [
   { id: "power", name: "Arcane Focus", icon: "ic_arcane", max: 3, rarity: 2, weight: 0.7, desc: () => "All spell damage +12%." },
   { id: "wisdom", name: "Scholar's Crystal", icon: "ic_xp", max: 3, rarity: 0, weight: 0.8, desc: () => "+20% XP gained." },
 ];
+
+/**
+ * Repeatable fallback, offered only to fill the level-up screen once the normal pool runs short
+ * (every spell at level 5 and every upgrade maxed, usually past wave 25). Without it the screen
+ * had no cards and the paused game could never resume.
+ */
+export const MASTERY: UpgradeDef = { id: "mastery", name: "Mastery", icon: "ic_arcane", max: 999, rarity: 2, weight: 0, desc: () => "All spell damage +6% and heal 1." };
 
 export const RARITY_COLORS = [0x9c8bd0, 0x8fd3ff, 0xffe59a];
 export const RARITY_NAMES = ["COMMON", "RARE", "EPIC"];

@@ -57,9 +57,9 @@ export class SpellManager {
   }
 
   // ---------------------------------------------------------------- target picking
-  /** prefer the enemy nearest the rune's centre (draw ON a monster to aim), else nearest the wizard */
+  /** prefer the enemy nearest the rune's centre (draw ON a monster to aim), else the nearest one on screen */
   pickTarget(cx: number, cy: number): Target | null {
-    const ts = this.g.targets();
+    const ts = this.g.visibleTargets();
     let best: Target | null = null, bd = GAME.rune.targetPickRadius;
     for (const t of ts) {
       const d = Math.hypot(t.x - cx, t.y - t.height - cy);
@@ -68,9 +68,10 @@ export class SpellManager {
     if (best) return best;
     return this.nearest(this.g.wizard.x, this.g.wizard.y, 1e9);
   }
+  /** nearest ON-SCREEN target (auto-aim never chases enemies the player can't see) */
   nearest(x: number, y: number, maxD: number, exclude?: Set<Target>): Target | null {
     let best: Target | null = null, bd = maxD;
-    for (const t of this.g.targets()) {
+    for (const t of this.g.visibleTargets()) {
       if (exclude?.has(t)) continue;
       const d = Math.hypot(t.x - x, t.y - y);
       if (d < bd) { bd = d; best = t; }
@@ -278,7 +279,7 @@ export class SpellManager {
     Audio.play("arcane_cast");
     const n = L.missiles ?? 4;
     // choose targets: nearest few, cycling
-    const pool = g.targets().slice().sort((a, b) => Math.hypot(a.x - w.x, a.y - w.y) - Math.hypot(b.x - w.x, b.y - w.y)).slice(0, n); // spread: one missile per nearby foe, cycling if there are fewer
+    const pool = g.visibleTargets().sort((a, b) => Math.hypot(a.x - w.x, a.y - w.y) - Math.hypot(b.x - w.x, b.y - w.y)).slice(0, n); // spread: one missile per nearby foe, cycling if there are fewer
     if (main && !pool.includes(main)) pool.unshift(main);
     // rotating arcane circles around the wizard
     for (let i = 0; i < 3; i++) g.vfx.play("sigil_arcane", w.x, w.y - 2 - i * 6, { scale: 0.5 + i * 0.25, alpha: 0.8 - i * 0.2, add: true, depth: DEPTH.sigil, anim: "sigil_arcane:play", loop: false });
@@ -381,8 +382,8 @@ export class SpellManager {
     for (const p of this.projectiles) {
       if (!p.active) continue;
       p.age += dtMs;
-      // homing
-      if (p.target && !p.target.alive) p.target = p.kind === "missile" ? this.nearest(p.x, p.y, 200, p.hit) : null;
+      // homing (a target knocked off-screen is dropped, so nothing chases it out of view)
+      if (p.target && (!p.target.alive || !g.inView(p.target, -16))) p.target = p.kind === "missile" ? this.nearest(p.x, p.y, 200, p.hit) : null;
       if (p.target && p.turn) {
         const want = Math.atan2(p.target.y - p.target.height - p.y, p.target.x - p.x);
         const cur = Math.atan2(p.vy, p.vx);
@@ -443,6 +444,9 @@ export class SpellManager {
         if (p.kind === "missile") p.target = this.nearest(p.x, p.y, 160, p.hit);
       }
       if (consumed) continue;
+      // left the screen: fizzle quietly instead of exploding where nobody can see it
+      const v = g.cameras.main.worldView;
+      if (p.x < v.x - 20 || p.x > v.right + 20 || p.y < v.y - 20 || p.y > v.bottom + 20) { p.kill(); continue; }
       if (p.age >= p.life) {
         if (p.kind === "fireball") this.explodeFireball(p, null);
         else {

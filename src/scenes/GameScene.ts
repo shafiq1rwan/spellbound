@@ -166,6 +166,20 @@ export class GameScene extends Phaser.Scene {
     if (this.boss && this.boss.alive) out.push(this.boss);
     return out;
   }
+  /** is the target on screen (inset by pad art px)? */
+  inView(t: Target, pad = 4) {
+    if (t.isBoss) return true;
+    const v = this.cameras.main.worldView, cy = t.y - t.height * 0.5;
+    return t.x >= v.x + pad && t.x <= v.right - pad && cy >= v.y + pad && cy <= v.bottom - pad;
+  }
+  /**
+   * Targets the player can see (or just entering view). Auto-aim (spells, chains, homing, pets) only picks from these, so
+   * bolts, missiles and explosions stay on screen; enemies knocked off-screen walk back in.
+   */
+  visibleTargets(): Target[] {
+    // -10: include enemies just stepping into view (centre up to 10 px past the edge, body showing)
+    return this.targets().filter((t) => this.inView(t, -10));
+  }
 
   // ---------------------------------------------------------------- input -> runes
   private canDraw(clientX: number, clientY: number) {
@@ -435,10 +449,22 @@ export class GameScene extends Phaser.Scene {
     this.vfx.glow(this.wizard.x, this.wizard.y - 10, PAL.gold, 140, 700, 0.5);
     this.time.delayedCall(520, () => {
       if (this.over) { this.levelingUp = false; return; }
+      const choices = this.upgrades.choices();
+      // never pause behind an empty level-up screen (that froze late-game runs)
+      if (!choices.length) { this.xp.pendingLevels = 0; this.levelingUp = false; return; }
+      // everything maxed: Mastery is the only card, so apply it without stopping the action
+      if (choices.length === 1 && choices[0].id === "mastery") {
+        this.upgrades.apply("mastery");
+        Analytics.track("upgrade", "mastery", "picked");
+        this.vfx.floatText(this.wizard.x, this.wizard.y - 50, "MASTERY +6%", PAL.gold, 1, 1200);
+        this.xp.pendingLevels = Math.max(0, this.xp.pendingLevels - 1);
+        this.levelingUp = false;
+        return;
+      }
       Poki.gameplayStop();
       this.suspendOverlays();
       this.scene.pause();
-      this.scene.launch("Upgrade", { choices: this.upgrades.choices(), level: this.xp.level - this.xp.pendingLevels + 1 });
+      this.scene.launch("Upgrade", { choices, level: this.xp.level - this.xp.pendingLevels + 1 });
     });
   }
   /** called by UpgradeScene */

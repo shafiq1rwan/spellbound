@@ -23,7 +23,7 @@ during the guided tutorial).
 3 hearts, throws nearby enemies back, and the run continues. It only appears when an ad can be offered.
 **Familiars:** a spell's first upgrade (level 2) summons an elemental
 pet (Ember Wisp, Frost Sprite, Spark Imp, Arcane Owl) that auto-casts a weaker version of the spell.
-Difficulty rises a steady ~33% per wave (see `docs/DIFFICULTY.md`). **Spell combination:** freeze enemies with Ice Nova, then hit them with any other spell to
+Difficulty rises a steady ~28% per wave (see `docs/DIFFICULTY.md`). **Spell combination:** freeze enemies with Ice Nova, then hit them with any other spell to
 *shatter* them for double damage. Switching elements also builds the combo meter 3× faster than
 repeating one spell. **Aiming:** draw the rune on top of a monster to target it.
 Otherwise the spell goes for the nearest enemy.
@@ -81,6 +81,14 @@ public/assets/gfx/         baked PNG sheets + manifest.json (+ bitmap font)
 - **Enemies and waves:** `src/config/enemies.ts` and `src/config/waves.ts`. Waves 1 to 10 are authored
   (boss on wave 10). After that, waves scale endlessly with a boss every 10th wave.
 - **Game feel:** the hit-stop and shake values are in `GAME.feel`; XP pull speeds are in `GAME.xp`.
+- **Effect budgets** (`src/systems/VFXManager.ts`): at most 420 live particles (× quality), 24 big
+  glows, 24 lightning bolts and 32 sprites per effect type; 60 XP orbs (`XPSystem`). If the frame rate
+  drops under 45, effect density steps down automatically (to 35%) and recovers above 56.
+- **Auto-aim** only picks enemies on screen or just stepping into view (`GameScene.visibleTargets`);
+  projectiles that fly 20 px past the edge fizzle, so effects don't play out of view.
+- **Spawns** come from the four screen edges with equal odds (`EnemySpawnManager.edgePoint`). In
+  portrait the side edges are close to the wizard, so spawning by edge length sent most enemies in
+  from the sides with little warning.
 
 Gameplay analytics (Poki `measure` events): see `docs/ANALYTICS.md`.
 

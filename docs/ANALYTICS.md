@@ -36,7 +36,7 @@ before the SDK is ready are queued and flushed once it is.
 | `revive` | `offer` | `visible` → `interact` | Revive button shown on game over → tapped | How many players take the rewarded revive? |
 | `revive` | `granted` | `reached` | The ad played and the run continued | Revive success rate (interact vs granted) |
 | `level` | `2` … `15+` | `reached` *(once/run)* | Each level-up | Progression pace |
-| `upgrade` | e.g. `spell:fireball`, `haste`, `vitality` | `picked` | Upgrade card chosen | Which upgrades are popular? |
+| `upgrade` | e.g. `spell:fireball`, `haste`, `vitality`, `mastery` | `picked` | Upgrade card chosen (`mastery` = auto-applied once everything is maxed) | Which upgrades are popular? How many runs max out? |
 | `combo` | `x10`, `x20`, `shatter` | `reached` *(once/run)* | Combo milestones; first Ice→other Shatter | Do players discover spell mixing? |
 | `button` | `pause` | `visible` *(once/run)* → `interact` | HUD pause button | |
 | `gameover` | `retry`, `menu` | `visible` → `interact` | Game-over buttons | **Do players retry after dying?** |

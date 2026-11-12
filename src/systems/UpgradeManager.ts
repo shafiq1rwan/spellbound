@@ -1,4 +1,4 @@
-import { GENERIC_UPGRADES, type UpgradeId } from "../config/upgrades";
+import { GENERIC_UPGRADES, MASTERY, type UpgradeId } from "../config/upgrades";
 import { SPELLS, SPELL_ORDER, type SpellId } from "../config/spells";
 import type { GameScene } from "../scenes/GameScene";
 
@@ -56,6 +56,11 @@ export class UpgradeManager {
       out.push(pool[idx].c);
       pool.splice(idx, 1);
     }
+    // late game: the pool can run dry (or leave only one card); fill with the repeatable Mastery
+    if (out.length < n) {
+      const have = this.counts.mastery ?? 0;
+      out.push({ id: MASTERY.id, name: MASTERY.name, icon: MASTERY.icon, desc: MASTERY.desc(have + 1), rarity: MASTERY.rarity, levelText: `LV ${have + 1}` });
+    }
     return out.sort(() => Math.random() - 0.5);
   }
 
@@ -74,6 +79,7 @@ export class UpgradeManager {
       case "potion": g.heal(2); break;
       case "power": g.spells.powerMult *= 1.12; break;
       case "wisdom": g.xp.gainMult *= 1.2; break;
+      case "mastery": g.spells.powerMult *= 1.06; g.heal(1); break;
     }
   }
 }

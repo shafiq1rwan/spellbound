@@ -59,6 +59,30 @@ v1.4 balance notes:
 - With all runes from wave 1, spell rotation kept the combo maxed, so the combo bonus is now +2.5% per stack (max +50%).
 - Ice Nova level 1 freezes for 1.1 s on a 2.3 s cooldown (was 1.5 s on 2.0 s).
 
+## v1.6.1: on-screen auto-aim and spawn sides
+
+Auto-aim now ignores enemies outside the screen (the playtest saw bolts and explosions off screen).
+In portrait that cost the casual bot defence, because 2/3 of spawns came from the close left/right
+edges and used to be shot before they appeared. Spawns are now split evenly across the four edges.
+
+| Casual bot, 3 runs each | Results |
+|---|---|
+| v1.6.0 | 3:45, 6:03, alive at 7:44 |
+| On-screen aim only | 2:20, 2:46, 6:44 |
+| On-screen aim + even spawn sides (v1.6.1) | 4:20, 6:29 (wave 10 boss, run alone), alive at 7:44; plus 1:26 in a run that shared the CPU with two other browsers |
+
+The casual bot's spread is wide (it tends to get surrounded and collapse), so compare medians over
+several runs.
+
+## Late game
+
+All 32 regular upgrades (4 spells × 4 levels, plus haste, vitality, magnet, power and wisdom) run out
+around level 33. After that every level-up applies **Mastery** automatically: +6% spell damage and
+1 heart, with no pause. Before v1.6.1 the level-up screen opened empty and the game froze.
+
+`tools/qa/endgame.mjs [wave] [seconds] [cpuThrottle]` loads that state and logs frame rate, live
+particles, tweens, on/off-screen enemies and projectiles.
+
 Re-run after balance changes, for example:
 
 ```

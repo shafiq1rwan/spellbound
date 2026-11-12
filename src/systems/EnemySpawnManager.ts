@@ -64,12 +64,14 @@ export class EnemySpawnManager {
     const m = GAME.spawn.margin;
     const w = this.g.wizard;
     for (let tries = 0; tries < 12; tries++) {
-      const side = Math.random() * (2 * (v.width + v.height));
+      // each side equally likely (not by length): in portrait the left/right edges are only ~95 art px
+      // from the wizard, so spawning by edge length sent 2/3 of enemies in with ~3 s of warning
+      const side = Math.floor(Math.random() * 4), f = Math.random();
       let x: number, y: number;
-      if (side < v.width) { x = v.x + side; y = v.y - m; }
-      else if (side < 2 * v.width) { x = v.x + side - v.width; y = v.bottom + m + 8; }
-      else if (side < 2 * v.width + v.height) { x = v.x - m; y = v.y + side - 2 * v.width; }
-      else { x = v.right + m; y = v.y + side - 2 * v.width - v.height; }
+      if (side === 0) { x = v.x + f * v.width; y = v.y - m; }
+      else if (side === 1) { x = v.x + f * v.width; y = v.bottom + m + 8; }
+      else if (side === 2) { x = v.x - m; y = v.y + f * v.height; }
+      else { x = v.right + m; y = v.y + f * v.height; }
       if (Math.hypot(x - w.x, y - w.y) >= GAME.spawn.minDistance) return { x, y };
     }
     return { x: w.x + GAME.spawn.minDistance, y: w.y };

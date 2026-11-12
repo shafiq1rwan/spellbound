@@ -58,7 +58,7 @@ export class FamiliarSystem {
   private nearest(r: number): Target | null {
     const w = this.g.wizard;
     let best: Target | null = null, bd = r;
-    for (const t of this.g.targets()) {
+    for (const t of this.g.visibleTargets()) {
       const d = Math.hypot(t.x - w.x, t.y - w.y);
       if (d < bd) { bd = d; best = t; }
     }

@@ -23,8 +23,17 @@ export class VFXManager {
   private bits: Bit[] = [];
   private decals: Decal[] = [];
   private bolts: Phaser.GameObjects.Graphics[] = [];
+  private glows: Phaser.GameObjects.Image[] = [];
+  private loopers = new WeakSet<Phaser.GameObjects.Sprite>();
   private flashRect: Phaser.GameObjects.Rectangle;
+  /** effective quality: the setting (1 high, 0.4 low) x autoQ */
   q = 1;
+  private baseQ = 1;
+  /** drops when the frame rate does (late waves on a weak phone), recovers when it's back */
+  private autoQ = 1;
+  private fpsT = 0;
+  /** live particles across every emitter, recounted each frame and bumped on each burst */
+  private aliveParticles = 0;
   reduced = false;
   // screen shake in ART pixels (Phaser's built-in shake scales with canvas size x zoom = far too strong here)
   private shakeAmp = 0;
@@ -63,7 +72,8 @@ export class VFXManager {
 
   refreshQuality() {
     const s = Save.settings;
-    this.q = s.quality === "low" ? 0.4 : 1;
+    this.baseQ = s.quality === "low" ? 0.4 : 1;
+    this.q = this.baseQ * this.autoQ;
     this.reduced = s.reducedMotion;
   }
 
@@ -73,9 +83,20 @@ export class VFXManager {
     this.animPool.set(key, pool);
     let s = pool.find((p) => !p.active);
     if (!s) {
-      s = this.scene.add.sprite(0, 0, key);
-      pool.push(s);
+      if (pool.length >= 32) {
+        // budget reached: recycle the oldest one-shot sprite of this kind instead of adding more
+        const i = pool.findIndex((p) => !this.loopers.has(p));
+        if (i < 0) { s = this.scene.add.sprite(0, 0, key); pool.push(s); }
+        else { s = pool.splice(i, 1)[0]; pool.push(s); }
+      } else {
+        s = this.scene.add.sprite(0, 0, key);
+        pool.push(s);
+      }
+    } else {
+      pool.splice(pool.indexOf(s), 1);
+      pool.push(s); // keep the pool ordered oldest-first
     }
+    if (o.loop) this.loopers.add(s); else this.loopers.delete(s);
     s.setActive(true).setVisible(true).setPosition(x, y).setScale(o.scale ?? 1).setAngle(o.angle ?? 0)
       .setDepth(o.depth ?? DEPTH.fx).setAlpha(o.alpha ?? 1).setFlipX(!!o.flipX)
       .setBlendMode(o.add ? Phaser.BlendModes.ADD : Phaser.BlendModes.NORMAL);
@@ -99,7 +120,12 @@ export class VFXManager {
   burst(kind: string, x: number, y: number, n: number, o: { tint?: number; speed?: [number, number]; life?: [number, number]; scale?: number } = {}) {
     const e = this.emitters.get(kind);
     if (!e) return;
-    const count = Math.max(1, Math.round(n * this.q));
+    // global particle budget (fill-rate is what lags phones): thin out, then skip
+    const budget = 420 * this.q;
+    const room = budget - this.aliveParticles;
+    if (room < 1) return;
+    const count = Math.min(Math.floor(room), Math.max(1, Math.round(n * this.q)));
+    this.aliveParticles += count;
     if (o.tint !== undefined) e.setParticleTint(o.tint); else e.setParticleTint(0xffffff);
     const def = this.defaults.get(kind)!;
     if (o.speed) e.setParticleSpeed({ min: o.speed[0], max: o.speed[1] } as unknown as number);
@@ -123,9 +149,17 @@ export class VFXManager {
   // ------------------------------------------------------------ glow (additive, tinted)
   glow(x: number, y: number, color: number, size: number, ms: number, alpha = 0.7, depth = DEPTH.fxLow) {
     if (this.q < 1 && size < 40) return;
-    const g = this.scene.add.image(x, y, size > 48 ? "glow_big" : "glow").setTint(color).setBlendMode(Phaser.BlendModes.ADD).setDepth(depth).setAlpha(alpha);
-    g.setDisplaySize(size, size);
-    this.scene.tweens.add({ targets: g, alpha: 0, scale: g.scale * 1.25, duration: ms, ease: "Quad.easeOut", onComplete: () => g.destroy() });
+    // pooled, at most 24 at once: big additive glows are the most expensive thing to draw
+    let g = this.glows.find((v) => !v.active);
+    if (!g) {
+      if (this.glows.length >= 24) return;
+      g = this.scene.add.image(0, 0, "glow").setBlendMode(Phaser.BlendModes.ADD);
+      this.glows.push(g);
+    }
+    const im = g;
+    im.setActive(true).setVisible(true).setTexture(size > 48 ? "glow_big" : "glow").setPosition(x, y).setTint(color).setDepth(depth).setAlpha(alpha);
+    im.setDisplaySize(size, size);
+    this.scene.tweens.add({ targets: im, alpha: 0, scale: im.scale * 1.25, duration: ms, ease: "Quad.easeOut", onComplete: () => im.setActive(false).setVisible(false) });
   }
 
   /** brief arena illumination for big explosions (kept subtle; disabled by reduced motion) */
@@ -197,8 +231,12 @@ export class VFXManager {
   // ------------------------------------------------------------ lightning
   /** jagged bolt between two points: glow + body + white core; flickers then fades */
   bolt(x0: number, y0: number, x1: number, y1: number, o: { width?: number; color?: number; ms?: number } = {}) {
-    const g = this.bolts.find((b) => !b.active) ?? this.scene.add.graphics().setBlendMode(Phaser.BlendModes.ADD).setDepth(DEPTH.fxHigh);
-    if (!this.bolts.includes(g)) this.bolts.push(g);
+    let g = this.bolts.find((b) => !b.active);
+    if (!g) {
+      if (this.bolts.length >= 24) return; // enough lightning on screen already
+      g = this.scene.add.graphics().setBlendMode(Phaser.BlendModes.ADD).setDepth(DEPTH.fxHigh);
+      this.bolts.push(g);
+    }
     g.setActive(true).setVisible(true).setAlpha(1);
     const color = o.color ?? PAL.boltYellow;
     const draw = () => {
@@ -272,6 +310,18 @@ export class VFXManager {
 
   update(dtMs: number) {
     this.updateShake(dtMs);
+    let alive = 0;
+    for (const e of this.emitters.values()) alive += e.getAliveParticleCount();
+    this.aliveParticles = alive;
+    // adaptive density: check the smoothed frame rate once a second
+    this.fpsT += dtMs;
+    if (this.fpsT >= 1000) {
+      this.fpsT = 0;
+      const fps = this.scene.game.loop.actualFps;
+      if (fps < 45) this.autoQ = Math.max(0.35, this.autoQ - 0.15);
+      else if (fps > 56) this.autoQ = Math.min(1, this.autoQ + 0.05);
+      this.q = this.baseQ * this.autoQ;
+    }
     const dt = dtMs / 1000;
     for (const b of this.bits) {
       if (!b.active) continue;

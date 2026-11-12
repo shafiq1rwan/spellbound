@@ -32,10 +32,15 @@ export class XPSystem {
 
   drop(x: number, y: number, value: number) {
     let left = value;
+    let active = 0;
+    for (const o of this.orbs) if (o.active) active++;
     while (left > 0) {
+      // cap the orbs on screen: past 60, the rest of the XP rides on one big orb
+      if (active >= 60) { this.spawn(x, y, left); return; }
       const v = left >= 5 ? 5 : 1;
       left -= v;
       this.spawn(x, y, v);
+      active++;
     }
   }
 

@@ -37,6 +37,7 @@ All checks below were **actually executed**. Browser checks used headless Micros
 | Guided paused tutorial, first run (`tools/qa/guided.mjs`, CDP touch) | 390×844 | slime holds still while paused; a swipe during the tutorial does no damage; traced triangle → ✓ → second slime → aimed triangle → "SURVIVE!", chain icon, "can't move" hint, wave 1 starts. Events: step-trace and step-aim start/complete |
 | Menu goal card | 390×844, 360×640, 1280×720 | pictogram (triangle → fireball → skull), "DRAW SHAPES TO CAST SPELLS", chain + "YOU CAN'T MOVE - SURVIVE!" |
 | Staged unlocks and "can't move" hint | 390×844 | wave 1 HUD shows only the Fire slot; wave 2 adds the Circle slot with its ghost demo; the first hit shows the binding flash, chain icon and hint (`hint cant-move-hit visible`) |
+| Late game, wave 34 (`tools/qa/endgame.mjs`): every spell Lv 5, every upgrade, all pets, casting on cooldown | 390×844, also at 6× CPU throttle | **Before:** the first level-up after every upgrade was maxed opened an empty card screen and the paused game never resumed (the tester's wave 34 freeze); 850 live particles; 13–17 projectiles flying off screen after enemies outside the view. **After:** Mastery (+6% damage, heal 1) is applied automatically with no pause; particles capped at 420 (≈410); 0–6 projectiles off view, which fizzle at the edge |
 
 ## Bugs found by QA and fixed
 
