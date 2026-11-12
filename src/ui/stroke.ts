@@ -13,9 +13,12 @@ export function strokeSegments(g: Phaser.GameObjects.Graphics, pts: P[], width: 
   if (width >= 2) {
     g.fillStyle(color, alpha);
     const r = width / 2;
-    // round caps on joints, thinned so translucent glow passes don't bead too much
+    // square caps on joints, thinned so translucent glow passes don't bead too much. At these
+    // widths (≤ 6 art px) a square reads the same as a circle, and fillRect is a plain quad:
+    // fillCircle is re-triangulated (earcut) every frame, which made bolts expensive.
     const step = width >= 4 ? 2 : 1;
-    for (let i = 0; i < count; i += step) g.fillCircle(ox + pts[i].x, oy + pts[i].y, r);
-    g.fillCircle(ox + pts[count - 1].x, oy + pts[count - 1].y, r);
+    const cap = (x: number, y: number) => g.fillRect(x - r, y - r, width, width);
+    for (let i = 0; i < count; i += step) cap(ox + pts[i].x, oy + pts[i].y);
+    cap(ox + pts[count - 1].x, oy + pts[count - 1].y);
   }
 }

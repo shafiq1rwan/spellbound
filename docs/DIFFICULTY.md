@@ -69,6 +69,7 @@ edges and used to be shot before they appeared. Spawns are now split evenly acro
 |---|---|
 | v1.6.0 | 3:45, 6:03, alive at 7:44 |
 | On-screen aim only | 2:20, 2:46, 6:44 |
+| v1.6.2: nothing off screen can be hit | 6:24 (wave 10 boss), alive at 7:42 |
 | On-screen aim + even spawn sides (v1.6.1) | 4:20, 6:29 (wave 10 boss, run alone), alive at 7:44; plus 1:26 in a run that shared the CPU with two other browsers |
 
 The casual bot's spread is wide (it tends to get surrounded and collapse), so compare medians over

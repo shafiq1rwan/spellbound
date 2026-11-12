@@ -28,8 +28,9 @@ export class CombatSystem {
   }
 
   damage(t: Target, base: number, o: HitOpts) {
-    if (!t.alive) return { killed: false, amount: 0 };
     const g = this.g;
+    // off-screen enemies can't be hurt (they haven't "arrived" yet): see GameScene.visibleTargets
+    if (!t.alive || !g.inView(t)) return { killed: false, amount: 0 };
     let amount = base * g.spells.damageMult();
     let shatter = false;
     // Spell combination: hitting a frozen enemy with fire/lightning/arcane shatters it for double damage

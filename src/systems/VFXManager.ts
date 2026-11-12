@@ -34,6 +34,8 @@ export class VFXManager {
   private fpsT = 0;
   /** live particles across every emitter, recounted each frame and bumped on each burst */
   private aliveParticles = 0;
+  private lastFlash = -1e9;
+  private flash: { start: number; ms: number; strength: number } | null = null;
   reduced = false;
   // screen shake in ART pixels (Phaser's built-in shake scales with canvas size x zoom = far too strong here)
   private shakeAmp = 0;
@@ -67,7 +69,7 @@ export class VFXManager {
       const t = scene.add.bitmapText(0, 0, "pixel", "", 8).setOrigin(0.5).setDepth(DEPTH.numbers).setVisible(false);
       this.numbers.push(t);
     }
-    this.flashRect = scene.add.rectangle(0, 0, 4000, 4000, 0xffffff, 0).setDepth(DEPTH.flash).setBlendMode(Phaser.BlendModes.ADD);
+    this.flashRect = scene.add.rectangle(0, 0, 4000, 4000, 0xffffff, 0).setDepth(DEPTH.flash).setBlendMode(Phaser.BlendModes.ADD).setVisible(false);
   }
 
   refreshQuality() {
@@ -149,10 +151,12 @@ export class VFXManager {
   // ------------------------------------------------------------ glow (additive, tinted)
   glow(x: number, y: number, color: number, size: number, ms: number, alpha = 0.7, depth = DEPTH.fxLow) {
     if (this.q < 1 && size < 40) return;
-    // pooled, at most 24 at once: big additive glows are the most expensive thing to draw
+    // additive glows are the biggest GPU cost on phones (each one repaints its whole square):
+    // capped at 96 art px across and 16 at once
+    size = Math.min(size, 96);
     let g = this.glows.find((v) => !v.active);
     if (!g) {
-      if (this.glows.length >= 24) return;
+      if (this.glows.length >= 16) return;
       g = this.scene.add.image(0, 0, "glow").setBlendMode(Phaser.BlendModes.ADD);
       this.glows.push(g);
     }
@@ -164,11 +168,15 @@ export class VFXManager {
 
   /** brief arena illumination for big explosions (kept subtle; disabled by reduced motion) */
   illuminate(color: number, strength = 0.1, ms = 220) {
+    // a full-screen additive pass: at most one every 1.2 s, and none while the frame rate is struggling
+    const now = performance.now();
+    if (this.q < 0.7 || now - this.lastFlash < 1200) return;
+    this.lastFlash = now;
     if (this.reduced) strength *= 0.4;
-    const r = this.flashRect;
-    r.setFillStyle(color, 1).setAlpha(strength);
-    this.scene.tweens.killTweensOf(r);
-    this.scene.tweens.add({ targets: r, alpha: 0, duration: ms, ease: "Quad.easeOut" });
+    // faded on real time in update(), not by a tween: hit-stops pause tweens, which kept the
+    // flash on screen far longer than intended during heavy fights
+    this.flashRect.setFillStyle(color, 1).setAlpha(strength).setVisible(true);
+    this.flash = { start: now, ms, strength };
   }
 
   // ------------------------------------------------------------ damage numbers
@@ -310,6 +318,11 @@ export class VFXManager {
 
   update(dtMs: number) {
     this.updateShake(dtMs);
+    if (this.flash) {
+      const k = (performance.now() - this.flash.start) / this.flash.ms;
+      if (k >= 1) { this.flashRect.setAlpha(0).setVisible(false); this.flash = null; }
+      else this.flashRect.setAlpha(this.flash.strength * (1 - k) * (1 - k));
+    }
     let alive = 0;
     for (const e of this.emitters.values()) alive += e.getAliveParticleCount();
     this.aliveParticles = alive;

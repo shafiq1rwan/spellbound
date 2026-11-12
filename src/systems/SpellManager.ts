@@ -245,7 +245,6 @@ export class SpellManager {
       hitSet.add(nx);
     }
     Audio.play("bolt_crack");
-    g.vfx.illuminate(0xfff8d0, 0.05, 120);
     let px = tip.x, py = tip.y;
     chain.forEach((t, i) => {
       const fromX = px, fromY = py;
@@ -383,7 +382,7 @@ export class SpellManager {
       if (!p.active) continue;
       p.age += dtMs;
       // homing (a target knocked off-screen is dropped, so nothing chases it out of view)
-      if (p.target && (!p.target.alive || !g.inView(p.target, -16))) p.target = p.kind === "missile" ? this.nearest(p.x, p.y, 200, p.hit) : null;
+      if (p.target && (!p.target.alive || !g.inView(p.target))) p.target = p.kind === "missile" ? this.nearest(p.x, p.y, 200, p.hit) : null;
       if (p.target && p.turn) {
         const want = Math.atan2(p.target.y - p.target.height - p.y, p.target.x - p.x);
         const cur = Math.atan2(p.vy, p.vx);
@@ -421,9 +420,9 @@ export class SpellManager {
           g.vfx.burst("dot", p.x, p.y, 1, { tint: PAL.iceCyan, speed: [2, 8], life: [150, 250] });
         }
       }
-      // collisions
+      // collisions (on-screen enemies only)
       let consumed = false;
-      for (const t of g.targets()) {
+      for (const t of g.visibleTargets()) {
         if (p.hit.has(t)) continue;
         const d = Math.hypot(t.x - p.x, t.y - t.height - p.y);
         if (d > p.radius + t.radius) continue;
@@ -444,9 +443,9 @@ export class SpellManager {
         if (p.kind === "missile") p.target = this.nearest(p.x, p.y, 160, p.hit);
       }
       if (consumed) continue;
-      // left the screen: fizzle quietly instead of exploding where nobody can see it
+      // reached the screen edge: vanish (nothing beyond the edge can be hit anyway)
       const v = g.cameras.main.worldView;
-      if (p.x < v.x - 20 || p.x > v.right + 20 || p.y < v.y - 20 || p.y > v.bottom + 20) { p.kill(); continue; }
+      if (p.x < v.x || p.x > v.right || p.y < v.y || p.y > v.bottom) { p.kill(); continue; }
       if (p.age >= p.life) {
         if (p.kind === "fireball") this.explodeFireball(p, null);
         else {

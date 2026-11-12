@@ -81,11 +81,15 @@ public/assets/gfx/         baked PNG sheets + manifest.json (+ bitmap font)
 - **Enemies and waves:** `src/config/enemies.ts` and `src/config/waves.ts`. Waves 1 to 10 are authored
   (boss on wave 10). After that, waves scale endlessly with a boss every 10th wave.
 - **Game feel:** the hit-stop and shake values are in `GAME.feel`; XP pull speeds are in `GAME.xp`.
-- **Effect budgets** (`src/systems/VFXManager.ts`): at most 420 live particles (× quality), 24 big
-  glows, 24 lightning bolts and 32 sprites per effect type; 60 XP orbs (`XPSystem`). If the frame rate
-  drops under 45, effect density steps down automatically (to 35%) and recovers above 56.
-- **Auto-aim** only picks enemies on screen or just stepping into view (`GameScene.visibleTargets`);
-  projectiles that fly 20 px past the edge fizzle, so effects don't play out of view.
+- **Effect budgets** (`src/systems/VFXManager.ts`): at most 420 live particles (× quality), 16 big
+  glows (each at most 96 art px across), 24 lightning bolts and 32 sprites per effect type; 60 XP orbs
+  (`XPSystem`). The full-screen flash fires at most once every 1.2 s (meteor, boss, level-up, getting
+  hurt). If the frame rate drops under 45, effect density steps down automatically (to 35%) and
+  recovers above 56. Bolts and rune trails use square joints (`src/ui/stroke.ts`) because Phaser
+  re-triangulates every `fillCircle` each frame.
+- **Only what's on screen gets hit** (like Survivor.io): auto-aim, chains, homing and pets pick on-screen
+  enemies (`GameScene.visibleTargets`), projectiles vanish at the screen edge, and `CombatSystem`
+  ignores damage to anything whose centre is off screen.
 - **Spawns** come from the four screen edges with equal odds (`EnemySpawnManager.edgePoint`). In
   portrait the side edges are close to the wizard, so spawning by edge length sent most enemies in
   from the sides with little warning.

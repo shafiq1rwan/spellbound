@@ -166,19 +166,19 @@ export class GameScene extends Phaser.Scene {
     if (this.boss && this.boss.alive) out.push(this.boss);
     return out;
   }
-  /** is the target on screen (inset by pad art px)? */
-  inView(t: Target, pad = 4) {
+  /** is the target's centre on screen (inset by pad art px)? */
+  inView(t: Target, pad = 0) {
     if (t.isBoss) return true;
     const v = this.cameras.main.worldView, cy = t.y - t.height * 0.5;
     return t.x >= v.x + pad && t.x <= v.right - pad && cy >= v.y + pad && cy <= v.bottom - pad;
   }
   /**
-   * Targets the player can see (or just entering view). Auto-aim (spells, chains, homing, pets) only picks from these, so
-   * bolts, missiles and explosions stay on screen; enemies knocked off-screen walk back in.
+   * Targets on screen. Like Survivor.io, nothing the player can't see gets hit: auto-aim, chains,
+   * homing and pets only pick these, projectiles vanish at the screen edge, and CombatSystem
+   * ignores damage to anything off screen (splash, nova, vortex included).
    */
   visibleTargets(): Target[] {
-    // -10: include enemies just stepping into view (centre up to 10 px past the edge, body showing)
-    return this.targets().filter((t) => this.inView(t, -10));
+    return this.targets().filter((t) => this.inView(t));
   }
 
   // ---------------------------------------------------------------- input -> runes
