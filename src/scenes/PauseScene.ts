@@ -1,6 +1,7 @@
 import Phaser from "phaser";
 import { Layout } from "../core/Layout";
 import { Poki } from "../core/Poki";
+import { Analytics } from "../core/Analytics";
 import { PAL } from "../config/palette";
 import { SPELLS, SPELL_ORDER } from "../config/spells";
 import { Button, UI, backdrop, panelBox, txt } from "../ui/widgets";
@@ -56,6 +57,9 @@ export class PauseScene extends Phaser.Scene {
     Poki.gameplayStart();
   }
   private quit() {
+    const g = this.scene.get("Game") as GameScene;
+    if (g.tutorial) Analytics.track("tutorial", "intro", "fail", "run");
+    Analytics.track("run", "quit-to-menu", "reached", "run");
     ["HUD", "Tutorial", "Game"].forEach((k) => this.scene.stop(k));
     this.scene.start("Menu");
   }

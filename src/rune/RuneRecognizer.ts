@@ -4,14 +4,15 @@
 // Dependency-free and erasable-TS only, so the Node test runner can import it directly.
 
 export type Pt = { x: number; y: number };
-export type RuneName = "triangle" | "circle" | "zigzag" | "spiral";
+export type RuneName = "triangle" | "circle" | "zigzag" | "vee";
 
 export interface Features {
   closure: number;   // start-end distance / bbox size (0 = closed)
   netTurn: number;   // |signed turning| in degrees
   totalTurn: number; // sum |turning| in degrees
   corners: number;   // sharp direction changes
-  radial: number;    // inner/outer radius ratio around the centroid (circle ~0.8, spiral ~0.2)
+  radial: number;    // inner/outer radius ratio around the centroid (circle ~0.8)
+  dip: number;       // V-ness: shorter arm's climb / taller arm's climb (0..1); 0 if the low point isn't mid-stroke
   length: number;    // path length (input units)
   size: number;      // bbox max side (input units)
 }
@@ -39,7 +40,7 @@ const HALF_DIAG = 0.5 * Math.sqrt(2 * SIZE * SIZE);
 const ANGLE_RANGE = (45 * Math.PI) / 180;
 const ANGLE_PREC = (2 * Math.PI) / 180;
 const PHI = 0.5 * (-1 + Math.sqrt(5));
-const RUNES: RuneName[] = ["triangle", "circle", "zigzag", "spiral"];
+const RUNES: RuneName[] = ["triangle", "circle", "zigzag", "vee"];
 
 // ------------------------------------------------------------------ geometry helpers
 function pathLength(pts: Pt[]): number {
@@ -155,8 +156,17 @@ export function features(points: Pt[]): Features {
   const sx = Math.max(b.w, 1e-6), sy = Math.max(b.h, 1e-6);
   const radii = p.map((q) => Math.hypot((q.x - c.x) / sx, (q.y - c.y) / sy)).sort((u, v) => u - v);
   const radial = radii[Math.floor(radii.length * 0.15)] / Math.max(1e-6, radii[Math.floor(radii.length * 0.85)]);
+  // V orientation: the lowest point (screen y grows downward) must be mid-stroke with both ends above it.
+  // This is what tells a V apart from a caret (the first two sides of a triangle), which $1 alone can't.
+  let lo = 0;
+  for (let i = 1; i < p.length; i++) if (p[i].y > p[lo].y) lo = i;
+  const loFrac = lo / (p.length - 1);
+  const rise0 = p[lo].y - p[0].y, rise1 = p[lo].y - p[p.length - 1].y;
+  // both arms must climb: the shorter climb as a share of the taller one, and the taller climb must be real
+  const dip = loFrac > 0.12 && loFrac < 0.88 && Math.max(rise0, rise1) / size >= 0.22
+    ? Math.min(rise0, rise1) / Math.max(rise0, rise1, 1e-6) : 0;
   const deg = 180 / Math.PI;
-  return { closure, netTurn: Math.abs(net) * deg, totalTurn: total * deg, corners, radial, length, size };
+  return { closure, netTurn: Math.abs(net) * deg, totalTurn: total * deg, corners, radial, dip, length, size };
 }
 
 function gate(r: RuneName, f: Features): boolean {
@@ -165,7 +175,11 @@ function gate(r: RuneName, f: Features): boolean {
     // forgiving: open gaps, overdrawn loops, ovals and wobble are all fine as long as the radius stays roughly constant
     case "circle": return f.closure < 0.7 && f.netTurn > 220 && f.netTurn < 640 && f.corners <= 3 && f.radial > 0.45;
     case "zigzag": return f.closure > 0.3 && f.netTurn < 230 && f.corners >= 2 && f.totalTurn > 150;
-    case "spiral": return f.netTurn >= 470 && f.closure > 0.12 && f.radial < 0.55;
+    // V / check mark (or a gentle U): open, dips in the middle with both ends well above the low point,
+    // bends 55-220 degrees overall. W has 3+ corners and a Z never dips, so neither passes.
+    // (net turning is unreliable for sharp V's: a ~180deg reversal can sum as +170 or -190, so only U-shapes use it)
+    case "vee": return f.closure > 0.25 && f.dip >= 0.25 &&
+      ((f.corners >= 1 && f.corners <= 2) || (f.corners === 0 && f.netTurn >= 55 && f.netTurn <= 220));
   }
 }
 
@@ -189,7 +203,7 @@ function rotations<T>(arr: T[], k: number): T[] {
 
 /** raw (un-normalised) template paths, one list per rune */
 export function templatePaths(): Record<RuneName, Pt[][]> {
-  const out: Record<RuneName, Pt[][]> = { triangle: [], circle: [], zigzag: [], spiral: [] };
+  const out: Record<RuneName, Pt[][]> = { triangle: [], circle: [], zigzag: [], vee: [] };
   // triangles: equilateral / tall / wide, every start vertex, both directions
   const tris = [
     [[0, -1], [0.866, 0.5], [-0.866, 0.5]],
@@ -226,20 +240,19 @@ export function templatePaths(): Record<RuneName, Pt[][]> {
     out.zigzag.push(poly(z, false));
     out.zigzag.push(poly([...z].reverse(), false));
   }
-  // spirals: outward and inward, both directions, 1.6-2.6 turns
-  for (const turns of [1.6, 2.1, 2.6])
-    for (const dir of [1, -1])
-      for (const inward of [false, true]) {
-        const pts: Pt[] = [];
-        const M = 80;
-        for (let i = 0; i <= M; i++) {
-          const u = i / M;
-          const th = dir * u * turns * Math.PI * 2;
-          const r = 0.12 + u;
-          pts.push({ x: Math.cos(th) * r, y: Math.sin(th) * r });
-        }
-        out.spiral.push(inward ? pts.reverse() : pts);
+  // V / check marks: narrow to wide, symmetric and lopsided (check mark), both stroke directions, plus a rounded U
+  for (const half of [0.25, 0.45, 0.7, 0.95])         // half-angle of the V (radians)
+    for (const arm of [1, 0.55])                       // second arm length (0.55 = check mark)
+      for (const dir of [1, -1]) {
+        const l = [-Math.sin(half), -Math.cos(half)], r = [Math.sin(half) * arm, -Math.cos(half) * arm];
+        const v = dir > 0 ? [l, [0, 0], r] : [r, [0, 0], l];
+        out.vee.push(poly(v, false));
       }
+  for (const dir of [1, -1]) {
+    const pts: Pt[] = [];
+    for (let i = 0; i <= 30; i++) { const a = Math.PI + (dir > 0 ? i : 30 - i) / 30 * Math.PI; pts.push({ x: Math.cos(a) * 0.6, y: -Math.sin(a) * 1 - 0.2 }); }
+    out.vee.push(pts);
+  }
   return out;
 }
 
@@ -255,7 +268,7 @@ export class RuneRecognizer {
   recognize(points: Pt[]): RecognizeResult {
     const f = features(points);
     const enabled = this.opts.enabled ?? RUNES;
-    const scores = { triangle: 0, circle: 0, zigzag: 0, spiral: 0 } as Record<RuneName, number>;
+    const scores = { triangle: 0, circle: 0, zigzag: 0, vee: 0 } as Record<RuneName, number>;
     const empty = (reason: string): RecognizeResult => ({ rune: null, score: 0, best: "triangle", bestScore: 0, gated: [], scores, features: f, reason });
     if (points.length < 5) return empty("too few points");
     const cand = normalize(points);
@@ -272,7 +285,8 @@ export class RuneRecognizer {
     for (const r of gated) if (enabled.includes(r) && (pick === null || scores[r] > scores[pick])) pick = r;
     if (pick && scores[pick] >= this.opts.threshold) return { rune: pick, score: scores[pick], best, bestScore: scores[best], gated, scores, features: f };
     // no gate agreed: allow a very confident template match
-    if (enabled.includes(best) && scores[best] >= this.opts.strongThreshold && gated.length === 0)
+    // (never for the V: without its orientation gate a caret / half-drawn triangle would cast it)
+    if (best !== "vee" && enabled.includes(best) && scores[best] >= this.opts.strongThreshold && gated.length === 0)
       return { rune: best, score: scores[best], best, bestScore: scores[best], gated, scores, features: f };
     return { rune: null, score: pick ? scores[pick] : scores[best], best, bestScore: scores[best], gated, scores, features: f, reason: pick ? "low score" : "no shape match" };
   }
@@ -288,10 +302,6 @@ export function idealGlyph(r: RuneName): Pt[] {
       return p;
     }
     case "zigzag": return poly([[-0.45, -0.4], [0.45, -0.4], [-0.45, 0.4], [0.45, 0.4]], false);
-    case "spiral": {
-      const p: Pt[] = [];
-      for (let i = 0; i <= 70; i++) { const u = i / 70, th = u * 2.1 * Math.PI * 2; const r = 0.05 + u * 0.45; p.push({ x: Math.cos(th) * r, y: Math.sin(th) * r }); }
-      return p;
-    }
+    case "vee": return poly([[-0.38, -0.42], [0, 0.42], [0.38, -0.42]], false);
   }
 }

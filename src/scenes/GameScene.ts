@@ -9,6 +9,7 @@ import { Audio } from "../core/Audio";
 import { Save } from "../core/Save";
 import { Poki } from "../core/Poki";
 import { bus, EV } from "../core/bus";
+import { Analytics, cap } from "../core/Analytics";
 import { Wizard } from "../entities/Wizard";
 import { Enemy, type Target } from "../entities/Enemy";
 import type { Boss } from "../entities/Boss";
@@ -34,6 +35,11 @@ export class GameScene extends Phaser.Scene {
   drawing = false;
   levelingUp = false;
   tutorial = false;
+  // analytics state (per run)
+  private lastHurtBy = "unknown";
+  private misses = 0;
+  private tutorialMisses = 0;
+  private survivalMark = 0;
 
   wizard!: Wizard;
   enemies: Enemy[] = [];
@@ -65,6 +71,7 @@ export class GameScene extends Phaser.Scene {
       now: 0, over: false, wave: 0, hp: GAME.player.maxHp, maxHp: GAME.player.maxHp,
       stats: { kills: 0, score: 0, timeMs: 0, casts: 0 }, drawing: false, levelingUp: false,
       enemies: [], boss: null, stroke: [], hitstopUntil: 0, frozenTime: false, slowmo: 1,
+      lastHurtBy: "unknown", misses: 0, tutorialMisses: 0, survivalMark: 0,
     });
   }
 
@@ -103,8 +110,11 @@ export class GameScene extends Phaser.Scene {
     Audio.startMusic();
     bus.emit(EV.HP, this.hp, this.maxHp, 0);
     bus.emit(EV.XP, 0, this.xp.toNext, 1);
+    Analytics.newRun();
+    Analytics.track("rune", "triangle", "visible", "run");
     if (!Save.data.tutorialDone) {
       this.tutorial = true;
+      Analytics.track("tutorial", "intro", "start", "run");
       this.scene.launch("Tutorial");
     } else this.time.delayedCall(700, () => this.spawner.startWave(1));
     Poki.gameplayStart();
@@ -183,17 +193,32 @@ export class GameScene extends Phaser.Scene {
     if (Save.settings.debugRunes) bus.emit(EV.DEBUG, res);
     const b = this.renderer2.bounds();
     if (!res.rune) {
+      this.trackMiss(res.bestScore >= 0.6 ? res.best : "unclear");
       this.failCast("");
       return;
     }
     const id = RUNE_TO_SPELL[res.rune];
     const why = this.spells.cast(id, b.cx, b.cy);
     if (why === null) {
+      Analytics.track("rune", res.rune, "interact", "run");
       this.stats.casts++;
       const c = ELEMENT_COLORS[SPELLS[id].element];
       this.renderer2.success(res.rune, c.main, c.light);
       this.ambience.flareRunes(c.main);
-    } else this.failCast(why === "locked" ? "NOT YET LEARNED" : "RECHARGING...");
+    } else {
+      Analytics.track("drawing", why === "locked" ? "not-learned" : "recharging", "reached", "run");
+      this.failCast(why === "locked" ? "NOT YET LEARNED" : "RECHARGING...");
+    }
+  }
+  /** a stroke that wasn't recognised: how often, and which rune they were most likely attempting */
+  private trackMiss(attempt: string) {
+    this.misses++;
+    if ([1, 3, 5, 10, 20].includes(this.misses)) Analytics.track("drawing", "misses", String(this.misses), "run");
+    Analytics.track("drawing", `miss-${attempt}`, "reached", "run");
+    if (this.tutorial) {
+      this.tutorialMisses++;
+      Analytics.track("tutorial", `fail-${cap(this.tutorialMisses, 5)}`, "reached", "run");
+    }
   }
   private failCast(msg: string) {
     this.renderer2.fail();
@@ -228,6 +253,8 @@ export class GameScene extends Phaser.Scene {
   private showCombo(n: number) {
     const t = this.comboText;
     if (n < 3) { t.setVisible(false); return; }
+    if (n >= 10) Analytics.track("combo", "x10", "reached", "run");
+    if (n >= 20) Analytics.track("combo", "x20", "reached", "run");
     t.setText(`x${n} COMBO`).setVisible(true).setTint(n >= 15 ? PAL.pink : n >= 8 ? PAL.gold : PAL.lavender);
     this.tweens.killTweensOf(t);
     t.setScale(1.5);
@@ -240,10 +267,11 @@ export class GameScene extends Phaser.Scene {
   }
 
   // ---------------------------------------------------------------- player health
-  damagePlayer(n: number, sx: number, sy: number, ignoreInvuln = false): boolean {
+  damagePlayer(n: number, sx: number, sy: number, ignoreInvuln = false, source = "unknown"): boolean {
     if (this.over || this.wizard.dead || this.tutorial) return false;
     if (!ignoreInvuln && this.wizard.isInvulnerable(this.now)) return false;
     this.hp = Math.max(0, this.hp - n);
+    this.lastHurtBy = source;
     bus.emit(EV.HP, this.hp, this.maxHp, -n);
     Audio.play("hurt");
     this.wizard.hurt(this.now, GAME.player.invulnMs);
@@ -274,6 +302,7 @@ export class GameScene extends Phaser.Scene {
 
   onBossDefeated(b: Boss) {
     this.boss = null;
+    Analytics.track("boss", "guardian", "complete");
     this.spawner.bossAlive = false;
     this.stats.kills++;
     this.stats.score += 600 * (1 + Math.floor(this.wave / 10));
@@ -287,6 +316,7 @@ export class GameScene extends Phaser.Scene {
   // ---------------------------------------------------------------- flow
   tutorialDone() {
     this.tutorial = false;
+    Analytics.track("tutorial", "intro", "complete", "run");
     Save.data.tutorialDone = true;
     Save.save();
     this.time.delayedCall(600, () => this.spawner.startWave(1));
@@ -322,6 +352,7 @@ export class GameScene extends Phaser.Scene {
 
   private openUpgrade() {
     this.levelingUp = true;
+    Analytics.track("level", cap(this.xp.level - this.xp.pendingLevels + 1, 15), "reached", "run");
     this.input2.abort();
     this.wizard.levelUp();
     Audio.play("levelup");
@@ -346,6 +377,9 @@ export class GameScene extends Phaser.Scene {
 
   private gameOver() {
     this.over = true;
+    if (this.wave > 0) Analytics.track("wave", cap(this.wave, 21), "fail");
+    if (this.boss?.alive) Analytics.track("boss", "guardian", "fail");
+    Analytics.track("death", this.lastHurtBy, "reached");
     this.input2.abort();
     Poki.gameplayStop();
     this.slowmo = 0.35;
@@ -373,7 +407,12 @@ export class GameScene extends Phaser.Scene {
     if (this.frozenTime) return;
     const dt = real * this.slowmo;
     this.now += dt;
-    if (!this.over && !this.tutorial) this.stats.timeMs += dt;
+    if (!this.over && !this.tutorial) {
+      this.stats.timeMs += dt;
+      const marks = [30, 60, 120, 180, 300, 600];
+      if (this.survivalMark < marks.length && this.stats.timeMs >= marks[this.survivalMark] * 1000)
+        Analytics.track("survival", `${marks[this.survivalMark++]}s`, "reached", "run");
+    }
     this.wizard.update(dt, this.now);
     for (const e of this.enemies) e.update(dt);
     if (this.enemies.length > 64 || Math.random() < 0.02) this.enemies = this.enemies.filter((e) => e.alive);

@@ -3,6 +3,7 @@ import { Layout } from "./core/Layout";
 import { Save } from "./core/Save";
 import { Audio } from "./core/Audio";
 import { Poki } from "./core/Poki";
+import { Analytics } from "./core/Analytics";
 import { BootScene } from "./scenes/BootScene";
 import { PreloadScene } from "./scenes/PreloadScene";
 import { MenuScene } from "./scenes/MenuScene";
@@ -60,4 +61,4 @@ document.addEventListener("touchmove", (e) => e.preventDefault(), { passive: fal
 document.addEventListener("gesturestart", (e) => e.preventDefault());
 
 // handles for QA scripts (tools/qa)
-Object.assign(window as unknown as Record<string, unknown>, { __game: game, __audio: Audio });
+Object.assign(window as unknown as Record<string, unknown>, { __game: game, __audio: Audio, __analytics: Analytics });

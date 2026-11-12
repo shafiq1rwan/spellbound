@@ -4,6 +4,7 @@ import { ELEMENT_COLORS, PAL, type Element } from "../config/palette";
 import { GAME } from "../config/game";
 import { ENEMIES } from "../config/enemies";
 import { Audio } from "../core/Audio";
+import { Analytics } from "../core/Analytics";
 import type { Target } from "../entities/Enemy";
 import { Enemy } from "../entities/Enemy";
 import type { GameScene } from "../scenes/GameScene";
@@ -35,6 +36,7 @@ export class CombatSystem {
     if (t.frozen && !o.noShatter && o.element !== "ice") {
       shatter = true;
       amount *= 2;
+      Analytics.track("combo", "shatter", "reached", "run");
       t.thaw();
       Audio.play("shatter", { maxConcurrent: 3 });
       g.vfx.burst("shard", t.x, t.y - t.height, 10, { speed: [60, 160] });

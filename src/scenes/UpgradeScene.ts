@@ -1,6 +1,7 @@
 import Phaser from "phaser";
 import { Layout } from "../core/Layout";
 import { Audio } from "../core/Audio";
+import { Analytics } from "../core/Analytics";
 import { PAL } from "../config/palette";
 import { RARITY_COLORS, RARITY_NAMES } from "../config/upgrades";
 import type { UpgradeChoice } from "../systems/UpgradeManager";
@@ -118,6 +119,7 @@ export class UpgradeScene extends Phaser.Scene {
     if (this.picked || !this.ready) return;
     this.picked = true;
     const c = this.choices[i];
+    Analytics.track("upgrade", c.id, "picked");
     const g = this.scene.get("Game") as GameScene;
     Audio.play("ui_select");
     const card = this.cards[i];

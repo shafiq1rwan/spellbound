@@ -64,11 +64,26 @@ const makers: Record<RuneName, (R: () => number) => Pt[]> = {
     const pts = densify(vs);
     return R() < 0.5 ? pts.reverse() : pts;
   },
-  spiral(R) {
-    const turns = 1.7 + R() * 0.8, dir = R() < 0.5 ? 1 : -1, s = R() * 6.28;
+  // V and check marks as people actually draw them: narrow to wide, lopsided arms, bowed strokes,
+  // rounded bottoms, little end-hooks, either direction
+  vee(R) {
+    const half = 0.18 + R() * 0.85;                       // ~10..60 degree half-angle
+    const short = 0.45 + R() * 0.55, which = R() < 0.5;   // one arm may be shorter (check mark)
+    const la = which ? short : 1, ra = which ? 1 : short;
+    const bow = (R() - 0.5) * 0.25, round = R() < 0.3 ? 0.08 + R() * 0.1 : 0;
+    const L = [-Math.sin(half) * la, -Math.cos(half) * la], Rr = [Math.sin(half) * ra, -Math.cos(half) * ra];
     const pts: Pt[] = [];
-    for (let i = 0; i <= 90; i++) { const u = i / 90, th = s + dir * u * turns * Math.PI * 2; const r = 0.1 + u; pts.push({ x: Math.cos(th) * r, y: Math.sin(th) * r }); }
-    return R() < 0.35 ? pts.reverse() : pts;
+    const arm = (a: number[], b: number[], n: number) => {
+      for (let k = 0; k <= n; k++) {
+        const t = k / n, bowK = Math.sin(t * Math.PI) * bow;
+        pts.push({ x: a[0] + (b[0] - a[0]) * t + bowK, y: a[1] + (b[1] - a[1]) * t });
+      }
+    };
+    arm(L, [-round, -round * 0.5], 14);
+    if (round) for (let k = 1; k < 6; k++) { const a = Math.PI + (k / 6) * Math.PI; pts.push({ x: Math.cos(a) * round, y: -Math.sin(a) * round * 0.5 - round * 0.5 }); }
+    arm([round, -round * 0.5], Rr, 14);
+    if (R() < 0.15) { const e = pts[pts.length - 1]; pts.push({ x: e.x + 0.06, y: e.y + 0.05 }); }
+    return R() < 0.5 ? pts.reverse() : pts;
   },
 };
 
@@ -79,7 +94,8 @@ for (const rune of Object.keys(makers) as RuneName[]) {
     const wrong: Record<string, number> = {};
     const N = 150;
     for (let i = 0; i < N; i++) {
-      const r = rec.recognize(humanize(makers[rune](R), R));
+      // V's are drawn upright in practice; everything else may be tilted up to ~26 degrees
+      const r = rec.recognize(humanize(makers[rune](R), R, { rot: rune === "vee" ? 0.3 : 0.45 }));
       if (r.rune === rune) ok++;
       else wrong[String(r.rune)] = (wrong[String(r.rune)] ?? 0) + 1;
     }
@@ -110,6 +126,22 @@ test("accepts hard human circles: open gaps, overdrawn loops, eggs, wobble (>= 9
   }
   console.log("hard circles", ok, N, JSON.stringify(wrong));
   assert.ok(ok / N >= 0.92, `hard circles: ${ok}/${N}, misses ${JSON.stringify(wrong)}`);
+});
+
+test("carets / half-drawn triangles do NOT cast the V spell (>= 95%)", () => {
+  const R = rng(777);
+  let asVee = 0;
+  const N = 150;
+  for (let i = 0; i < N; i++) {
+    // upside-down V (the first two sides of a triangle, apex up), sometimes with a stub of the third side
+    const half = 0.3 + R() * 0.6;
+    const vs = [[-Math.sin(half), Math.cos(half)], [0, 0], [Math.sin(half), Math.cos(half)]];
+    if (R() < 0.4) vs.push([Math.sin(half) - 0.3, Math.cos(half)]);
+    const pts = densify(R() < 0.5 ? vs : [...vs].reverse());
+    if (rec.recognize(humanize(pts, R, { rot: 0.3 })).rune === "vee") asVee++;
+  }
+  console.log("carets as vee", asVee, N);
+  assert.ok(asVee / N <= 0.05, `${asVee}/${N} carets were read as V`);
 });
 
 test("rejects straight lines, dots and random scribbles", () => {

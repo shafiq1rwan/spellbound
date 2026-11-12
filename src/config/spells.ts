@@ -1,7 +1,7 @@
 import type { Element } from "./palette";
 
 export type SpellId = "fireball" | "nova" | "lightning" | "arcane";
-export type RuneId = "triangle" | "circle" | "zigzag" | "spiral";
+export type RuneId = "triangle" | "circle" | "zigzag" | "vee";
 
 export interface SpellDef {
   id: SpellId;
@@ -80,19 +80,19 @@ export const SPELLS: Record<SpellId, SpellDef> = {
     ],
   },
   arcane: {
-    id: "arcane", rune: "spiral", element: "arcane", name: "Arcane Barrage", runeName: "Spiral",
-    icon: "ic_arcane", runeIcon: "rune_arcane", cooldown: 1500, unlockWave: 4,
+    id: "arcane", rune: "vee", element: "arcane", name: "Arcane Barrage", runeName: "V",
+    icon: "ic_arcane", runeIcon: "rune_arcane", cooldown: 1100, unlockWave: 4,
     levels: [
-      { desc: "Homing arcane missiles.", damage: 11, missiles: 4, pierce: 1, knockback: 14 },
-      { desc: "Two more missiles.", damage: 12, missiles: 6, pierce: 1, knockback: 16 },
-      { desc: "Missiles pierce a foe.", damage: 13, missiles: 7, pierce: 2, knockback: 18 },
-      { desc: "A dense barrage.", damage: 14, missiles: 9, pierce: 2, knockback: 20 },
-      { desc: "VORTEX: pulls foes into a rift.", damage: 15, missiles: 10, pierce: 2, knockback: 20, vortex: true },
+      { desc: "Missiles hit every foe near you.", damage: 13, missiles: 6, pierce: 1, knockback: 22 },
+      { desc: "Two more missiles.", damage: 14, missiles: 8, pierce: 1, knockback: 24 },
+      { desc: "Missiles pierce a foe.", damage: 15, missiles: 9, pierce: 2, knockback: 26 },
+      { desc: "A dense barrage.", damage: 16, missiles: 11, pierce: 2, knockback: 28 },
+      { desc: "VORTEX: pulls foes into a rift.", damage: 17, missiles: 12, pierce: 2, knockback: 28, vortex: true },
     ],
   },
 };
 
 export const SPELL_ORDER: SpellId[] = ["fireball", "nova", "lightning", "arcane"];
 export const RUNE_TO_SPELL: Record<RuneId, SpellId> = {
-  triangle: "fireball", circle: "nova", zigzag: "lightning", spiral: "arcane",
+  triangle: "fireball", circle: "nova", zigzag: "lightning", vee: "arcane",
 };

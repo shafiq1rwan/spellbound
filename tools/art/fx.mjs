@@ -307,13 +307,9 @@ function glyph(im, kind, cx, cy, s, col) {
     return;
   }
   if (kind === "arcane") {
-    let px0 = cx, py0 = cy;
-    for (let u = 0; u < 1; u += 0.02) {
-      const a = u * 12, r = u * s;
-      const x = cx + Math.cos(a) * r, y = cy + Math.sin(a) * r * 0.5;
-      im.line(px0, py0, x, y, col);
-      px0 = x; py0 = y;
-    }
+    // V rune, seen in perspective on the ground
+    im.line(cx - s * 0.8, cy - s * 0.42, cx, cy + s * 0.42, col);
+    im.line(cx, cy + s * 0.42, cx + s * 0.8, cy - s * 0.42, col);
     return;
   }
   // level: star

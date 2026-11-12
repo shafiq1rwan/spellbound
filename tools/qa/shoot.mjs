@@ -55,7 +55,7 @@ const SHAPES = {
   triangle: dens([[0, -0.5], [0.45, 0.4], [-0.45, 0.4], [0, -0.5]]),
   circle: Array.from({ length: 40 }, (_, i) => { const a = -Math.PI / 2 + (i / 39) * Math.PI * 2.05; return [Math.cos(a) * 0.48, Math.sin(a) * 0.48]; }),
   zigzag: dens([[-0.45, -0.4], [0.45, -0.4], [-0.45, 0.4], [0.45, 0.4]]),
-  spiral: Array.from({ length: 70 }, (_, i) => { const u = i / 69, th = u * 2.1 * Math.PI * 2, r = 0.05 + u * 0.45; return [Math.cos(th) * r, Math.sin(th) * r]; }),
+  vee: dens([[-0.38, -0.42], [0, 0.42], [0.38, -0.42]]),
   scribble: dens([[-0.4, 0], [0.4, 0.05], [-0.1, 0.1]]),
 };
 const slow = (k) => page.evaluate((k) => { const g = window.__game.scene.getScene("Game"); g.slowmo = k; g.tweens.timeScale = k; g.time.timeScale = k; g.anims.globalTimeScale = k; }, k);
@@ -115,7 +115,7 @@ try {
     });
     await sleep(700);
     await shot("0_mob");
-    for (const s of ["zigzag", "circle", "spiral", "triangle"]) {
+    for (const s of ["zigzag", "circle", "vee", "triangle"]) {
       await draw(SHAPES[s], cw / 2, ch * 0.3, Math.min(cw, ch) * 0.26, { stepMs: 4 });
       await slow(0.12);
       await sleep(150);
@@ -141,7 +141,7 @@ try {
     });
     const fps = [];
     for (let k = 0; k < 4; k++) {
-      for (const s of ["triangle", "spiral", "zigzag", "circle"]) { await draw(SHAPES[s], cw / 2, ch * 0.3, Math.min(cw, ch) * 0.25, { stepMs: 8 }); await sleep(250); fps.push((await game())?.fps); }
+      for (const s of ["triangle", "vee", "zigzag", "circle"]) { await draw(SHAPES[s], cw / 2, ch * 0.3, Math.min(cw, ch) * 0.25, { stepMs: 8 }); await sleep(250); fps.push((await game())?.fps); }
       if (k === 1) { await slow(0.15); await sleep(200); await shot("chaos"); await slow(1); }
     }
     console.log("fps samples", fps.join(","));
@@ -160,7 +160,7 @@ try {
     await page.evaluate(() => { const g = window.__game.scene.getScene("Game"); g.damagePlayer = () => false; for (const s of ["nova", "lightning", "arcane"]) g.spells.levels[s] = 3; g.spawner.startWave(10); });
     await sleep(4200);
     await shot("boss");
-    for (const s of ["triangle", "zigzag", "spiral"]) { await draw(SHAPES[s], cw / 2, ch * 0.25, Math.min(cw, ch) * 0.25); await sleep(500); }
+    for (const s of ["triangle", "zigzag", "vee"]) { await draw(SHAPES[s], cw / 2, ch * 0.25, Math.min(cw, ch) * 0.25); await sleep(500); }
     await sleep(3000);
     await shot("boss_fight");
   } else if (scenario === "gameover") {
@@ -207,7 +207,7 @@ try {
         const t = g.targets()[0];
         if (!t) return { none: true };
         const cam = g.cameras.main, S = cam.zoom, dpr = window.devicePixelRatio;
-        const rune = { fireball: "triangle", nova: "circle", lightning: "zigzag", arcane: "spiral" };
+        const rune = { fireball: "triangle", nova: "circle", lightning: "zigzag", arcane: "vee" };
         const ready = Object.keys(rune).filter((s) => g.spells.levels[s] > 0 && g.spells.cooldownFrac(s) === 0);
         const near = g.enemies.filter((e) => e.alive && Math.hypot(e.x, e.y) < 45).length;
         const pick = ready.includes("nova") && near >= 2 ? "nova" : ready[Math.floor(Math.random() * ready.length)] ?? "fireball";

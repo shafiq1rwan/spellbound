@@ -124,6 +124,11 @@ export class Enemy implements Target {
     });
   }
 
+  /** analytics tag for what hurt the player, e.g. "skeleton" or "golem-elite" */
+  tag() {
+    return this.elite ? `${this.kind}-elite` : this.kind;
+  }
+
   get frozen() {
     return this.g.now < this.frozenUntil;
   }
@@ -303,7 +308,7 @@ export class Enemy implements Target {
       this.x += this.vx * dt;
       this.y += this.vy * dt;
       if (dist < this.radius + 6) {
-        g.damagePlayer(1, this.x, this.y);
+        g.damagePlayer(1, this.x, this.y, false, "boss-orb");
         this.die();
         return;
       }
@@ -385,7 +390,7 @@ export class Enemy implements Target {
 
     // contact damage
     if (this.kind !== "orb" && this.state !== "spawn" && !frozen && dist < this.radius + w.radius && this.def.contactDamage > 0) {
-      if (g.damagePlayer(this.def.contactDamage, this.x, this.y)) {
+      if (g.damagePlayer(this.def.contactDamage, this.x, this.y, false, this.tag())) {
         this.kbx -= ux * 140;
         this.kby -= uy * 140;
       }
@@ -462,7 +467,7 @@ export class Enemy implements Target {
       this.kbx += (dx / d) * 160;
       this.kby += (dy / d) * 160;
       Audio.play("skel_swing", { vol: 0.7 });
-      if (dist <= range + 6) g.damagePlayer(dmg, this.x, this.y);
+      if (dist <= range + 6) g.damagePlayer(dmg, this.x, this.y, false, this.tag());
     } else {
       const r = ((this.def.attackRange ?? 30) + 8) * (this.elite ? 1.25 : 1);
       Audio.play("golem_slam");
@@ -471,7 +476,7 @@ export class Enemy implements Target {
       g.vfx.burst("chip", this.x, this.y - 2, 10, { speed: [40, 110] });
       g.vfx.decal("decal_scorch", this.x, this.y, 1.2, 2500, 0.5);
       g.shockwaveGrass(this.x, this.y, r * 1.5);
-      if (dist <= r + g.wizard.radius) g.damagePlayer(dmg, this.x, this.y);
+      if (dist <= r + g.wizard.radius) g.damagePlayer(dmg, this.x, this.y, false, this.tag());
     }
   }
 }

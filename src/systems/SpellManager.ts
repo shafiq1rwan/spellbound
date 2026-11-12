@@ -267,7 +267,7 @@ export class SpellManager {
     Audio.play("arcane_cast");
     const n = L.missiles ?? 4;
     // choose targets: nearest few, cycling
-    const pool = g.targets().slice().sort((a, b) => Math.hypot(a.x - w.x, a.y - w.y) - Math.hypot(b.x - w.x, b.y - w.y)).slice(0, Math.max(1, Math.ceil(n / 2)));
+    const pool = g.targets().slice().sort((a, b) => Math.hypot(a.x - w.x, a.y - w.y) - Math.hypot(b.x - w.x, b.y - w.y)).slice(0, n); // spread: one missile per nearby foe, cycling if there are fewer
     if (main && !pool.includes(main)) pool.unshift(main);
     // rotating arcane circles around the wizard
     for (let i = 0; i < 3; i++) g.vfx.play("sigil_arcane", w.x, w.y - 2 - i * 6, { scale: 0.5 + i * 0.25, alpha: 0.8 - i * 0.2, add: true, depth: DEPTH.sigil, anim: "sigil_arcane:play", loop: false });

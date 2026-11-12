@@ -6,6 +6,7 @@ import { ENEMIES } from "../config/enemies";
 import { PAL } from "../config/palette";
 import { Audio } from "../core/Audio";
 import { bus, EV } from "../core/bus";
+import { Analytics } from "../core/Analytics";
 import { DEPTH } from "../systems/VFXManager";
 import { Enemy, type Target } from "./Enemy";
 import type { GameScene } from "../scenes/GameScene";
@@ -58,6 +59,7 @@ export class Boss implements Target {
     g.vfx.shake(2, 500);
     g.tweens.add({ targets: this, y: this.home.y, duration: 1600, ease: "Cubic.easeOut", onComplete: () => { this.act = "idle"; this.actT = 0; } });
     bus.emit(EV.BOSS_HP, 1, "ANCIENT GUARDIAN");
+    Analytics.track("boss", "guardian", "start");
   }
 
   /** body centre for VFX */
@@ -184,7 +186,7 @@ export class Boss implements Target {
           g.vfx.bolt(this.x, this.cy, w.x, w.y - 12, { color: PAL.pink, ms: 380 });
           g.vfx.bolt(this.x, this.cy, w.x, w.y - 12, { color: PAL.violet, ms: 380 });
           g.vfx.illuminate(PAL.pink, 0.1);
-          g.damagePlayer(2, this.x, this.cy, true);
+          g.damagePlayer(2, this.x, this.cy, true, "boss-beam");
         }
         break;
       }

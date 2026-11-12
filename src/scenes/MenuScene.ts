@@ -3,6 +3,7 @@ import { Layout } from "../core/Layout";
 import { Audio } from "../core/Audio";
 import { Save, fmtTime } from "../core/Save";
 import { Poki } from "../core/Poki";
+import { Analytics } from "../core/Analytics";
 import { PAL, ELEMENT_COLORS, type Element } from "../config/palette";
 import { VFXManager, DEPTH } from "../systems/VFXManager";
 import { Ambience } from "../systems/Ambience";
@@ -42,7 +43,9 @@ export class MenuScene extends Phaser.Scene {
     this.wiz.on(Phaser.Animations.Events.ANIMATION_COMPLETE, () => this.wiz.play("wizard:idle"));
     this.logo = this.add.image(0, 0, "logo").setDepth(100);
     this.play = new Button(this, 0, 0, "PLAY", () => this.startRun(), { scale: 2, minW: 112 });
-    this.settings = new Button(this, 0, 0, "SETTINGS", () => { this.scene.pause(); this.scene.launch("Settings", { from: "Menu" }); }, { minW: 112 });
+    this.settings = new Button(this, 0, 0, "SETTINGS", () => { Analytics.track("menu", "settings", "interact"); this.scene.pause(); this.scene.launch("Settings", { from: "Menu" }); }, { minW: 112 });
+    Analytics.track("menu", "play", "visible");
+    Analytics.track("menu", "settings", "visible");
     this.play.setDepth(100);
     this.settings.setDepth(100);
     const d = Save.data;
@@ -85,6 +88,7 @@ export class MenuScene extends Phaser.Scene {
   private async startRun() {
     if (this.starting) return;
     this.starting = true;
+    Analytics.track("menu", "play", "interact");
     Audio.unlock();
     Audio.play("ui_select");
     if (Save.data.runs > 0) await Poki.commercialBreak();

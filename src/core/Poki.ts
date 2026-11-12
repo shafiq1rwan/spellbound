@@ -1,6 +1,6 @@
 // PokiAdapter — the only file that talks to the Poki SDK (https://sdk.poki.com).
 // Documented API used: PokiSDK.init(), gameLoadingFinished(), gameplayStart(), gameplayStop(),
-// commercialBreak(onStart).then(), setDebug(). Everything degrades to no-ops when the SDK is
+// commercialBreak(onStart).then(), setDebug(), measure(category, what, action). Everything degrades to no-ops when the SDK is
 // absent (local dev, blocked script), so the game never depends on it to run.
 import { Audio } from "./Audio";
 
@@ -11,6 +11,7 @@ type PokiSDKType = {
   gameplayStart: () => void;
   gameplayStop: () => void;
   commercialBreak: (onStart?: () => void) => Promise<void>;
+  measure?: (category: string, what: string, action: string) => void;
 };
 declare global {
   interface Window { PokiSDK?: PokiSDKType }
@@ -25,6 +26,8 @@ class PokiAdapter {
   /** loadingFinished() was requested before the SDK was ready: replay it once it is */
   private loadedPending = false;
   private initPromise: Promise<void> | null = null;
+  /** analytics events sent before the SDK was ready (flushed once it is) */
+  private measureQueue: [string, string, string][] = [];
 
   /** starts SDK init once; await it before gameLoadingFinished() */
   start() {
@@ -55,6 +58,7 @@ class PokiAdapter {
       ]);
       this.ready = true;
       if (this.loadedPending) this.loadingFinished();
+      this.flushMeasures();
       if (!ok) console.info("[poki] init timed out; continuing");
       const local = /^(localhost|127\.|192\.168\.|\[::1\])/.test(location.hostname);
       if (local) window.PokiSDK.setDebug?.(true);
@@ -75,6 +79,21 @@ class PokiAdapter {
       s.onerror = () => { clearTimeout(t); resolve(); };
       document.head.appendChild(s);
     });
+  }
+
+  /** PokiSDK.measure — custom analytics event (see src/core/Analytics.ts) */
+  measure(category: string, what: string, action: string) {
+    const sdk = this.sdk();
+    if (!sdk) {
+      if (this.measureQueue.length < 100) this.measureQueue.push([category, what, action]);
+      return;
+    }
+    try { sdk.measure?.(category, what, action); } catch { /* ignore */ }
+  }
+  private flushMeasures() {
+    const q = this.measureQueue;
+    this.measureQueue = [];
+    for (const [c, w, a] of q) this.measure(c, w, a);
   }
 
   loadingFinished() {

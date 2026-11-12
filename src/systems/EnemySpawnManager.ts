@@ -7,6 +7,7 @@ import { SPELLS, SPELL_ORDER } from "../config/spells";
 import type { EnemyKind } from "../config/enemies";
 import { Audio } from "../core/Audio";
 import { bus, EV } from "../core/bus";
+import { Analytics, cap } from "../core/Analytics";
 import { Enemy } from "../entities/Enemy";
 import { Boss } from "../entities/Boss";
 import type { GameScene } from "../scenes/GameScene";
@@ -19,7 +20,8 @@ export class EnemySpawnManager {
   private nextSpawn = 0;
   private elitesLeft = 0;
   inBreak = true;
-  private breakT = 0;
+  /** no automatic start before the first wave: GameScene schedules startWave(1) itself */
+  private breakT = Number.POSITIVE_INFINITY;
   bossAlive = false;
   enabled = true;
 
@@ -35,11 +37,13 @@ export class EnemySpawnManager {
     this.nextSpawn = 600;
     this.elitesLeft = this.def.elites;
     this.inBreak = false;
+    Analytics.track("wave", cap(n, 21), "start");
     Audio.play("wave");
     bus.emit(EV.WAVE, n, !!this.def.boss);
     const unlock = SPELL_ORDER.find((s) => SPELLS[s].unlockWave === n && this.g.spells.levels[s] === 0);
     if (unlock) {
       this.g.spells.levels[unlock] = 1;
+      Analytics.track("rune", SPELLS[unlock].rune, "visible", "run");
       bus.emit(EV.UNLOCK, unlock);
     } else {
       bus.emit(EV.WAVE_BANNER, `WAVE ${n}`, this.def.boss ? "A GUARDIAN STIRS..." : this.def.elites ? "ELITES APPROACH" : "", this.def.boss ? PAL.pink : PAL.gold);
@@ -97,6 +101,7 @@ export class EnemySpawnManager {
     const alive = this.g.enemies.filter((e) => e.alive && e.kind !== "orb").length;
     const waveOver = this.waveT >= this.def.durationMs && (!this.def.boss || !this.bossAlive);
     if (waveOver) {
+      Analytics.track("wave", cap(this.wave, 21), "complete");
       this.inBreak = true;
       this.breakT = GAME.waveBreakMs;
       this.g.xp.vacuum();

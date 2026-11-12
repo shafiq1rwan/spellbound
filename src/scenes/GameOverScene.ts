@@ -2,6 +2,7 @@ import Phaser from "phaser";
 import { Layout } from "../core/Layout";
 import { Audio } from "../core/Audio";
 import { Poki } from "../core/Poki";
+import { Analytics } from "../core/Analytics";
 import { Save, fmtTime } from "../core/Save";
 import { PAL } from "../config/palette";
 import { Button, UI, panelBox, txt } from "../ui/widgets";
@@ -73,12 +74,15 @@ export class GameOverScene extends Phaser.Scene {
     [retry, menu].forEach((b) => { b.setAlpha(0); b.setEnabled(false); });
     this.time.delayedCall(1100, () => {
       [retry, menu].forEach((b) => { b.setEnabled(true); this.tweens.add({ targets: b, alpha: 1, duration: 250 }); });
+      Analytics.track("gameover", "retry", "visible");
+      Analytics.track("gameover", "menu", "visible");
     });
     this.input.keyboard?.on("keydown-ENTER", () => this.retry());
   }
   private async retry() {
     if (this.busy) return;
     this.busy = true;
+    Analytics.track("gameover", "retry", "interact");
     Audio.play("ui_select");
     await Poki.commercialBreak();
     this.scene.stop("Game");
@@ -88,6 +92,7 @@ export class GameOverScene extends Phaser.Scene {
   private menu() {
     if (this.busy) return;
     this.busy = true;
+    Analytics.track("gameover", "menu", "interact");
     this.scene.stop("Game");
     this.scene.start("Menu");
   }

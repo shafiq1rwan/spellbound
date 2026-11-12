@@ -8,7 +8,7 @@ spells at monsters closing in from every side.
 | Triangle | **Fireball** | Single-target projectile with splash. At level 3 it splits into 3; at level 5 it becomes a meteor. |
 | Circle | **Ice Nova** | Big ring centred on the wizard: damages, freezes and pushes foes back from level 1 (shards from level 3, a double pulse at 5). |
 | Zigzag | **Lightning Chain** | Instant bolt that jumps between enemies. Stuns from level 3; every bolt forks at level 5. |
-| Spiral | **Arcane Barrage** | Homing missiles with knockback. Pierce from level 3; summons a vortex at level 5. |
+| V (or ✓) | **Arcane Barrage** | A homing missile for each nearby enemy, with knockback. Pierce from level 3; summons a vortex at level 5. |
 
 The runes unlock on waves 1 to 4. **Spell combination:** freeze enemies with Ice Nova, then hit them with any other spell to
 *shatter* them for double damage. Switching elements also builds the combo meter 3× faster than
@@ -68,5 +68,7 @@ public/assets/gfx/         baked PNG sheets + manifest.json (+ bitmap font)
 - **Enemies and waves:** `src/config/enemies.ts` and `src/config/waves.ts`. Waves 1 to 10 are authored
   (boss on wave 10). After that, waves scale endlessly with a boss every 10th wave.
 - **Game feel:** the hit-stop and shake values are in `GAME.feel`; XP pull speeds are in `GAME.xp`.
+
+Gameplay analytics (Poki `measure` events): see `docs/ANALYTICS.md`.
 
 See `docs/ART_PIPELINE.md` for how the art is made and `docs/QA_REPORT.md` for what was verified.

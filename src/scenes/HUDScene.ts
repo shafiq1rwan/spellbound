@@ -3,6 +3,7 @@
 import Phaser from "phaser";
 import { Layout } from "../core/Layout";
 import { bus, EV } from "../core/bus";
+import { Analytics } from "../core/Analytics";
 import { Save, fmtTime } from "../core/Save";
 import { PAL, ELEMENT_COLORS } from "../config/palette";
 import { SPELLS, SPELL_ORDER, type SpellId } from "../config/spells";
@@ -60,7 +61,8 @@ export class HUDScene extends Phaser.Scene {
     this.wavePanel = slice(this, "panel_dark", 0, 0, 58, 19);
     this.waveText = txt(this, 0, 0, "WAVE 1", { color: PAL.gold });
     this.timeText = txt(this, 0, 0, "0:00", { color: 0xd8d0f0 });
-    this.pauseBtn = new Button(this, 0, 0, "", () => bus.emit(EV.PAUSE_REQ), { icon: "ic_pause" });
+    this.pauseBtn = new Button(this, 0, 0, "", () => { Analytics.track("button", "pause", "interact"); bus.emit(EV.PAUSE_REQ); }, { icon: "ic_pause" });
+    Analytics.track("button", "pause", "visible", "run");
     // boss bar
     this.bossC = this.add.container(0, 0).setVisible(false);
     const bf = slice(this, "bar", 0, 0, this.bossW + 4, 8);

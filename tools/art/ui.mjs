@@ -302,22 +302,22 @@ export function icons() {
     .......kyyk.....
     ......kyyyyyyyk.
     ......kkkkkkkkk.`);
+  // V rune (Arcane Barrage)
   mk("rune_arcane", arc, `
     ................
-    .....kkkkkk.....
-    ....kppppppkk...
-    ...kpkkkkkkppk..
-    ..kpk......kpk..
-    ..kpk..kkk..kpk.
-    .kpk..kpppk.kpk.
-    .kpk.kpk.kpk.kpk
-    .kpk.kpk..kpkpk.
-    .kpk..kkk.kpkpk.
-    ..kpk....kpk.kpk
-    ..kppk..kppk.kpk
-    ...kpppppkk.kpk.
-    ....kkkkk..kpk..
-    ..........kk....`);
+    .kk..........kk.
+    kppk........kppk
+    kppk........kppk
+    .kppk......kppk.
+    .kppk......kppk.
+    ..kppk....kppk..
+    ..kppk....kppk..
+    ...kppk..kppk...
+    ...kppk..kppk...
+    ....kppkkppk....
+    ....kppppppk....
+    .....kppppk.....
+    ......kkkk......`);
   // upgrade icons
   mk("ic_fireball", fire, `
     ................
