@@ -24,8 +24,8 @@ export interface WaveDef {
  * Difficulty curve. Pressure starts low and grows a steady ~33% per wave, so each wave is a small
  * step up rather than a wall. Measured with tools/qa/sim-run.mjs (see docs/DIFFICULTY.md).
  */
-export const PRESSURE_BASE = 9;
-export const PRESSURE_GROWTH = 1.33;
+export const PRESSURE_BASE = 7;
+export const PRESSURE_GROWTH = 1.28;
 export const pressureFor = (wave: number) =>
   wave <= 10 ? PRESSURE_BASE * Math.pow(PRESSURE_GROWTH, wave - 1)
              : PRESSURE_BASE * Math.pow(PRESSURE_GROWTH, 9) * Math.pow(1.15, wave - 10); // gentler in endless

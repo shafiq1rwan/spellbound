@@ -44,9 +44,12 @@ export class GameScene extends Phaser.Scene {
   private swipeReadyAt = 0;
   /** one rewarded revive per run */
   reviveUsed = false;
+  /** guided tutorial: enemies hold still until the player has cast */
+  worldPaused = false;
+  private taps = 0;
+  private boundHintShown = false;
   private runEnded = false;
   private castThisRun = new Set<string>();
-  private demoShown = new Set<string>();
 
   wizard!: Wizard;
   enemies: Enemy[] = [];
@@ -80,7 +83,7 @@ export class GameScene extends Phaser.Scene {
       stats: { kills: 0, score: 0, timeMs: 0, casts: 0 }, drawing: false, levelingUp: false,
       enemies: [], boss: null, stroke: [], hitstopUntil: 0, frozenTime: false, slowmo: 1,
       lastHurtBy: "unknown", misses: 0, tutorialMisses: 0, survivalMark: 0, swipeReadyAt: 0,
-      castThisRun: new Set<string>(), demoShown: new Set<string>(), reviveUsed: false, runEnded: false,
+      castThisRun: new Set<string>(), reviveUsed: false, runEnded: false, worldPaused: false, taps: 0, boundHintShown: false,
     });
   }
 
@@ -112,14 +115,6 @@ export class GameScene extends Phaser.Scene {
     });
 
     this.on(EV.COMBO, (n) => this.showCombo(n as number));
-    // waves 2-4: a short ghost demo of a rune the player hasn't cast yet this run
-    this.on(EV.WAVE, (n) => {
-      if ((n as number) < 2 || (n as number) > 4 || this.tutorial) return;
-      const next = SPELL_ORDER.find((s) => s !== "fireball" && !this.castThisRun.has(s) && !this.demoShown.has(s));
-      if (!next) return;
-      this.demoShown.add(next);
-      this.time.delayedCall(1200, () => !this.over && !this.levelingUp && this.scene.launch("Tutorial", { mode: "demo", spell: next }));
-    });
     this.on(EV.PAUSE_REQ, () => this.pauseGame());
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => this.cleanup());
     this.game.events.on(Phaser.Core.Events.HIDDEN, this.onHidden, this);
@@ -129,7 +124,7 @@ export class GameScene extends Phaser.Scene {
     bus.emit(EV.HP, this.hp, this.maxHp, 0);
     bus.emit(EV.XP, 0, this.xp.toNext, 1);
     Analytics.newRun();
-    for (const id of SPELL_ORDER) Analytics.track("rune", SPELLS[id].rune, "visible", "run");
+    Analytics.track("rune", "triangle", "visible", "run");
     if (!Save.data.tutorialDone) {
       this.tutorial = true;
       Analytics.track("tutorial", "intro", "start", "run");
@@ -206,7 +201,12 @@ export class GameScene extends Phaser.Scene {
     bus.emit(EV.STROKE, false);
     let len = 0;
     for (let i = 1; i < this.stroke.length; i++) len += Math.hypot(this.stroke[i].x - this.stroke[i - 1].x, this.stroke[i].y - this.stroke[i - 1].y);
-    if (len < GAME.rune.minLengthPx || this.over) { this.renderer2.cancel(); return; }
+    if (len < GAME.rune.minLengthPx || this.over) {
+      this.renderer2.cancel();
+      // repeated taps usually mean "I'm trying to move": explain that the wizard is rooted
+      if (!this.over && ++this.taps >= 2) this.showBoundHint("tap");
+      return;
+    }
     const res = this.recognizer.recognize(this.stroke);
     if (Save.settings.debugRunes) bus.emit(EV.DEBUG, res);
     const b = this.renderer2.bounds();
@@ -245,6 +245,7 @@ export class GameScene extends Phaser.Scene {
   /** straight swipe: light damage to every enemy the trail passes through */
   private slash() {
     const cfg = GAME.swipe;
+    if (this.tutorial) { this.failCast(""); return; } // the guided tutorial is about the triangle
     if (this.now < this.swipeReadyAt) { this.renderer2.cancel(); return; }
     this.swipeReadyAt = this.now + cfg.cooldownMs;
     const pts = this.renderer2.points();
@@ -339,6 +340,7 @@ export class GameScene extends Phaser.Scene {
     bus.emit(EV.HP, this.hp, this.maxHp, -n);
     Audio.play("hurt");
     this.wizard.hurt(this.now, GAME.player.invulnMs);
+    this.showBoundHint("hit");
     this.wizard.face(sx);
     this.vfx.shake(GAME.feel.shakeHeavy, 160);
     this.vfx.play("hitflash", this.wizard.x, this.wizard.y - 16, { add: true, tint: PAL.hpRed, scale: 2 });
@@ -378,6 +380,16 @@ export class GameScene extends Phaser.Scene {
   }
 
   // ---------------------------------------------------------------- flow
+  /** "you can't move, draw spells to defend": once per run, on the first hit or repeated taps */
+  showBoundHint(why: string) {
+    if (this.boundHintShown || this.tutorial) return;
+    this.boundHintShown = true;
+    this.wizard.flashBind();
+    this.vfx.floatIcon("ic_chain", this.wizard.x, this.wizard.y - 52, 1.5, 1800);
+    bus.emit(EV.HINT, "YOU CAN'T MOVE - DRAW SPELLS TO DEFEND!", 3500);
+    Analytics.track("hint", `cant-move-${why}`, "visible", "run");
+  }
+
   tutorialDone() {
     this.tutorial = false;
     Analytics.track("tutorial", "intro", "complete", "run");
@@ -522,9 +534,9 @@ export class GameScene extends Phaser.Scene {
         Analytics.track("survival", `${marks[this.survivalMark++]}s`, "reached", "run");
     }
     this.wizard.update(dt, this.now);
-    for (const e of this.enemies) e.update(dt);
+    if (!this.worldPaused) for (const e of this.enemies) e.update(dt);
     if (this.enemies.length > 64 || Math.random() < 0.02) this.enemies = this.enemies.filter((e) => e.alive);
-    this.boss?.update(dt);
+    if (!this.worldPaused) this.boss?.update(dt);
     this.spells.update(dt);
     this.familiars.update(dt);
     this.xp.update(dt);

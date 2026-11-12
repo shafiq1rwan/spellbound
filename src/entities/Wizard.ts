@@ -19,6 +19,8 @@ export class Wizard {
   bodyGlow: Phaser.GameObjects.Image;
   shadow: Phaser.GameObjects.Image;
   sigil: Phaser.GameObjects.Sprite;
+  /** always-on binding circle: the wizard is rooted ("spellbound") to this spot */
+  bind: Phaser.GameObjects.Sprite;
   facing = 1;
   radius = GAME.player.radius;
   element: Element | "cyan" = "cyan";
@@ -46,6 +48,7 @@ export class Wizard {
     for (const [k, a] of Object.entries(meta.anims)) this.frameBase[k] = a.frames[0];
     this.shadow = scene.add.image(x, y, "shadow2").setDepth(DEPTH.shadow);
     this.sigil = scene.add.sprite(x, y, "sigil_level").setDepth(DEPTH.sigil).setVisible(false).setBlendMode(Phaser.BlendModes.ADD);
+    this.bind = scene.add.sprite(x, y, "sigil_level").play("sigil_level:play").setDepth(DEPTH.sigil - 1).setBlendMode(Phaser.BlendModes.ADD).setAlpha(0.3).setScale(1.15);
     this.bodyGlow = scene.add.image(x, y - 14, "glow_big").setTint(PAL.violet).setBlendMode(Phaser.BlendModes.ADD).setAlpha(0.16).setDisplaySize(70, 60).setDepth(DEPTH.sigil + 1);
     this.sprite = scene.add.sprite(x, y, "wizard").setOrigin(OX / 48, OY / 48);
     this.sprite.play("wizard:idle");
@@ -145,7 +148,7 @@ export class Wizard {
     this.scene.time.delayedCall(90, () => this.sprite.clearTint());
     this.sprite.setAlpha(1);
     this.crystal.stop();
-    this.scene.tweens.add({ targets: [this.crystalGlow, this.bodyGlow], alpha: 0, duration: 500 });
+    this.scene.tweens.add({ targets: [this.crystalGlow, this.bodyGlow, this.bind], alpha: 0, duration: 500 });
     // crystal drops to the ground and dims
     this.scene.tweens.add({ targets: this.crystal, y: this.y - 2, x: this.x + this.facing * 14, duration: 500, ease: "Bounce.easeOut" });
     this.scene.tweens.add({ targets: this.crystal, alpha: 0.4, duration: 900 });
@@ -160,6 +163,13 @@ export class Wizard {
     });
   }
 
+  /** flare the binding circle (used with the "you can't move" hint) */
+  flashBind() {
+    this.scene.tweens.killTweensOf(this.bind);
+    this.bind.setAlpha(1).setScale(1.5);
+    this.scene.tweens.add({ targets: this.bind, alpha: 0.3, scale: 1.15, duration: 900, ease: "Quad.easeOut" });
+  }
+
   /** rewarded revive: undo the death, rise in a burst of light, brief invulnerability */
   revive(now: number, invulnMs: number) {
     this.scene.tweens.killTweensOf([this.sprite, this.crystal, this.shadow, this.crystalGlow, this.bodyGlow]);
@@ -171,6 +181,7 @@ export class Wizard {
     this.shadow.setAlpha(1);
     this.crystalGlow.setAlpha(0.55);
     this.bodyGlow.setAlpha(0.16);
+    this.bind.setAlpha(0.3);
     this.element = "cyan";
     this.invulnUntil = now + invulnMs;
     this.sx = 0.6; this.sy = 1.4;
@@ -210,6 +221,7 @@ export class Wizard {
     this.shadow.setPosition(this.x, this.y);
     this.bodyGlow.setPosition(this.x, this.y - 12);
     this.sigil.setPosition(this.x, this.y);
+    this.bind.setPosition(this.x, this.y);
     // invulnerability blink
     if (!this.dead) s.setAlpha(now < this.invulnUntil ? (Math.floor(now / 70) % 2 ? 0.35 : 1) : 1);
     // occasional blink while idle

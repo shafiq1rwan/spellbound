@@ -6,13 +6,14 @@ Every wave has a **pressure** target: enemy HP arriving per second. The spawner 
 spawn interval from the wave's enemy mix and group size (`spawnIntervalMs` in `src/config/waves.ts`).
 Changing the mix therefore never silently changes the difficulty.
 
-- **Waves 1–10:** `pressure = 9 × 1.33^(wave − 1)`, a steady +33% per wave (all four runes work from wave 1).
+- **Waves 1–10:** `pressure = 7 × 1.28^(wave − 1)`, a steady +28% per wave. One new spell per wave: Ice Nova at wave 2, Lightning at 3, Arcane at 4.
 - **Endless (11+):** grows a gentler +15% per wave, with the Guardian boss every 10th wave.
 - **Boss waves:** the adds run at 30% of normal pressure, so the Guardian is the real threat.
 
 | Wave | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 (boss) |
 |---|---|---|---|---|---|---|---|---|---|---|
-| Pressure, HP/s (v1.4) | 9 | 12 | 16 | 21 | 28 | 38 | 50 | 66 | 88 | boss + 34 |
+| Pressure, HP/s (v1.6) | 7 | 9 | 11.5 | 15 | 19 | 24 | 31 | 40 | 51 | boss + 19 |
+| Pressure, HP/s (v1.4–1.5, all runes from wave 1) | 9 | 12 | 16 | 21 | 28 | 38 | 50 | 66 | 88 | boss + 34 |
 | Pressure, HP/s (v1.2 and earlier) | 12 | 20 | 29 | 46 | 79 + elite | 110 | 153 | 186 | 272 | |
 
 Other tuning in this pass:
@@ -41,10 +42,14 @@ The simulated player casts through the real spell system and fumbles a share of 
 bots pick the best spell for the situation; the casual bot draws a random known rune, as a new
 player does. Runs are capped at 8 minutes.
 
-| Player profile | v1.2.0 | v1.3.0 | v1.4.0 (all runes from wave 1) |
-|---|---|---|---|
-| **Casual**: a random rune every 1.8 s, 35% fail | (smart bot) died in **wave 3** at 1:30 | (smart bot) died in wave 8 at ~5:00 | loses hearts in waves 2–3 while learning, recovers, dies at the **wave 10 boss at 6:42** |
-| **Moderate**: smart, every 1.3 s, 25% fail | — | beat the wave 10 boss | wave 12+ untouched; endless keeps ramping |
+| Player profile | v1.2.0 | v1.3.0 | v1.4.0 (all runes from wave 1) | v1.6.0 (one new spell per wave) |
+|---|---|---|---|---|
+| **Casual**: a random rune every 1.8 s, 35% fail | (smart bot) died in **wave 3** at 1:30 | (smart bot) died in wave 8 at ~5:00 | loses hearts in waves 2–3 while learning, recovers, dies at the **wave 10 boss at 6:42** | dies at the **wave 10 boss at 6:03**, losing only a heart or two before it |
+| **Moderate**: smart, every 1.3 s, 25% fail | — | beat the wave 10 boss | wave 12+ untouched; endless keeps ramping | beats the boss; alive in wave 12 at 7:36 |
+
+v1.6: spells unlock one per wave again (players found all four at once overwhelming). With v1.5's
+pressure (9 × 1.33) and staged unlocks, the casual bot died in **wave 3 at 1:41**, matching the playtest
+drop-off under 1:30. The curve was lowered to 7 × 1.28.
 
 v1.5: early levels need less XP (3, 6, 11, 19, 28; was 8, 13, 19, 25, 32). The first upgrade and pet
 arrive about 11 s into wave 1. The casual bot no longer loses hearts early, and still dies at the wave 10

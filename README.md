@@ -10,8 +10,14 @@ spells at monsters closing in from every side.
 | Zigzag | **Lightning Chain** | Instant bolt that jumps between enemies. Stuns from level 3; every bolt forks at level 5. |
 | V (or ✓) | **Arcane Barrage** | A homing missile for each nearby enemy, with knockback. Pierce from level 3; summons a vortex at level 5. |
 
-All four runes work from wave 1 (waves 2–4 show a ghost demo of a rune you haven't used yet).
-**Swipe:** a straight line through monsters is a light slash, a basic attack that needs no rune.
+**One new spell per wave:** Fireball from the start, then Ice Nova (wave 2), Lightning (wave 3) and
+Arcane (wave 4). The HUD shows only the spells you have, and each unlock plays a short ghost demo.
+**The wizard is rooted:** you can't move. The menu says so on its goal card, a binding circle sits under
+the wizard, and a chain hint appears on the first hit (or when a player keeps tapping to move).
+**Guided first run, world paused:** a frozen slime with a dashed triangle to trace (a ghost hand shows
+how), then a second slime to aim at, then "SURVIVE!" and wave 1. Nothing attacks until both casts land.
+**Swipe:** a straight line through monsters is a light slash, a basic attack that needs no rune (off
+during the guided tutorial).
 **Onboarding is wordless** (pictograms, ghost hand, ✓/✗) so it works in any language.
 **Revive:** once per run, the game-over screen offers 🎬 REVIVE through a Poki rewarded ad. It restores
 3 hearts, throws nearby enemies back, and the run continues. It only appears when an ad can be offered.

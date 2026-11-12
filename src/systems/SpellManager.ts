@@ -16,8 +16,8 @@ interface Vortex { x: number; y: number; t: number; dur: number; tick: number; s
 
 export class SpellManager {
   g: GameScene;
-  // every rune works from wave 1 (playtests: players expect to use the runes shown in the HUD)
-  levels: Record<SpellId, number> = { fireball: 1, nova: 1, lightning: 1, arcane: 1 };
+  // one new rune per wave (playtest: all four at once overwhelmed new players)
+  levels: Record<SpellId, number> = { fireball: 1, nova: 0, lightning: 0, arcane: 0 };
   readyAt: Record<SpellId, number> = { fireball: 0, nova: 0, lightning: 0, arcane: 0 };
   cdMult = 1;
   powerMult = 1;

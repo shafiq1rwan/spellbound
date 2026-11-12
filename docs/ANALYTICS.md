@@ -19,6 +19,8 @@ before the SDK is ready are queued and flushed once it is.
 | `run` | `1`, `2`, `3`, `4`, `5+` | `start` | Each run in a session | How many retries per session? |
 | `run` | `quit-to-menu` | `reached` *(once/run)* | Quit from the pause menu | Do players give up mid-run? |
 | `tutorial` | `intro` | `start` / `complete` / `fail` | First run only; `fail` = quit before finishing | **Do new players get through the tutorial?** |
+| `tutorial` | `step-trace`, `step-aim` | `start` / `complete` | Guided steps: trace the dashed triangle on the frozen slime → aim at a second slime | **Which tutorial step loses players?** |
+| `hint` | `cant-move-hit`, `cant-move-tap` | `visible` *(once/run)* | "You can't move" hint: on the first hit, or after a player taps twice as if to move | How many players expect to move? |
 | `tutorial` | `fail-1` … `fail-5+` | `reached` *(once/run)* | Unrecognised strokes during the tutorial | **How many attempts does the first triangle take?** |
 | `wave` | `1` … `20`, `21+` | `start` / `complete` / `fail` | Wave begins / ends / run really ends in it (a revived death doesn't count as `fail`) | **Where do players drop off?** |
 | `boss` | `guardian` | `start` / `complete` / `fail` | Wave 10, 20, … | Is the boss too hard? |

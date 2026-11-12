@@ -7,7 +7,7 @@ import { Analytics } from "../core/Analytics";
 import { PAL, ELEMENT_COLORS, type Element } from "../config/palette";
 import { VFXManager, DEPTH } from "../systems/VFXManager";
 import { Ambience } from "../systems/Ambience";
-import { Button, txt } from "../ui/widgets";
+import { Button, txt, slice } from "../ui/widgets";
 
 export class MenuScene extends Phaser.Scene {
   private vfx!: VFXManager;
@@ -18,6 +18,9 @@ export class MenuScene extends Phaser.Scene {
   private play!: Button;
   private settings!: Button;
   private best!: Phaser.GameObjects.BitmapText;
+  /** "what do I do?" card: pictogram + two short lines */
+  private goal!: Phaser.GameObjects.Container;
+  private goalH = 0;
   private floor!: Phaser.GameObjects.Image;
   private sigil!: Phaser.GameObjects.Sprite;
   private glow!: Phaser.GameObjects.Image;
@@ -42,6 +45,7 @@ export class MenuScene extends Phaser.Scene {
     this.crystal = this.add.image(0, 0, "glow").setTint(PAL.iceCyan).setBlendMode(Phaser.BlendModes.ADD).setAlpha(0.6).setDisplaySize(40, 40);
     this.wiz.on(Phaser.Animations.Events.ANIMATION_COMPLETE, () => this.wiz.play("wizard:idle"));
     this.logo = this.add.image(0, 0, "logo").setDepth(100);
+    this.goal = this.buildGoalCard();
     this.play = new Button(this, 0, 0, "PLAY", () => this.startRun(), { scale: 2, minW: 112 });
     this.settings = new Button(this, 0, 0, "SETTINGS", () => { Analytics.track("menu", "settings", "interact"); this.scene.pause(); this.scene.launch("Settings", { from: "Menu" }); }, { minW: 112 });
     Analytics.track("menu", "play", "visible");
@@ -49,7 +53,7 @@ export class MenuScene extends Phaser.Scene {
     this.play.setDepth(100);
     this.settings.setDepth(100);
     const d = Save.data;
-    this.best = txt(this, 0, 0, d.bestWave ? `BEST  WAVE ${d.bestWave}  ${fmtTime(d.bestTimeMs)}  SCORE ${d.bestScore}` : "DRAW RUNES. CAST SPELLS. SURVIVE.", { color: 0xb9a8e0 }).setDepth(100);
+    this.best = txt(this, 0, 0, d.bestWave ? `BEST  WAVE ${d.bestWave}  ${fmtTime(d.bestTimeMs)}  SCORE ${d.bestScore}` : "", { color: 0xb9a8e0 }).setDepth(100);
     this.layout();
     this.offLayout = Layout.onChange(() => this.layout());
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => this.offLayout?.());
@@ -63,26 +67,60 @@ export class MenuScene extends Phaser.Scene {
     cam.fadeIn(250, 11, 12, 30);
   }
 
+  /** pictogram [triangle] -> [fireball] -> [skull], "draw shapes to cast spells", chain + "survive" */
+  private buildGoalCard() {
+    const c = this.add.container(0, 0).setDepth(100);
+    const cw = Math.min(Layout.w - 24, 176);
+    const P = 8;
+    const icons = ["rune_fire", "ic_fireball", "ic_skull"];
+    const row: Phaser.GameObjects.GameObject[] = [];
+    let x = 0;
+    const parts: { o: Phaser.GameObjects.Image | ReturnType<typeof txt>; w: number }[] = [];
+    icons.forEach((k, i) => {
+      const im = this.add.image(0, 0, k).setOrigin(0, 0.5);
+      parts.push({ o: im, w: im.width });
+      if (i < icons.length - 1) { const a = txt(this, 0, 0, "→", { color: 0xb9a8e0, ox: 0 }); parts.push({ o: a, w: a.ink().w }); }
+    });
+    const gap = 6, rowW = parts.reduce((s2, p) => s2 + p.w, 0) + gap * (parts.length - 1);
+    x = -Math.floor(rowW / 2);
+    const rowY = P + 8;
+    for (const p of parts) { p.o.setPosition(x, rowY); x += p.w + gap; row.push(p.o); }
+    const l1 = txt(this, 0, rowY + 8 + 6, "DRAW SHAPES TO CAST SPELLS", { oy: 0, color: 0xfff8ec, maxWidth: cw - 2 * P });
+    const chain = this.add.image(0, 0, "ic_chain").setOrigin(0, 0.5);
+    const l2 = txt(this, 0, 0, "YOU CAN'T MOVE - SURVIVE!", { ox: 0, color: PAL.gold });
+    const l2w = chain.width + 4 + l2.ink().w;
+    const l2y = l1.y + l1.ink().h + 9 + 3.5;
+    chain.setPosition(-Math.floor(l2w / 2), Math.round(l2y));
+    l2.setPosition(-Math.floor(l2w / 2) + chain.width + 4, l2y);
+    this.goalH = Math.round(l2y + 8 + P);
+    const bg = slice(this, "panel_dark", 0, 0, cw, this.goalH).setOrigin(0.5, 0).setAlpha(0.92);
+    c.add([bg, ...row, l1, chain, l2]);
+    return c;
+  }
+
   private layout() {
     const W = Layout.w, H = Layout.h, sf = Layout.safe;
     this.cameras.main.setZoom(Layout.S).setScroll(0, 0);
     const cx = Math.round(W / 2);
     const portrait = Layout.portrait;
-    const wy = Math.round(portrait ? H * 0.56 : H * 0.62);
+    const wy = Math.round(portrait ? H * 0.63 : H * 0.62);
     const wx = portrait ? cx : Math.round(W * 0.3);
     this.floor.setPosition(wx, wy);
     this.wiz.setPosition(wx, wy);
     this.sigil.setPosition(wx, wy);
     this.glow.setPosition(wx, wy - 30);
     const ux = portrait ? cx : Math.round(W * 0.68);
-    this.logo.setPosition(ux, Math.round(portrait ? sf.top + H * 0.17 : H * 0.24));
-    // stacked: PLAY, 8px gap, SETTINGS (positions from real button heights)
-    const py = Math.round(portrait ? H * 0.74 : H * 0.52);
+    // top-down stack: logo, goal card, (wizard), PLAY, SETTINGS, best
+    const logoY = Math.round(portrait ? sf.top + H * 0.13 : sf.top + 6 + this.logo.height / 2);
+    this.logo.setPosition(ux, logoY);
+    const goalTop = Math.round(logoY + this.logo.height / 2 + 6);
+    this.goal.setPosition(ux, goalTop);
+    const py = Math.round(portrait ? Math.max(H * 0.78, wy + 30 + this.play.bh / 2) : goalTop + this.goalH + 8 + this.play.bh / 2);
     this.play.setPosition(ux, py);
     const sy = py + Math.ceil(this.play.bh / 2) + 8 + Math.floor(this.settings.bh / 2);
     this.settings.setPosition(ux, sy);
     this.best.setMaxWidth(portrait ? W - 16 : W * 0.6);
-    this.best.setPosition(ux, Math.round(portrait ? H - sf.bottom - 14 : sy + Math.ceil(this.settings.bh / 2) + 14));
+    this.best.setPosition(ux, Math.round(portrait ? Math.min(H - sf.bottom - 10, sy + Math.ceil(this.settings.bh / 2) + 12) : sy + Math.ceil(this.settings.bh / 2) + 12));
   }
 
   private async startRun() {

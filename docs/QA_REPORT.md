@@ -34,6 +34,9 @@ All checks below were **actually executed**. Browser checks used headless Micros
 | Ice → Fire Shatter (`tools/qa/ice-combo.mjs`) | 390×844 | a sloppy oval hits all 8 enemies; a fireball on a frozen enemy does double damage (50 instead of 25) |
 | Loading time (`tools/qa/load-timing.mjs`) | 390×844, 4× CPU throttle, emulated 4G | menu appears at 2.6 s, down from 5.1 s (about 8.7 s originally). Requests went from 106 to 7. Sound generation runs in a worker, so loading never stalls at 100%. |
 | Screen shake | 390×844, 1920×1080 | peaks 1–2 art px, then the camera returns exactly to rest |
+| Guided paused tutorial, first run (`tools/qa/guided.mjs`, CDP touch) | 390×844 | slime holds still while paused; a swipe during the tutorial does no damage; traced triangle → ✓ → second slime → aimed triangle → "SURVIVE!", chain icon, "can't move" hint, wave 1 starts. Events: step-trace and step-aim start/complete |
+| Menu goal card | 390×844, 360×640, 1280×720 | pictogram (triangle → fireball → skull), "DRAW SHAPES TO CAST SPELLS", chain + "YOU CAN'T MOVE - SURVIVE!" |
+| Staged unlocks and "can't move" hint | 390×844 | wave 1 HUD shows only the Fire slot; wave 2 adds the Circle slot with its ghost demo; the first hit shows the binding flash, chain icon and hint (`hint cant-move-hit visible`) |
 
 ## Bugs found by QA and fixed
 

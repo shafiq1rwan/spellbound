@@ -125,7 +125,7 @@ export class HUDScene extends Phaser.Scene {
     const x = d.x / Layout.S, y = d.y / Layout.S;
     if (this.pauseBtn.contains(x, y)) return true;
     for (const s of this.slots) {
-      if (Math.abs(x - s.x) <= 13 && Math.abs(y - s.y) <= 13) {
+      if (s.c.visible && Math.abs(x - s.x) <= 13 && Math.abs(y - s.y) <= 13) {
         // tapping a rune shows how to draw it
         if (this.g.spells.levels[s.id] > 0) this.scene.launch("Tutorial", { mode: "demo", spell: s.id });
         return true;
@@ -150,10 +150,13 @@ export class HUDScene extends Phaser.Scene {
     this.pauseBtn.setPosition(Math.round(W - sf.right - 6 - this.pauseBtn.bw / 2), barY);
     this.bossC.setPosition(Math.round(W / 2), Math.round(top + 42));
     this.debugText.setPosition(sf.left + 4, top + 30);
-    const n = this.slots.length;
+    // only spells you have are shown (no "?" slots to fumble with), centred as a group
+    const shown = this.slots.filter((s) => this.g.spells.levels[s.id] > 0);
+    this.slots.forEach((s) => s.c.setVisible(shown.includes(s)));
+    const n = shown.length;
     if (Layout.portrait) {
       const by = Math.round(H - sf.bottom - 17);
-      this.slots.forEach((s, i) => {
+      shown.forEach((s, i) => {
         s.x = Math.round(W / 2 + (i - (n - 1) / 2) * 28);
         s.y = by;
         s.c.setPosition(s.x, s.y);
@@ -165,7 +168,7 @@ export class HUDScene extends Phaser.Scene {
       this.banner.setPosition(Math.round(W / 2), Math.round(H * 0.3));
     } else {
       const cx = Math.round(sf.left + 18);
-      this.slots.forEach((s, i) => {
+      shown.forEach((s, i) => {
         s.x = cx;
         s.y = Math.round(H / 2 + (i - (n - 1) / 2) * 28 + 6);
         s.c.setPosition(s.x, s.y);
@@ -244,6 +247,7 @@ export class HUDScene extends Phaser.Scene {
   }
   private onUnlock(id: SpellId) {
     this.refreshSlots();
+    this.layout();
     const d = SPELLS[id];
     this.showBanner("NEW RUNE!", `${d.runeName.toUpperCase()} = ${d.name.toUpperCase()}`, ELEMENT_COLORS[d.element].main);
     const s = this.slots.find((q) => q.id === id)!;
