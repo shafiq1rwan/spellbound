@@ -503,6 +503,22 @@ export function icons() {
     ..kggwwwwwwggk..
     ...kkggggggkk...
     .....kkkkkk.....`);
+  // rewarded-ad marker (clapperboard): every reward button carries it
+  mk("ic_video", { w: "#FFF8EC", g: "#9C8BD0", y: C.uiGold[2] }, `
+    ................
+    .kkkkkkkkkkkkkk.
+    .kwwkkwwkkwwkkk.
+    .kkwwkkwwkkwwkk.
+    .kkkkkkkkkkkkkk.
+    .kggggggggggggk.
+    .kgwwwwwwwwwwgk.
+    .kgwwwykwwwwwgk.
+    .kgwwwykkwwwwgk.
+    .kgwwwykwwwwwgk.
+    .kgwwwwwwwwwwgk.
+    .kgwwwwwwwwwwgk.
+    .kggggggggggggk.
+    .kkkkkkkkkkkkkk.`);
   mk("hand", { w: "#FFF8EC", s: "#C9B8E8" }, `
     ....kk..........
     ...kwwk.........

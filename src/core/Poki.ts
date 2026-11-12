@@ -11,6 +11,7 @@ type PokiSDKType = {
   gameplayStart: () => void;
   gameplayStop: () => void;
   commercialBreak: (onStart?: () => void) => Promise<void>;
+  rewardedBreak: (onStart?: () => void) => Promise<boolean>;
   measure?: (category: string, what: string, action: string) => void;
 };
 declare global {
@@ -111,6 +112,34 @@ class PokiAdapter {
     this.playing = false;
     try { this.sdk()?.gameplayStop(); } catch { /* ignore */ }
   }
+  /** can a rewarded ad be offered right now? (dev builds simulate one so the flow can be tested) */
+  rewardedAvailable() {
+    return !!this.sdk() || import.meta.env.DEV;
+  }
+  /**
+   * Rewarded ad, only ever on the player's explicit choice. Resolves true ONLY if the video played;
+   * no reward otherwise (no fill / ad blocker). Audio is muted while it plays and no other SDK
+   * events fire until it resolves.
+   */
+  async rewardedBreak(): Promise<boolean> {
+    const sdk = this.sdk();
+    if (!sdk) {
+      if (!import.meta.env.DEV) return false;
+      await new Promise((r) => setTimeout(r, 600)); // dev: simulate a watched ad
+      return true;
+    }
+    if (this.inBreak) return false;
+    this.gameplayStop();
+    this.inBreak = true;
+    let ok = false;
+    try {
+      ok = !!(await sdk.rewardedBreak(() => Audio.mute("ad", true)));
+    } catch { ok = false; }
+    Audio.mute("ad", false);
+    this.inBreak = false;
+    return ok;
+  }
+
   /** natural break (e.g. before a retry). Always resolves; audio is muted during the ad. */
   async commercialBreak(): Promise<void> {
     const sdk = this.sdk();

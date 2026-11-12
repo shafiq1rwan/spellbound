@@ -92,7 +92,7 @@ export class MenuScene extends Phaser.Scene {
     Audio.unlock();
     Audio.play("ui_select");
     if (Save.data.runs > 0) await Poki.commercialBreak();
-    this.cameras.main.fadeOut(300, 11, 12, 30);
+    this.cameras.main.fadeOut(180, 11, 12, 30);
     this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => this.scene.start("Game"));
   }
 

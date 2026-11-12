@@ -149,15 +149,39 @@ export class Wizard {
     // crystal drops to the ground and dims
     this.scene.tweens.add({ targets: this.crystal, y: this.y - 2, x: this.x + this.facing * 14, duration: 500, ease: "Bounce.easeOut" });
     this.scene.tweens.add({ targets: this.crystal, alpha: 0.4, duration: 900 });
-    this.scene.time.delayedCall(900, () => {
+    this.scene.time.delayedCall(650, () => {
       // dissolve into magical particles
       for (let i = 0; i < 26; i++) {
         this.scene.time.delayedCall(i * 22, () => {
           this.vfx.burst(i % 3 ? "dot" : "twinkle", this.x + (Math.random() - 0.5) * 18, this.y - Math.random() * 32, 1, { tint: i % 2 ? PAL.violet : PAL.lavender, speed: [8, 26] });
         });
       }
-      this.scene.tweens.add({ targets: [this.sprite, this.crystal, this.shadow], alpha: 0, duration: 600, onComplete: onDone });
+      this.scene.tweens.add({ targets: [this.sprite, this.crystal, this.shadow], alpha: 0, duration: 450, onComplete: onDone });
     });
+  }
+
+  /** rewarded revive: undo the death, rise in a burst of light, brief invulnerability */
+  revive(now: number, invulnMs: number) {
+    this.scene.tweens.killTweensOf([this.sprite, this.crystal, this.shadow, this.crystalGlow, this.bodyGlow]);
+    this.dead = false;
+    this.busy = true;
+    this.lowHp = false;
+    this.sprite.setAlpha(1).clearTint().play("wizard:cheer");
+    this.crystal.setAlpha(1).play("crystal:cyan");
+    this.shadow.setAlpha(1);
+    this.crystalGlow.setAlpha(0.55);
+    this.bodyGlow.setAlpha(0.16);
+    this.element = "cyan";
+    this.invulnUntil = now + invulnMs;
+    this.sx = 0.6; this.sy = 1.4;
+    this.scene.tweens.add({ targets: this, sx: 1, sy: 1, duration: 500, ease: "Elastic.easeOut" });
+    this.vfx.glow(this.x, this.y - 16, PAL.gold, 140, 800, 0.9);
+    for (let i = 0; i < 20; i++) {
+      this.scene.time.delayedCall(i * 25, () => {
+        const a = i * 0.8;
+        this.vfx.burst("twinkle", this.x + Math.cos(a) * 14, this.y - 4 - i * 2.2, 1, { tint: i % 2 ? PAL.gold : PAL.lavender });
+      });
+    }
   }
 
   update(dtMs: number, now: number) {

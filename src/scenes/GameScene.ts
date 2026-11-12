@@ -42,6 +42,9 @@ export class GameScene extends Phaser.Scene {
   private tutorialMisses = 0;
   private survivalMark = 0;
   private swipeReadyAt = 0;
+  /** one rewarded revive per run */
+  reviveUsed = false;
+  private runEnded = false;
   private castThisRun = new Set<string>();
   private demoShown = new Set<string>();
 
@@ -77,7 +80,7 @@ export class GameScene extends Phaser.Scene {
       stats: { kills: 0, score: 0, timeMs: 0, casts: 0 }, drawing: false, levelingUp: false,
       enemies: [], boss: null, stroke: [], hitstopUntil: 0, frozenTime: false, slowmo: 1,
       lastHurtBy: "unknown", misses: 0, tutorialMisses: 0, survivalMark: 0, swipeReadyAt: 0,
-      castThisRun: new Set<string>(), demoShown: new Set<string>(),
+      castThisRun: new Set<string>(), demoShown: new Set<string>(), reviveUsed: false, runEnded: false,
     });
   }
 
@@ -133,7 +136,7 @@ export class GameScene extends Phaser.Scene {
       this.scene.launch("Tutorial");
     } else this.time.delayedCall(700, () => this.spawner.startWave(1));
     Poki.gameplayStart();
-    cam.fadeIn(400, 11, 12, 30);
+    cam.fadeIn(200, 11, 12, 30);
   }
 
   private on(ev: string, fn: (...a: unknown[]) => void) {
@@ -438,8 +441,6 @@ export class GameScene extends Phaser.Scene {
 
   private gameOver() {
     this.over = true;
-    if (this.wave > 0) Analytics.track("wave", cap(this.wave, 21), "fail");
-    if (this.boss?.alive) Analytics.track("boss", "guardian", "fail");
     Analytics.track("death", this.lastHurtBy, "reached");
     this.input2.abort();
     Poki.gameplayStop();
@@ -456,8 +457,54 @@ export class GameScene extends Phaser.Scene {
     this.wizard.die(() => {
       Audio.play("gameover");
       const beat = Save.submitRun({ timeMs: this.stats.timeMs, wave: this.wave, kills: this.stats.kills, score: this.stats.score });
-      this.scene.launch("GameOver", { ...this.stats, wave: this.wave, beat });
+      this.scene.launch("GameOver", { ...this.stats, wave: this.wave, beat, canRevive: !this.reviveUsed && Poki.rewardedAvailable() });
     });
+  }
+
+  /** the run is really over (no revive taken): close the wave/boss funnels. Idempotent. */
+  endRun() {
+    if (this.runEnded) return;
+    this.runEnded = true;
+    if (this.wave > 0) Analytics.track("wave", cap(this.wave, 21), "fail");
+    if (this.boss?.alive) Analytics.track("boss", "guardian", "fail");
+  }
+
+  /** rewarded revive (called by GameOverScene after a successful ad) */
+  revive() {
+    this.over = false;
+    this.reviveUsed = true;
+    Save.data.runs = Math.max(0, Save.data.runs - 1); // the run continues, it isn't a new one
+    Save.save();
+    this.slowmo = 1;
+    this.frozenTime = false;
+    this.tweens.timeScale = this.time.timeScale = this.anims.globalTimeScale = 1;
+    this.hp = Math.min(this.maxHp, 3);
+    bus.emit(EV.HP, this.hp, this.maxHp, this.hp);
+    bus.emit(EV.LOW_HP, false);
+    this.wizard.revive(this.now, 3000);
+    // breathing room: a golden shockwave throws everything back and freezes it briefly
+    const w = this.wizard;
+    this.vfx.play("nova", w.x, w.y - 4, { scale: 110 / 58, depth: DEPTH.fxLow, tint: PAL.gold });
+    this.vfx.play("shock", w.x, w.y, { scale: 3.5, add: true, tint: PAL.gold, depth: DEPTH.fxLow });
+    this.vfx.illuminate(PAL.gold, 0.12, 500);
+    this.vfx.shake(2, 250);
+    this.shockwaveGrass(w.x, w.y, 160);
+    Audio.play("levelup");
+    Audio.play("ice_wave", { vol: 0.7, rate: 0.8 });
+    for (const e of this.enemies) {
+      if (!e.alive) continue;
+      if (e.kind === "orb") { e.die(); continue; }
+      const dx = e.x - w.x, dy = e.y - w.y, d = Math.hypot(dx, dy);
+      if (d < 120) {
+        e.push(dx, dy, 420 * (1 - d / 160));
+        e.freeze(1200);
+        this.combat.damage(e, 25, { element: "arcane", dx, dy, kb: 0, heavy: false, noShatter: true, quiet: true });
+      }
+    }
+    this.scene.setVisible(true, "HUD");
+    Audio.startMusic();
+    Poki.gameplayStart();
+    Analytics.track("revive", "granted", "reached");
   }
 
   // ---------------------------------------------------------------- loop

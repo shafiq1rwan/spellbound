@@ -32,8 +32,11 @@ export const GAME = {
     driftMax: 110,
     /** px/s once inside the magnet radius */
     pullSpeed: 320,
-    /** xp needed to go from level n to n+1 */
-    toNext: (lvl: number) => Math.round(4 + lvl * 3 + Math.pow(lvl, 1.6)),
+    /**
+     * xp needed to go from level n to n+1. Early levels are discounted (35% at level 1, easing to 100%
+     * by level 6) so the first upgrade + pet land within ~15 s: early rewards keep new players playing.
+     */
+    toNext: (lvl: number) => Math.max(3, Math.round((4 + lvl * 3 + Math.pow(lvl, 1.6)) * Math.min(1, 0.35 + 0.13 * (lvl - 1)))),
   },
 
   /** straight swipe = light slash on every enemy the trail crosses (a basic attack; runes stay stronger) */

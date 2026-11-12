@@ -46,6 +46,10 @@ player does. Runs are capped at 8 minutes.
 | **Casual**: a random rune every 1.8 s, 35% fail | (smart bot) died in **wave 3** at 1:30 | (smart bot) died in wave 8 at ~5:00 | loses hearts in waves 2–3 while learning, recovers, dies at the **wave 10 boss at 6:42** |
 | **Moderate**: smart, every 1.3 s, 25% fail | — | beat the wave 10 boss | wave 12+ untouched; endless keeps ramping |
 
+v1.5: early levels need less XP (3, 6, 11, 19, 28; was 8, 13, 19, 25, 32). The first upgrade and pet
+arrive about 11 s into wave 1. The casual bot no longer loses hearts early, and still dies at the wave 10
+boss (6:13). The bots never use the rewarded revive, which adds time for real players.
+
 v1.4 balance notes:
 - With all runes from wave 1, spell rotation kept the combo maxed, so the combo bonus is now +2.5% per stack (max +50%).
 - Ice Nova level 1 freezes for 1.1 s on a 2.3 s cooldown (was 1.5 s on 2.0 s).

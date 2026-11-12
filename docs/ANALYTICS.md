@@ -20,7 +20,7 @@ before the SDK is ready are queued and flushed once it is.
 | `run` | `quit-to-menu` | `reached` *(once/run)* | Quit from the pause menu | Do players give up mid-run? |
 | `tutorial` | `intro` | `start` / `complete` / `fail` | First run only; `fail` = quit before finishing | **Do new players get through the tutorial?** |
 | `tutorial` | `fail-1` … `fail-5+` | `reached` *(once/run)* | Unrecognised strokes during the tutorial | **How many attempts does the first triangle take?** |
-| `wave` | `1` … `20`, `21+` | `start` / `complete` / `fail` | Wave begins / ends / player dies in it | **Where do players drop off?** |
+| `wave` | `1` … `20`, `21+` | `start` / `complete` / `fail` | Wave begins / ends / run really ends in it (a revived death doesn't count as `fail`) | **Where do players drop off?** |
 | `boss` | `guardian` | `start` / `complete` / `fail` | Wave 10, 20, … | Is the boss too hard? |
 | `rune` | `triangle`, `circle`, `zigzag`, `vee` | `visible` → `interact` *(once/run)* | Rune unlocked → first successful cast | **Do players actually use each spell once they have it?** |
 | `drawing` | `misses` | `1`, `3`, `5`, `10`, `20` *(once/run)* | Running count of unrecognised strokes | How often does drawing fail? |
@@ -31,6 +31,8 @@ before the SDK is ready are queued and flushed once it is.
 | `death` | `slime`, `bat`, `skeleton`, `golem`, `*-elite`, `boss-orb`, `boss-beam` | `reached` | What dealt the killing blow | **What kills players?** |
 | `survival` | `30s`, `60s`, `120s`, `180s`, `300s`, `600s` | `reached` *(once/run)* | Time alive in a run | Session depth |
 | `familiar` | `ember-wisp`, `frost-sprite`, `spark-imp`, `arcane-owl` | `reached` *(once/run)* | Pet summoned (spell reaches level 2) | How many runs get each pet? |
+| `revive` | `offer` | `visible` → `interact` | Revive button shown on game over → tapped | How many players take the rewarded revive? |
+| `revive` | `granted` | `reached` | The ad played and the run continued | Revive success rate (interact vs granted) |
 | `level` | `2` … `15+` | `reached` *(once/run)* | Each level-up | Progression pace |
 | `upgrade` | e.g. `spell:fireball`, `haste`, `vitality` | `picked` | Upgrade card chosen | Which upgrades are popular? |
 | `combo` | `x10`, `x20`, `shatter` | `reached` *(once/run)* | Combo milestones; first Ice→other Shatter | Do players discover spell mixing? |

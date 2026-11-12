@@ -13,6 +13,8 @@ spells at monsters closing in from every side.
 All four runes work from wave 1 (waves 2–4 show a ghost demo of a rune you haven't used yet).
 **Swipe:** a straight line through monsters is a light slash, a basic attack that needs no rune.
 **Onboarding is wordless** (pictograms, ghost hand, ✓/✗) so it works in any language.
+**Revive:** once per run, the game-over screen offers 🎬 REVIVE through a Poki rewarded ad. It restores
+3 hearts, throws nearby enemies back, and the run continues. It only appears when an ad can be offered.
 **Familiars:** a spell's first upgrade (level 2) summons an elemental
 pet (Ember Wisp, Frost Sprite, Spark Imp, Arcane Owl) that auto-casts a weaker version of the spell.
 Difficulty rises a steady ~33% per wave (see `docs/DIFFICULTY.md`). **Spell combination:** freeze enemies with Ice Nova, then hit them with any other spell to
