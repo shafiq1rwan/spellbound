@@ -8,7 +8,7 @@ All checks below were **actually executed**. Browser checks used headless Micros
 | Check | Result |
 |---|---|
 | `tsc --noEmit` | clean |
-| `npm test`: recognizer on 150 synthetic sloppy strokes per rune (±26° rotation, aspect changes, jitter, random start and direction, unclosed or overshooting shapes) | triangle, circle and zigzag each 150/150; V 144/150 (sloppy V's and check marks, tilted up to ±17°); carets (half-drawn triangles) read as V: 1/150 |
+| `npm test`: recognizer on 150 synthetic sloppy strokes per rune (±26° rotation, aspect changes, jitter, random start and direction, unclosed or overshooting shapes) | triangle, circle and zigzag each 150/150; V 144/150 (sloppy V's and check marks, tilted up to ±17°); carets (half-drawn triangles) read as V: 1/150; squares/rectangles cast a spell: 5/200 (they used to cast Fireball, or Ice Nova when neat) |
 | Junk rejection (lines, hooks, random scribbles) | 7/120 accepted (threshold ≤ 25%) |
 | `npm run build` | passes. Game code 126 KB (41 KB gz), Phaser 1.2 MB (332 KB gz), art about 300 KB |
 | External requests in the bundle | only the Poki SDK URL |

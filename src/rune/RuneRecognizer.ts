@@ -26,6 +26,8 @@ export interface RecognizeResult {
   scores: Record<RuneName, number>;
   features: Features;
   reason?: string;
+  /** how well the stroke matched a known NON-rune shape (e.g. a square), 0..1 */
+  rejectScore?: number;
 }
 
 export interface RecognizerOptions {
@@ -256,13 +258,33 @@ export function templatePaths(): Record<RuneName, Pt[][]> {
   return out;
 }
 
+/** non-rune shapes that would otherwise be read as a rune */
+export function rejectPaths(): Pt[][] {
+  const out: Pt[][] = [];
+  for (const asp of [1, 0.7, 1.4]) {
+    const box = [[-1, -asp], [1, -asp], [1, asp], [-1, asp]];
+    for (let st = 0; st < 4; st++)
+      for (const dir of [1, -1]) {
+        const v = rotations(dir > 0 ? box : [...box].reverse(), st);
+        out.push(poly(v, true, 0.06));
+      }
+    // starting in the middle of the top edge
+    out.push(poly([[0, -asp], [1, -asp], [1, asp], [-1, asp], [-1, -asp], [0, -asp]], false));
+    out.push(poly([[0, -asp], [-1, -asp], [-1, asp], [1, asp], [1, -asp], [0, -asp]], false));
+  }
+  return out;
+}
+
 export class RuneRecognizer {
   private templates: { rune: RuneName; pts: Pt[] }[] = [];
+  /** shapes that look rune-like to the gates but must NOT cast (squares/rectangles look like triangles) */
+  private rejects: Pt[][] = [];
   opts: RecognizerOptions;
   constructor(opts: RecognizerOptions) {
     this.opts = opts;
     const paths = templatePaths();
     for (const r of RUNES) for (const p of paths[r]) this.templates.push({ rune: r, pts: normalize(p) });
+    for (const p of rejectPaths()) this.rejects.push(normalize(p));
   }
 
   recognize(points: Pt[]): RecognizeResult {
@@ -283,6 +305,14 @@ export class RuneRecognizer {
     // pick among gated, enabled runes first
     let pick: RuneName | null = null;
     for (const r of gated) if (enabled.includes(r) && (pick === null || scores[r] > scores[pick])) pick = r;
+    // a square matches the square templates better than any rune: fizzle instead of casting Fireball
+    // squares slip into the triangle gate (2-4 corners) and, when neat, the circle gate (the start/end
+    // corner isn't counted, and the radius is fairly constant). Real circles rarely have 3+ sharp corners.
+    const squareRisk = pick === "triangle" || (pick === "circle" && f.corners >= 3);
+    let rejectScore = 0;
+    if (squareRisk) for (const t of this.rejects) rejectScore = Math.max(rejectScore, 1 - distanceAtBestAngle(cand, t) / HALF_DIAG);
+    if (pick && squareRisk && rejectScore > scores[pick] && f.closure < 0.5)
+      return { rune: null, score: scores[pick], best, bestScore: scores[best], gated, scores, features: f, reason: "square", rejectScore };
     if (pick && scores[pick] >= this.opts.threshold) return { rune: pick, score: scores[pick], best, bestScore: scores[best], gated, scores, features: f };
     // no gate agreed: allow a very confident template match
     // (never for the V: without its orientation gate a caret / half-drawn triangle would cast it)

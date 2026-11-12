@@ -144,6 +144,27 @@ test("carets / half-drawn triangles do NOT cast the V spell (>= 95%)", () => {
   assert.ok(asVee / N <= 0.05, `${asVee}/${N} carets were read as V`);
 });
 
+test("squares and rectangles do NOT cast any spell (>= 92%)", () => {
+  const R = rng(4444);
+  let asTri = 0;
+  const N = 200;
+  for (let i = 0; i < N; i++) {
+    // squares / rectangles / diamonds as people draw them: any start corner, either direction, sloppy closing
+    const asp = 0.65 + R() * 0.7;
+    let vs = [[-1, -asp], [1, -asp], [1, asp], [-1, asp]];
+    const start = Math.floor(R() * 4);
+    vs = [...vs.slice(start), ...vs.slice(0, start)];
+    if (R() < 0.5) vs = [vs[0], vs[3], vs[2], vs[1]];
+    const end = R() < 0.6 ? vs[0] : [vs[0][0] * 0.85 + vs[3][0] * 0.15, vs[0][1] * 0.85 + vs[3][1] * 0.15];
+    let pts = densify([...vs, end]);
+    if (R() < 0.25) { const c = Math.cos(0.785), s2 = Math.sin(0.785); pts = pts.map((q) => ({ x: q.x * c - q.y * s2, y: q.x * s2 + q.y * c })); } // diamond
+    const got = rec.recognize(humanize(pts, i % 2 ? R : () => 0.5)).rune; // half the squares drawn neatly
+    if (got) asTri++;
+  }
+  console.log("squares cast a spell", asTri, N);
+  assert.ok(asTri / N <= 0.08, `${asTri}/${N} squares cast a spell`);
+});
+
 test("rejects straight lines, dots and random scribbles", () => {
   const R = rng(99);
   let accepted = 0;

@@ -24,7 +24,7 @@ before the SDK is ready are queued and flushed once it is.
 | `boss` | `guardian` | `start` / `complete` / `fail` | Wave 10, 20, … | Is the boss too hard? |
 | `rune` | `triangle`, `circle`, `zigzag`, `vee` | `visible` → `interact` *(once/run)* | Rune unlocked → first successful cast | **Do players actually use each spell once they have it?** |
 | `drawing` | `misses` | `1`, `3`, `5`, `10`, `20` *(once/run)* | Running count of unrecognised strokes | How often does drawing fail? |
-| `drawing` | `miss-triangle`, `miss-circle`, `miss-zigzag`, `miss-vee`, `miss-unclear` | `reached` *(once/run)* | Failed stroke, labelled with the rune it most resembled | **Which rune is hardest to draw?** |
+| `drawing` | `miss-triangle`, `miss-circle`, `miss-zigzag`, `miss-vee`, `miss-square`, `miss-unclear` | `reached` *(once/run)* | Failed stroke, labelled with the rune it most resembled | **Which rune is hardest to draw?** |
 | `drawing` | `recharging`, `not-learned` | `reached` *(once/run)* | A valid rune drawn while on cooldown / before it's unlocked | Do players understand cooldowns and unlocks? |
 | `death` | `slime`, `bat`, `skeleton`, `golem`, `*-elite`, `boss-orb`, `boss-beam` | `reached` | What dealt the killing blow | **What kills players?** |
 | `survival` | `30s`, `60s`, `120s`, `180s`, `300s`, `600s` | `reached` *(once/run)* | Time alive in a run | Session depth |

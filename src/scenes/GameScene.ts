@@ -196,6 +196,12 @@ export class GameScene extends Phaser.Scene {
     if (Save.settings.debugRunes) bus.emit(EV.DEBUG, res);
     const b = this.renderer2.bounds();
     if (!res.rune) {
+      if (res.reason === "square") {
+        // a neat square looks a lot like a triangle to the matcher: explain instead of silently fizzling
+        this.trackMiss("square");
+        this.failCast("TRIANGLE = 3 CORNERS");
+        return;
+      }
       this.trackMiss(res.bestScore >= 0.6 ? res.best : "unclear");
       this.failCast("");
       return;
