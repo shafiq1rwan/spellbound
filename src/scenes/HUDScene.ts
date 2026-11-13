@@ -90,7 +90,7 @@ export class HUDScene extends Phaser.Scene {
     this.banner = txt(this, 0, 0, "", { scale: 2, color: PAL.gold }).setAlpha(0);
     this.bannerSub = txt(this, 0, 0, "", { color: PAL.lavender }).setAlpha(0);
     // bottom-anchored so a two-line hint grows upward, away from the XP bar
-    this.hint = rtxt(this, 0, 0, "", { size: 13, color: 0xfff4d6, maxWidth: 180, oy: 1 }).setAlpha(0);
+    this.hint = rtxt(this, 0, 0, "", { size: 13, color: 0xfff4d6, maxWidth: 180, oy: 1, balance: true }).setAlpha(0);
     this.debugText = txt(this, 4, 0, "", { ox: 0, oy: 0, color: 0x9fe8ff, align: 0 }).setVisible(Save.settings.debugRunes);
 
     this.layout();

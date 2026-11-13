@@ -97,7 +97,7 @@ const noLig = (s: string) => s.replace(/f(?=[il])/g, "f" + ZWNJ);
 export type RText = Phaser.GameObjects.Text;
 export function rtxt(
   scene: Phaser.Scene, x: number, y: number, s: string,
-  o: { size?: number; color?: number; ox?: number; oy?: number; maxWidth?: number; align?: "left" | "center" | "right"; shadow?: boolean } = {},
+  o: { size?: number; color?: number; ox?: number; oy?: number; maxWidth?: number; align?: "left" | "center" | "right"; shadow?: boolean; balance?: boolean } = {},
 ): RText {
   const t = scene.add.text(Math.round(x), Math.round(y), noLig(s), {
     fontFamily: READ_FONT,
@@ -109,12 +109,76 @@ export function rtxt(
   });
   t.setResolution(Layout.S);
   const set = t.setText.bind(t);
-  t.setText = ((v: string | string[]) => set(Array.isArray(v) ? v.map(noLig) : noLig(v))) as typeof t.setText;
+  t.setText = ((v: string | string[]) => {
+    set(Array.isArray(v) ? v.map(noLig) : noLig(v));
+    if (o.balance) balanceTwoLines(t, set);
+    return t;
+  }) as typeof t.setText;
+  if (o.balance) balanceTwoLines(t, set);
   t.setOrigin(o.ox ?? 0.5, o.oy ?? 0.5);
   // a soft 1-art-px dark edge keeps it readable over the battlefield
   if (o.shadow !== false) t.setShadow(0, 1, "#0b0c1e", 0, false, true).setStroke("#141629", 1.5);
   return t;
 }
+/**
+ * Visible ("ink") box of a Text or Image, in its own unscaled pixels from the top-left of its frame.
+ * Only bright pixels count: fonts add empty space above and below the letters, and the dark shadow,
+ * stroke and icon outlines barely show on the dark UI, so spacing is measured from what the eye sees.
+ */
+export function inkBox(o: Phaser.GameObjects.Text | Phaser.GameObjects.Image) {
+  let c: HTMLCanvasElement, k: number;
+  if (o instanceof Phaser.GameObjects.Text) {
+    c = o.canvas;
+    k = c.width / Math.max(1, o.width);
+  } else {
+    const f = o.frame;
+    c = document.createElement("canvas");
+    c.width = f.cutWidth;
+    c.height = f.cutHeight;
+    c.getContext("2d")!.drawImage(f.source.image as CanvasImageSource, f.cutX, f.cutY, f.cutWidth, f.cutHeight, 0, 0, f.cutWidth, f.cutHeight);
+    k = 1;
+  }
+  const d = c.getContext("2d")!.getImageData(0, 0, c.width, c.height).data;
+  let x0 = c.width, y0 = c.height, x1 = -1, y1 = -1;
+  for (let y = 0; y < c.height; y++)
+    for (let x = 0; x < c.width; x++) {
+      const i = (y * c.width + x) * 4;
+      if (d[i + 3] > 100 && d[i] + d[i + 1] + d[i + 2] > 150) {
+        if (x < x0) x0 = x;
+        if (x > x1) x1 = x;
+        if (y < y0) y0 = y;
+        if (y > y1) y1 = y;
+      }
+    }
+  if (x1 < 0) return { l: 0, t: 0, r: 0, b: 0, w: 0, h: 0 };
+  const l = x0 / k, t = y0 / k, r = (x1 + 1) / k, b = (y1 + 1) / k;
+  return { l, t, r, b, w: r - l, h: b - t };
+}
+
+/**
+ * Text that wraps onto two lines gets an even break (no single word left alone on line 2): try every
+ * word break and keep the one whose longer line is shortest. Longer text keeps normal wrapping.
+ */
+function balanceTwoLines(t: Phaser.GameObjects.Text, set: (v: string) => unknown) {
+  const maxW = t.style.wordWrapWidth;
+  if (!maxW) return;
+  const raw = t.text.replace(/\s*\n\s*/g, " ");
+  const words = raw.split(" ");
+  const ctx = t.context;
+  ctx.save();
+  ctx.font = (t.style as unknown as { _font: string })._font;
+  const width = (s: string) => ctx.measureText(s).width;
+  let best: string | null = null, bestW = Infinity;
+  if (width(raw) > maxW)
+    for (let k = 1; k < words.length; k++) {
+      const a = words.slice(0, k).join(" "), b = words.slice(k).join(" ");
+      const m = Math.max(width(a), width(b));
+      if (m <= maxW && m < bestW) { bestW = m; best = `${a}\n${b}`; }
+    }
+  ctx.restore();
+  if (best && best !== t.text) set(best);
+}
+
 /** register and load the bundled font (call during loading; resolves even if it fails) */
 export async function loadReadableFont(timeoutMs = 3000) {
   try {
