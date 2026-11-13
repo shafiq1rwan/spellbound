@@ -7,7 +7,7 @@ import { Analytics } from "../core/Analytics";
 import { Save, fmtTime } from "../core/Save";
 import { PAL, ELEMENT_COLORS } from "../config/palette";
 import { SPELLS, SPELL_ORDER, type SpellId } from "../config/spells";
-import { Button, txt, slice, type PixelText } from "../ui/widgets";
+import { Button, txt, rtxt, slice, type PixelText, type RText } from "../ui/widgets";
 import type { GameScene } from "./GameScene";
 import type { RecognizeResult } from "../rune/RuneRecognizer";
 
@@ -34,7 +34,7 @@ export class HUDScene extends Phaser.Scene {
   private bossW = 140;
   private banner!: PixelText;
   private bannerSub!: PixelText;
-  private hint!: PixelText;
+  private hint!: RText;
   private hintW = 180;
   private vignette!: Phaser.GameObjects.Image;
   private hurtFlash!: Phaser.GameObjects.Image;
@@ -89,7 +89,8 @@ export class HUDScene extends Phaser.Scene {
     this.lvText = txt(this, 0, 0, "LV 1", { color: PAL.xpMint, ox: 1 });
     this.banner = txt(this, 0, 0, "", { scale: 2, color: PAL.gold }).setAlpha(0);
     this.bannerSub = txt(this, 0, 0, "", { color: PAL.lavender }).setAlpha(0);
-    this.hint = txt(this, 0, 0, "", { color: 0xe8e0ff, maxWidth: 180 }).setAlpha(0);
+    // bottom-anchored so a two-line hint grows upward, away from the XP bar
+    this.hint = rtxt(this, 0, 0, "", { size: 10, weight: 600, color: 0xfff4d6, maxWidth: 180, oy: 1 }).setAlpha(0);
     this.debugText = txt(this, 4, 0, "", { ox: 0, oy: 0, color: 0x9fe8ff, align: 0 }).setVisible(Save.settings.debugRunes);
 
     this.layout();
@@ -163,7 +164,7 @@ export class HUDScene extends Phaser.Scene {
       });
       const bw = Math.round(Math.min(W - 60, 150));
       this.placeXp(Math.round(W / 2 + 12), by - 21, bw);
-      this.hint.setPosition(Math.round(W / 2), by - 36);
+      this.hint.setPosition(Math.round(W / 2), by - 30);
       this.hintW = W - 20;
       this.banner.setPosition(Math.round(W / 2), Math.round(H * 0.3));
     } else {
@@ -175,7 +176,7 @@ export class HUDScene extends Phaser.Scene {
       });
       const bw = Math.round(Math.min(W * 0.45, 190));
       this.placeXp(Math.round(W / 2 + 12), Math.round(H - sf.bottom - 9), bw);
-      this.hint.setPosition(Math.round(W / 2), Math.round(H - sf.bottom - 24));
+      this.hint.setPosition(Math.round(W / 2), Math.round(H - sf.bottom - 17));
       this.hintW = Math.round(W * 0.6);
       this.banner.setPosition(Math.round(W / 2), Math.round(H * 0.3));
     }
@@ -255,7 +256,7 @@ export class HUDScene extends Phaser.Scene {
     this.tweens.add({ targets: s.c, scale: 1, duration: 500, ease: "Back.easeOut" });
     this.tweens.add({ targets: s.glow, alpha: { from: 1, to: 0 }, duration: 500, repeat: 3 });
     this.time.delayedCall(500, () => this.scene.launch("Tutorial", { mode: "demo", spell: id }));
-    if (id === "nova") this.time.delayedCall(4200, () => this.showHint("TIP: FREEZE WITH ICE, THEN HIT WITH FIRE = SHATTER (x2)!", 4500));
+    if (id === "nova") this.time.delayedCall(4200, () => this.showHint("Tip: freeze enemies with Ice, then hit them with Fire for double damage!", 4500));
   }
 
   // ---------------------------------------------------------------- banners & hints
@@ -278,7 +279,7 @@ export class HUDScene extends Phaser.Scene {
     this.hintTimer?.remove();
     this.tweens.killTweensOf(this.hint);
     if (!s) { this.hint.setAlpha(0); return; }
-    this.hint.setScale(1).setTextWrapped(s, this.hintW).setAlpha(1);
+    this.hint.setScale(1).setWordWrapWidth(this.hintW, true).setText(s).setAlpha(1);
     this.pop(this.hint, 1.15);
     if (ms > 0) this.hintTimer = this.time.delayedCall(ms, () => this.tweens.add({ targets: this.hint, alpha: 0, duration: 300 }));
   }

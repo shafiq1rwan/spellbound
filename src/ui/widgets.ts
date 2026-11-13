@@ -1,6 +1,7 @@
 import Phaser from "phaser";
 import { Audio } from "../core/Audio";
 import { M } from "../core/assets";
+import { Layout } from "../core/Layout";
 
 /**
  * Bitmap text anchored on its INK (the visible glyph pixels), not the font's line box.
@@ -80,6 +81,49 @@ export function txt(
   if (o.maxWidth) t.setMaxWidth(o.maxWidth);
   if (o.color !== undefined) t.setTint(o.color);
   return t;
+}
+
+/**
+ * Readable text for sentences: descriptions, hints, the menu line. Pixelify Sans (SIL OFL 1.1, bundled
+ * in public/assets/fonts) in sentence case reads far better than the all-caps 1px bitmap font, which
+ * stays for titles, buttons and numbers. Rasterised at device resolution (Layout.S) so it stays crisp
+ * under the art-pixel camera zoom. Sizes are in art pixels; the font is loaded by loadReadableFont().
+ */
+export const READ_FONT = '"Pixelify Sans", "Trebuchet MS", system-ui, sans-serif';
+/** Pixelify Sans joins "fi"/"fl" into a ligature that reads as "A" at this size: break it with a ZWNJ */
+const ZWNJ = String.fromCharCode(0x200c); // zero-width non-joiner
+const noLig = (s: string) => s.replace(/f(?=[il])/g, "f" + ZWNJ);
+export type RText = Phaser.GameObjects.Text;
+export function rtxt(
+  scene: Phaser.Scene, x: number, y: number, s: string,
+  o: { size?: number; weight?: 400 | 500 | 600 | 700; color?: number; ox?: number; oy?: number; maxWidth?: number; align?: "left" | "center" | "right"; shadow?: boolean } = {},
+): RText {
+  const t = scene.add.text(Math.round(x), Math.round(y), noLig(s), {
+    fontFamily: READ_FONT,
+    fontSize: `${o.size ?? 9}px`,
+    fontStyle: String(o.weight ?? 500),
+    color: `#${(o.color ?? 0xfff8ec).toString(16).padStart(6, "0")}`,
+    align: o.align ?? "center",
+    lineSpacing: 1,
+    wordWrap: o.maxWidth ? { width: o.maxWidth, useAdvancedWrap: true } : undefined,
+  });
+  t.setResolution(Layout.S);
+  const set = t.setText.bind(t);
+  t.setText = ((v: string | string[]) => set(Array.isArray(v) ? v.map(noLig) : noLig(v))) as typeof t.setText;
+  t.setOrigin(o.ox ?? 0.5, o.oy ?? 0.5);
+  // a soft 1-art-px dark edge keeps it readable over the battlefield
+  if (o.shadow !== false) t.setShadow(0, 1, "#0b0c1e", 0, false, true).setStroke("#141629", 1.5);
+  return t;
+}
+/** register and load the bundled font (call during loading; resolves even if it fails) */
+export async function loadReadableFont(timeoutMs = 3000) {
+  try {
+    const f = new FontFace("Pixelify Sans", "url(assets/fonts/PixelifySans.ttf)", { weight: "400 700" });
+    document.fonts.add(f);
+    await Promise.race([f.load(), new Promise((r) => setTimeout(r, timeoutMs))]);
+  } catch {
+    /* falls back to the system font stack */
+  }
 }
 
 export function slice(scene: Phaser.Scene, key: string, x: number, y: number, w: number, h: number) {

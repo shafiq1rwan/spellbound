@@ -150,7 +150,7 @@ export class Boss implements Target {
             this.chargeDmg = 0;
             this.body.play("boss:charge");
             Audio.play("charge_beam");
-            bus.emit(EV.HINT, "BREAK ITS FOCUS! HIT IT HARD!", 2400);
+            bus.emit(EV.HINT, "Break its focus! Hit it hard!", 2400);
           }
         }
         break;

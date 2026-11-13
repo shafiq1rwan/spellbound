@@ -71,6 +71,7 @@ tools/art/                 build-time pixel-art generator (see docs/ART_PIPELINE
 tools/qa/shoot.mjs         headless-Edge QA driver (screenshots, scripted rune drawing, stress)
 tests/                     recognizer test suite
 public/assets/gfx/         baked PNG sheets + manifest.json (+ bitmap font)
+public/assets/fonts/       Pixelify Sans (readable text) + its OFL licence
 ```
 
 ## Tuning
@@ -94,6 +95,17 @@ public/assets/gfx/         baked PNG sheets + manifest.json (+ bitmap font)
   portrait the side edges are close to the wizard, so spawning by edge length sent most enemies in
   from the sides with little warning.
 
+- **Text:** two fonts. The in-house 5×7 bitmap font (`txt()` in `src/ui/widgets.ts`) is for titles,
+  buttons and numbers. Sentences (upgrade descriptions, hints, the menu line) use **Pixelify Sans** in
+  sentence case (`rtxt()`), drawn at device resolution so it stays sharp. Its "fi"/"fl" ligature reads
+  as an "A" at this size, so `rtxt()` breaks it with a zero-width non-joiner.
+
 Gameplay analytics (Poki `measure` events): see `docs/ANALYTICS.md`.
 
 See `docs/ART_PIPELINE.md` for how the art is made and `docs/QA_REPORT.md` for what was verified.
+
+## Credits
+
+- **Pixelify Sans** © 2021 The Pixelify Sans Project Authors (https://github.com/eifetx/Pixelify-Sans),
+  SIL Open Font License 1.1. The licence ships next to the font in `public/assets/fonts/OFL.txt`.
+- Everything else (art, sound, code) is made for this project; see `docs/ART_PIPELINE.md`.

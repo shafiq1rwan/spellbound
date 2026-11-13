@@ -75,7 +75,7 @@ desaturated so spells stay the strongest visual element.
 | Arcane Guardian (boss) | 96×96 | idle 4, charge 2, hurt 1 | Detached hands (24×24), 3 orbiting fragments, orb projectile (14×14). |
 | Arena floor | 640×640 | — | Paved plaza, inlaid rune circle, ruined walls, pillar stumps, rubble, mushrooms, flowers, dithered vignette. |
 | VFX | various | fireball, meteor, explosion ×2, frost nova, missile, starburst, vortex, hit flash, zap, smoke, portal, shock rings, XP gems, 5 element sigils | Plus particles, decals, glows and shadows. |
-| UI | — | 5×7 font (BMFont), logo, 9-slice panels/buttons/cards, hearts, 16×16 icons | |
+| UI | — | 5×7 font (BMFont), logo, 9-slice panels/buttons/cards, hearts, 16×16 icons (incl. `ic_gear`) | Readable text uses Pixelify Sans (SIL OFL 1.1, `public/assets/fonts/`), not generated |
 
 ## QA process used
 

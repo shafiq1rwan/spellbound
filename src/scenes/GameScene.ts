@@ -403,7 +403,7 @@ export class GameScene extends Phaser.Scene {
     this.boundHintShown = true;
     this.wizard.flashBind();
     this.vfx.floatIcon("ic_chain", this.wizard.x, this.wizard.y - 52, 1.5, 1800);
-    bus.emit(EV.HINT, "YOU CAN'T MOVE - DRAW SPELLS TO DEFEND!", 3500);
+    bus.emit(EV.HINT, "You can't move! Draw spells to defend yourself.", 3500);
     Analytics.track("hint", `cant-move-${why}`, "visible", "run");
   }
 

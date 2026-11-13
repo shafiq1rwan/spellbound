@@ -3,9 +3,9 @@ import { Layout } from "../core/Layout";
 import { Audio } from "../core/Audio";
 import { Analytics } from "../core/Analytics";
 import { PAL } from "../config/palette";
-import { RARITY_COLORS, RARITY_NAMES } from "../config/upgrades";
+import { RARITY_COLORS } from "../config/upgrades";
 import type { UpgradeChoice } from "../systems/UpgradeManager";
-import { backdrop, slice, txt } from "../ui/widgets";
+import { backdrop, slice, txt, rtxt } from "../ui/widgets";
 import type { GameScene } from "./GameScene";
 
 export class UpgradeScene extends Phaser.Scene {
@@ -37,13 +37,13 @@ export class UpgradeScene extends Phaser.Scene {
     const n = this.choices.length;
     const portrait = Layout.portrait;
     const cw = portrait ? Math.min(W - 20, 204) : Math.min(Math.floor((W - 40) / n), 128);
-    const ch = portrait ? 58 : Math.min(H - 70, 120);
+    const ch = portrait ? 50 : Math.min(H - 70, 110);
     const cardsH = portrait ? n * ch + (n - 1) * 8 : ch;
     // stack: title (14) | 6 | subtitle (7) | 14 | cards — vertically centred in the safe area
     const stackH = 14 + 6 + 7 + 14 + cardsH;
     const top = Math.max(sf.top + 6, Math.round(sf.top + (H - sf.top - sf.bottom) / 2 - stackH / 2));
     const title = txt(this, W / 2, top + 7, "LEVEL UP!", { scale: 2, color: PAL.gold });
-    const sub = txt(this, W / 2, top + 14 + 6, `LEVEL ${this.level}  -  CHOOSE A BLESSING`, { color: PAL.lavender, oy: 0, maxWidth: W - 16 });
+    const sub = rtxt(this, W / 2, top + 14 + 6, `Level ${this.level} · pick one`, { size: 9, weight: 500, color: PAL.lavender, oy: 0, maxWidth: W - 16 });
     const cardsTop = top + 14 + 6 + 7 + 14;
     title.setScale(0.3);
     this.tweens.add({ targets: title, scale: 1, duration: 350, ease: "Back.easeOut" });
@@ -80,32 +80,37 @@ export class UpgradeScene extends Phaser.Scene {
       icon.setPosition(Math.round(cx - icon.displayWidth / 2), Math.round(cy - icon.displayHeight / 2));
       items.push(icon);
     };
+    // readable font for the name and description (sentence case, high contrast); the rarity shows in
+    // the frame colour, so there's no rarity word, and the 1/2/3 key hints only appear with a mouse
     if (portrait) {
-      // [icon 32] | name ............ LV
-      //           | description (wraps)
-      //  key      |               RARITY
+      // [icon 32] | Name ............ LV 2
+      //           | Description that may wrap
       const iconCx = L + 16;
       addIcon(iconCx, 0);
       const tx = L + 32 + 8;
-      items.push(txt(this, tx, T, c.name.toUpperCase(), { ox: 0, oy: 0, color: 0xfff8ec }));
-      items.push(txt(this, R, T, c.levelText || "NEW", { ox: 1, oy: 0, color: rc }));
-      items.push(txt(this, tx, T + 7 + 6, c.desc.toUpperCase(), { ox: 0, oy: 0, color: 0xc8bce8, maxWidth: R - tx, align: 0 }));
-      items.push(txt(this, R, B, RARITY_NAMES[c.rarity], { ox: 1, oy: 1, color: rc }));
+      const lv = txt(this, R, 0, c.levelText || "NEW", { ox: 1, oy: 0, color: rc });
+      const name = rtxt(this, tx, 0, c.name, { size: 11, weight: 700, ox: 0, oy: 0, color: 0xfff8ec, align: "left" });
+      const desc = rtxt(this, tx, 0, c.desc, { size: 9, weight: 500, ox: 0, oy: 0, color: 0xece4ff, maxWidth: R - tx, align: "left" });
+      // centre the name + description block vertically in the card
+      const blockH = name.height + 2 + desc.height;
+      const top = Math.round(-blockH / 2);
+      name.setY(top);
+      desc.setY(top + name.height + 2);
+      lv.setY(Math.round(top + name.height / 2 - 3.5));
+      items.push(name, lv, desc);
     } else {
-      //      LV
+      //     LV 2
       //    [icon]
-      //     NAME
+      //     Name
       //  description
-      //    RARITY
       items.push(txt(this, 0, T, c.levelText || "NEW", { oy: 0, color: rc }));
       addIcon(0, T + 7 + 8 + 16);
       const nameT = T + 7 + 8 + 32 + 8;
-      const name = txt(this, 0, nameT, c.name.toUpperCase(), { oy: 0, color: 0xfff8ec, maxWidth: w - 2 * P });
+      const name = rtxt(this, 0, nameT, c.name, { size: 11, weight: 700, oy: 0, color: 0xfff8ec, maxWidth: w - 2 * P });
       items.push(name);
-      items.push(txt(this, 0, nameT + name.ink().h + 6, c.desc.toUpperCase(), { oy: 0, color: 0xc8bce8, maxWidth: w - 2 * P }));
-      items.push(txt(this, 0, B, RARITY_NAMES[c.rarity], { oy: 1, color: rc }));
+      items.push(rtxt(this, 0, nameT + name.height + 3, c.desc, { size: 9, weight: 500, oy: 0, color: 0xece4ff, maxWidth: w - 2 * P }));
     }
-    items.push(txt(this, L, B, `${i + 1}`, { ox: 0, oy: 1, color: 0x6d5c98 }));
+    if (window.matchMedia?.("(pointer: fine)").matches) items.push(txt(this, L, B, `${i + 1}`, { ox: 0, oy: 1, color: 0x6d5c98 }));
     ct.add(items);
     bg.setInteractive({ useHandCursor: true });
     bg.on("pointerover", () => { if (!this.picked) { this.tweens.add({ targets: ct, scale: 1.04, duration: 90 }); Audio.play("ui_hover", { vol: 0.5 }); } });

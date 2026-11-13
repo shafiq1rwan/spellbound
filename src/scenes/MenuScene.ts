@@ -7,7 +7,7 @@ import { Analytics } from "../core/Analytics";
 import { PAL, ELEMENT_COLORS, type Element } from "../config/palette";
 import { VFXManager, DEPTH } from "../systems/VFXManager";
 import { Ambience } from "../systems/Ambience";
-import { Button, txt, slice } from "../ui/widgets";
+import { Button, txt, rtxt, type RText } from "../ui/widgets";
 
 export class MenuScene extends Phaser.Scene {
   private vfx!: VFXManager;
@@ -17,8 +17,8 @@ export class MenuScene extends Phaser.Scene {
   private logo!: Phaser.GameObjects.Image;
   private play!: Button;
   private settings!: Button;
-  private best!: Phaser.GameObjects.BitmapText;
-  /** "what do I do?" card: pictogram + two short lines */
+  private best!: RText;
+  /** "what do I do?" in one line: pictogram + a short sentence (no panel) */
   private goal!: Phaser.GameObjects.Container;
   private goalH = 0;
   private floor!: Phaser.GameObjects.Image;
@@ -46,14 +46,15 @@ export class MenuScene extends Phaser.Scene {
     this.wiz.on(Phaser.Animations.Events.ANIMATION_COMPLETE, () => this.wiz.play("wizard:idle"));
     this.logo = this.add.image(0, 0, "logo").setDepth(100);
     this.goal = this.buildGoalCard();
-    this.play = new Button(this, 0, 0, "PLAY", () => this.startRun(), { scale: 2, minW: 112 });
-    this.settings = new Button(this, 0, 0, "SETTINGS", () => { Analytics.track("menu", "settings", "interact"); this.scene.pause(); this.scene.launch("Settings", { from: "Menu" }); }, { minW: 112 });
+    this.play = new Button(this, 0, 0, "PLAY", () => this.startRun(), { scale: 2, minW: 120 });
+    // settings is a small gear in the corner, like the in-game pause button: one big action on screen
+    this.settings = new Button(this, 0, 0, "", () => { Analytics.track("menu", "settings", "interact"); this.scene.pause(); this.scene.launch("Settings", { from: "Menu" }); }, { icon: "ic_gear" });
     Analytics.track("menu", "play", "visible");
     Analytics.track("menu", "settings", "visible");
     this.play.setDepth(100);
     this.settings.setDepth(100);
     const d = Save.data;
-    this.best = txt(this, 0, 0, d.bestWave ? `BEST  WAVE ${d.bestWave}  ${fmtTime(d.bestTimeMs)}  SCORE ${d.bestScore}` : "", { color: 0xb9a8e0 }).setDepth(100);
+    this.best = rtxt(this, 0, 0, d.bestWave ? `Best: wave ${d.bestWave} · ${fmtTime(d.bestTimeMs)}` : "", { size: 9, weight: 500, color: 0xc9b8f0 }).setDepth(100);
     this.layout();
     this.offLayout = Layout.onChange(() => this.layout());
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => this.offLayout?.());
@@ -67,14 +68,10 @@ export class MenuScene extends Phaser.Scene {
     cam.fadeIn(250, 11, 12, 30);
   }
 
-  /** pictogram [triangle] -> [fireball] -> [skull], "draw shapes to cast spells", chain + "survive" */
+  /** pictogram [triangle] -> [fireball] -> [skull] over one short line; the tutorial teaches the rest */
   private buildGoalCard() {
     const c = this.add.container(0, 0).setDepth(100);
-    const cw = Math.min(Layout.w - 24, 176);
-    const P = 8;
     const icons = ["rune_fire", "ic_fireball", "ic_skull"];
-    const row: Phaser.GameObjects.GameObject[] = [];
-    let x = 0;
     const parts: { o: Phaser.GameObjects.Image | ReturnType<typeof txt>; w: number }[] = [];
     icons.forEach((k, i) => {
       const im = this.add.image(0, 0, k).setOrigin(0, 0.5);
@@ -82,19 +79,12 @@ export class MenuScene extends Phaser.Scene {
       if (i < icons.length - 1) { const a = txt(this, 0, 0, "→", { color: 0xb9a8e0, ox: 0 }); parts.push({ o: a, w: a.ink().w }); }
     });
     const gap = 6, rowW = parts.reduce((s2, p) => s2 + p.w, 0) + gap * (parts.length - 1);
-    x = -Math.floor(rowW / 2);
-    const rowY = P + 8;
-    for (const p of parts) { p.o.setPosition(x, rowY); x += p.w + gap; row.push(p.o); }
-    const l1 = txt(this, 0, rowY + 8 + 6, "DRAW SHAPES TO CAST SPELLS", { oy: 0, color: 0xfff8ec, maxWidth: cw - 2 * P });
-    const chain = this.add.image(0, 0, "ic_chain").setOrigin(0, 0.5);
-    const l2 = txt(this, 0, 0, "YOU CAN'T MOVE - SURVIVE!", { ox: 0, color: PAL.gold });
-    const l2w = chain.width + 4 + l2.ink().w;
-    const l2y = l1.y + l1.ink().h + 9 + 3.5;
-    chain.setPosition(-Math.floor(l2w / 2), Math.round(l2y));
-    l2.setPosition(-Math.floor(l2w / 2) + chain.width + 4, l2y);
-    this.goalH = Math.round(l2y + 8 + P);
-    const bg = slice(this, "panel_dark", 0, 0, cw, this.goalH).setOrigin(0.5, 0).setAlpha(0.92);
-    c.add([bg, ...row, l1, chain, l2]);
+    let x = -Math.floor(rowW / 2);
+    const rowY = 8;
+    for (const p of parts) { p.o.setPosition(x, rowY); x += p.w + gap; c.add(p.o); }
+    const line = rtxt(this, 0, rowY + 10, "Draw shapes to cast spells", { size: 10, weight: 600, oy: 0, color: 0xfff8ec });
+    c.add(line);
+    this.goalH = Math.round(line.y + line.height);
     return c;
   }
 
@@ -110,17 +100,16 @@ export class MenuScene extends Phaser.Scene {
     this.sigil.setPosition(wx, wy);
     this.glow.setPosition(wx, wy - 30);
     const ux = portrait ? cx : Math.round(W * 0.68);
-    // top-down stack: logo, goal card, (wizard), PLAY, SETTINGS, best
+    // top-down stack: logo, goal line, (wizard), PLAY, best; settings gear in the corner
     const logoY = Math.round(portrait ? sf.top + H * 0.13 : sf.top + 6 + this.logo.height / 2);
     this.logo.setPosition(ux, logoY);
     const goalTop = Math.round(logoY + this.logo.height / 2 + 6);
     this.goal.setPosition(ux, goalTop);
-    const py = Math.round(portrait ? Math.max(H * 0.78, wy + 30 + this.play.bh / 2) : goalTop + this.goalH + 8 + this.play.bh / 2);
+    const py = Math.round(portrait ? Math.max(H * 0.8, wy + 34 + this.play.bh / 2) : goalTop + this.goalH + 14 + this.play.bh / 2);
     this.play.setPosition(ux, py);
-    const sy = py + Math.ceil(this.play.bh / 2) + 8 + Math.floor(this.settings.bh / 2);
-    this.settings.setPosition(ux, sy);
-    this.best.setMaxWidth(portrait ? W - 16 : W * 0.6);
-    this.best.setPosition(ux, Math.round(portrait ? Math.min(H - sf.bottom - 10, sy + Math.ceil(this.settings.bh / 2) + 12) : sy + Math.ceil(this.settings.bh / 2) + 12));
+    this.best.setPosition(ux, Math.round(py + Math.ceil(this.play.bh / 2) + 10));
+    // gear in the top-right corner, inside the safe area
+    this.settings.setPosition(Math.round(W - sf.right - 6 - this.settings.bw / 2), Math.round(sf.top + 6 + this.settings.bh / 2));
   }
 
   private async startRun() {

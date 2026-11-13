@@ -478,6 +478,21 @@ export function icons() {
     ...kwgk..kwgk...
     ...kwwk..kwwk...
     ...kkkk..kkkk...`);
+  // settings gear (menu corner button, same style as the pause icon)
+  mk("ic_gear", { w: "#FFFFFF", g: C.lavender }, `
+    ................
+    ......kkkk......
+    ..kkk.kwwk.kkk..
+    ..kwwkkwwkkwgk..
+    ..kwwwwwwwwwgk..
+    .kkwwwkkkkwggkk.
+    .kwwwwk..kwgggk.
+    .kwwwgk..kggggk.
+    .kkwwgkkkkgggkk.
+    ..kwgggggggggk..
+    ..kwgkkggkkggk..
+    ..kkk.kggk.kkk..
+    ......kkkk......`);
   mk("ic_skull", { w: C.bone[3], s: C.bone[1] }, `
     ................
     ....kkkkkkk.....

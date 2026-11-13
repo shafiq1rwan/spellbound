@@ -154,7 +154,7 @@ export class TutorialScene extends Phaser.Scene {
         g.worldPaused = false;
         g.wizard.flashBind();
         g.vfx.floatIcon("ic_chain", w.x, w.y - 52, 1.5, 2200);
-        bus.emit(EV.HINT, "YOU CAN'T MOVE - DRAW SPELLS TO DEFEND!", 3500);
+        bus.emit(EV.HINT, "You can't move! Draw spells to defend yourself.", 3500);
         this.tweens.add({ targets: [this.picto, this.mark], alpha: 0, duration: 300 });
         this.time.delayedCall(400, () => { g.tutorialDone(); this.scene.stop(); });
       });
