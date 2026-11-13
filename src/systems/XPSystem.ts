@@ -1,4 +1,4 @@
-// XP orbs: float + pulse, drift toward the stationary wizard, get pulled in inside the magnet
+// XP orbs: pop out of the enemy, then fly straight to the stationary wizard
 // radius, sparkle + rising-pitch chime on collection. Pooled.
 import Phaser from "phaser";
 import { GAME } from "../config/game";
@@ -13,7 +13,7 @@ export class XPSystem {
   g: GameScene;
   xp = 0;
   level = 1;
-  magnetMult = 1;
+
   gainMult = 1;
   pendingLevels = 0;
   private orbs: Orb[] = [];
@@ -26,9 +26,7 @@ export class XPSystem {
   get toNext() {
     return GAME.xp.toNext(this.level);
   }
-  get magnet() {
-    return GAME.xp.baseMagnet * this.magnetMult;
-  }
+
 
   drop(x: number, y: number, value: number) {
     let left = value;
@@ -77,15 +75,15 @@ export class XPSystem {
       }
       const dx = w.x - o.x, dy = w.y - 8 - o.y, d = Math.hypot(dx, dy) || 1;
       if (!w.dead) {
-        if (d < this.magnet || o.pulled) {
+        // a short pop so the drop is visible, then straight to the wizard (playtest: slow drifting
+        // XP felt sluggish). Arrives in ~0.3 s from across the screen.
+        const pop = GAME.xp.popMs / 1000;
+        if (o.pulled || o.t >= pop) {
           o.pulled = true;
-          const sp = GAME.xp.pullSpeed * Math.min(1.5, 0.9 + o.t * 0.5);
-          o.x += (dx / d) * sp * dt;
-          o.y += (dy / d) * sp * dt;
-        } else if (o.z === 0) {
-          const drift = Math.min(GAME.xp.driftMax, GAME.xp.driftSpeed + GAME.xp.driftAccel * o.t);
-          o.x += (dx / d) * drift * dt;
-          o.y += (dy / d) * drift * dt;
+          const sp = Math.min(GAME.xp.pullMax, GAME.xp.pullSpeed + GAME.xp.pullAccel * Math.max(0, o.t - pop));
+          const step = Math.min(d, sp * dt);
+          o.x += (dx / d) * step;
+          o.y += (dy / d) * step;
         }
         if (d < 7) { this.collect(o); continue; }
       }

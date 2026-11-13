@@ -111,7 +111,7 @@ At most one per wave, and never on boss or mini-boss waves.
 
 ## 5. Spell fusions (after maxing out)
 
-All 32 regular upgrades run out around level 33 (usually wave 25–30). Since v1.6.1 every level after
+All 29 regular upgrades run out around level 30 (usually wave 25–30). Since v1.6.1 every level after
 that applies **Mastery** (+6% damage, heal 1). That fixes the freeze, but it's only a number.
 
 Instead, once everything is maxed, unlock **fusions** cast by drawing two runes back to back:

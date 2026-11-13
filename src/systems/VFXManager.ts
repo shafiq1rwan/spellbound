@@ -36,7 +36,10 @@ export class VFXManager {
   private aliveParticles = 0;
   private lastFlash = -1e9;
   private flash: { start: number; ms: number; strength: number } | null = null;
-  reduced = false;
+  /** SCREEN SHAKE: OFF in Settings. Read live, so changing it from the pause menu applies at once. */
+  get reduced() {
+    return Save.settings.reducedMotion;
+  }
   // screen shake in ART pixels (Phaser's built-in shake scales with canvas size x zoom = far too strong here)
   private shakeAmp = 0;
   private shakeMs = 0;
@@ -76,7 +79,6 @@ export class VFXManager {
     const s = Save.settings;
     this.baseQ = s.quality === "low" ? 0.4 : 1;
     this.q = this.baseQ * this.autoQ;
-    this.reduced = s.reducedMotion;
   }
 
   // ------------------------------------------------------------ frame-animated effects
@@ -170,9 +172,8 @@ export class VFXManager {
   illuminate(color: number, strength = 0.1, ms = 220) {
     // a full-screen additive pass: at most one every 1.2 s, and none while the frame rate is struggling
     const now = performance.now();
-    if (this.q < 0.7 || now - this.lastFlash < 1200) return;
+    if (this.reduced || this.q < 0.7 || now - this.lastFlash < 1200) return; // no flashes with SCREEN SHAKE: OFF
     this.lastFlash = now;
-    if (this.reduced) strength *= 0.4;
     // faded on real time in update(), not by a tween: hit-stops pause tweens, which kept the
     // flash on screen far longer than intended during heavy fights
     this.flashRect.setFillStyle(color, 1).setAlpha(strength).setVisible(true);
@@ -290,7 +291,8 @@ export class VFXManager {
   }
   /** px: peak offset in art pixels (1 = subtle, 3 = huge); decays to zero over ms */
   shake(px: number, ms = 120) {
-    const amp = px * (this.reduced ? 0.4 : 1);
+    if (this.reduced) return; // SCREEN SHAKE: OFF
+    const amp = px;
     if (amp <= 0) return;
     if (!this.baseScroll) this.setShakeBase();
     // keep the stronger of the running and new shake
@@ -330,6 +332,7 @@ export class VFXManager {
     this.fpsT += dtMs;
     if (this.fpsT >= 1000) {
       this.fpsT = 0;
+      this.baseQ = Save.settings.quality === "low" ? 0.4 : 1; // pick up the EFFECTS setting mid-run
       const fps = this.scene.game.loop.actualFps;
       if (fps < 45) this.autoQ = Math.max(0.35, this.autoQ - 0.15);
       else if (fps > 56) this.autoQ = Math.min(1, this.autoQ + 0.05);

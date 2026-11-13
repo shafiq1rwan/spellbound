@@ -1,6 +1,6 @@
 import type { SpellId } from "./spells";
 
-export type UpgradeId = `spell:${SpellId}` | "haste" | "vitality" | "magnet" | "potion" | "power" | "wisdom" | "mastery";
+export type UpgradeId = `spell:${SpellId}` | "haste" | "vitality" | "potion" | "power" | "wisdom" | "mastery";
 
 export interface UpgradeDef {
   id: UpgradeId;
@@ -16,7 +16,6 @@ export interface UpgradeDef {
 export const GENERIC_UPGRADES: UpgradeDef[] = [
   { id: "haste", name: "Quickened Mind", icon: "ic_haste", max: 4, rarity: 1, weight: 1, desc: () => "Spells recharge 12% faster." },
   { id: "vitality", name: "Heart Rune", icon: "ic_heart", max: 3, rarity: 1, weight: 0.9, desc: () => "+1 max heart, heal 1." },
-  { id: "magnet", name: "Soul Magnet", icon: "ic_magnet", max: 3, rarity: 0, weight: 1, desc: () => "Pull XP from 45% farther." },
   { id: "potion", name: "Healing Draught", icon: "ic_potion", max: 99, rarity: 0, weight: 1.2, desc: () => "Heal 2 hearts." },
   { id: "power", name: "Arcane Focus", icon: "ic_arcane", max: 3, rarity: 2, weight: 0.7, desc: () => "Spells deal 12% more damage." },
   { id: "wisdom", name: "Scholar's Crystal", icon: "ic_xp", max: 3, rarity: 0, weight: 0.8, desc: () => "Gain 20% more XP." },

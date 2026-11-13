@@ -81,7 +81,11 @@ public/assets/fonts/       Jersey 10 (readable text) + its OFL licence
 - **Spells:** each level's stats and description live in `src/config/spells.ts`.
 - **Enemies and waves:** `src/config/enemies.ts` and `src/config/waves.ts`. Waves 1 to 10 are authored
   (boss on wave 10). After that, waves scale endlessly with a boss every 10th wave.
-- **Game feel:** the hit-stop and shake values are in `GAME.feel`; XP pull speeds are in `GAME.xp`.
+- **Game feel:** the hit-stop and shake values are in `GAME.feel`. XP orbs pop out for `GAME.xp.popMs`
+  (180 ms) and then fly straight to the wizard (`pullSpeed`/`pullAccel`/`pullMax`), arriving in about
+  half a second from across the screen.
+- **SCREEN SHAKE: OFF** (Settings, `reducedMotion` in the save) turns off screen shake, full-screen
+  flashes and hit-stop freezes, and softens the hurt flash. It's read live, so it applies mid-run.
 - **Effect budgets** (`src/systems/VFXManager.ts`): at most 420 live particles (× quality), 16 big
   glows (each at most 96 art px across), 24 lightning bolts and 32 sprites per effect type; 60 XP orbs
   (`XPSystem`). The full-screen flash fires at most once every 1.2 s (meteor, boss, level-up, getting

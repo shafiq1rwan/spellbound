@@ -256,6 +256,13 @@ export function icons() {
     im.grid(0, 0, grid);
     out[name] = im;
   };
+  // round and radially symmetric icons are drawn with geometry (hand-typed grids came out oval/lopsided)
+  const draw = (name, pal, fn) => {
+    const im = new Img(16, 16).palette({ k: C.outline, ...pal });
+    fn(im);
+    im.outline("k");
+    out[name] = im;
+  };
   const fire = { r: "#A8321E", o: C.fireOrange, y: C.fireYellow, w: "#FFF6D0" };
   const ice = { b: "#3B8CD8", c: C.iceCyan, w: "#FFFFFF" };
   const bolt = { b: "#9BC4FF", y: C.boltYellow, w: "#FFFBE0", o: "#C79A1E" };
@@ -276,22 +283,11 @@ export function icons() {
     ..kyykkkkkkkyyk.
     .kyyyyyyyyyyyyk.
     ..kkkkkkkkkkkk..`);
-  mk("rune_ice", ice, `
-    ................
-    .....kkkkkk.....
-    ...kkccccccckk..
-    ..kcckkkkkkcck..
-    .kcck......kcck.
-    .kck........kck.
-    kcck........kcck
-    kck..........kck
-    kck..........kck
-    kcck........kcck
-    .kck........kck.
-    .kcck......kcck.
-    ..kcckkkkkkcck..
-    ...kkccccccckk..
-    .....kkkkkk.....`);
+  // circle rune: a true circle with a 1px line, like the other rune glyphs
+  draw("rune_ice", ice, (im) => {
+    im.ring(7, 7, 6, "c");
+    for (const [x, y] of [[4, 2], [3, 3], [2, 4]]) im.px(x, y, "w"); // highlight, top-left
+  });
   mk("rune_bolt", bolt, `
     ................
     .kkkkkkkkk......
@@ -384,19 +380,18 @@ export function icons() {
     ..kyyk..........
     ..kyk...........
     ..kk............`);
-  mk("ic_arcane", arc, `
-    .......kk.......
-    ......kpk.......
-    ......kpk.......
-    .....kplpk......
-    .kkkkkplpkkkkk..
-    .kpppplwlpppppk.
-    ..kkkpllllpkkk..
-    ....kplwwlpk....
-    ...kpplkklppk...
-    ...kplk..kplk...
-    ..kpkk....kkpk..
-    ..kk........kk..`);
+  // arcane focus: symmetric five-point star
+  draw("ic_arcane", arc, (im) => {
+    const cx = 7, cy = 7.6, ro = 6.6, ri = 2.8, pts = [];
+    for (let i = 0; i < 10; i++) {
+      const a = -Math.PI / 2 + (i * Math.PI) / 5, r = i % 2 ? ri : ro;
+      pts.push(cx + 0.5 + Math.cos(a) * r, cy + Math.sin(a) * r);
+    }
+    im.poly(pts, "p");
+    im.map((x, y, v) => (v && x + y < 13 ? im.col("l") : undefined)); // lit top-left half
+    im.map((x, y, v) => (v && x + y > 16 ? im.col("v") : undefined)); // shaded bottom-right
+    im.px(7, 6, "w").px(7, 7, "w").px(6, 7, "l").px(8, 7, "l");
+  });
   mk("ic_haste", { a: C.uiGold[1], A: C.uiGold[2], s: C.lavender, S: "#8E74E8" }, `
     ...kkkkkkkkkk...
     ...kAAAAAAAAk...
@@ -479,20 +474,15 @@ export function icons() {
     ...kwwk..kwwk...
     ...kkkk..kkkk...`);
   // settings gear (menu corner button, same style as the pause icon)
-  mk("ic_gear", { w: "#FFFFFF", g: C.lavender }, `
-    ................
-    ......kkkk......
-    ..kkk.kwwk.kkk..
-    ..kwwkkwwkkwgk..
-    ..kwwwwwwwwwgk..
-    .kkwwwkkkkwggkk.
-    .kwwwwk..kwgggk.
-    .kwwwgk..kggggk.
-    .kkwwgkkkkgggkk.
-    ..kwgggggggggk..
-    ..kwgkkggkkggk..
-    ..kkk.kggk.kkk..
-    ......kkkk......`);
+  // settings gear: round body, 8 teeth placed in mirrored pairs around the centre (7,7), hole in the middle
+  draw("ic_gear", { w: "#FFFFFF", g: C.lavender }, (im) => {
+    im.circ(7, 7, 4, "w");
+    im.rect(6, 1, 3, 2, "w"); im.rect(6, 12, 3, 2, "w");   // N, S
+    im.rect(1, 6, 2, 3, "w"); im.rect(12, 6, 2, 3, "w");   // W, E
+    for (const [x, y] of [[3, 3], [10, 3], [3, 10], [10, 10]]) im.rect(x, y, 2, 2, "w"); // diagonals
+    im.map((x, y, v) => (v && x + y > 15 ? im.col("g") : undefined)); // shaded bottom-right
+    im.circ(7, 7, 1.2, "_");
+  });
   mk("ic_skull", { w: C.bone[3], s: C.bone[1] }, `
     ................
     ....kkkkkkk.....
@@ -504,20 +494,14 @@ export function icons() {
     ...kswwwwwsk....
     ....kwkwkwk.....
     ....kkkkkkk.....`);
-  mk("ic_clock", { w: "#FFFFFF", g: C.lavender, y: C.uiGold[2] }, `
-    ................
-    .....kkkkkk.....
-    ...kkggggggkk...
-    ..kggwwwwwwggk..
-    ..kgwwwwkwwwgk..
-    .kgwwwwwkwwwwgk.
-    .kgwwwwwkwwwwgk.
-    .kgwwwwwkkkwwgk.
-    .kgwwwwwwwwwwgk.
-    ..kgwwwwwwwwgk..
-    ..kggwwwwwwggk..
-    ...kkggggggkk...
-    .....kkkkkk.....`);
+  // clock (recharging): round face, ticks at 12/3/6/9, hands at 12 and 3
+  draw("ic_clock", { w: "#FFFFFF", g: C.lavender, y: C.uiGold[2] }, (im) => {
+    im.circ(7, 7, 6, "g");
+    im.circ(7, 7, 5, "w");
+    for (const [x, y] of [[7, 3], [11, 7], [7, 11], [3, 7]]) im.px(x, y, "g");
+    im.vline(7, 4, 4, "k");
+    im.hline(7, 7, 3, "k");
+  });
   // chain: "the wizard is bound to the circle" (can't move)
   mk("ic_chain", { g: C.uiGold[1], y: C.uiGold[2], d: C.uiGold[0] }, `
     ................

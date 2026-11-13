@@ -40,7 +40,7 @@ before the SDK is ready are queued and flushed once it is.
 | `combo` | `x10`, `x20`, `shatter` | `reached` *(once/run)* | Combo milestones; first Ice→other Shatter | Do players discover spell mixing? |
 | `button` | `pause` | `visible` *(once/run)* → `interact` | HUD pause button | |
 | `gameover` | `retry`, `menu` | `visible` → `interact` | Game-over buttons | **Do players retry after dying?** |
-| `settings` | e.g. `sound-50`, `effects-low`, `calm-motion-on`, `replay-tutorial` | `selected` | Settings changed | Are defaults right? |
+| `settings` | e.g. `sound-50`, `effects-low`, `screen-shake-off`, `replay-tutorial` (before v1.7.3 the shake toggle was `calm-motion-on/off`) | `selected` | Settings changed | Are defaults right? |
 
 ## Note on Poki's "Plays" column
 

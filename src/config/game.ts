@@ -25,13 +25,12 @@ export const GAME = {
   },
 
   xp: {
-    baseMagnet: 44,
-    /** px/s every orb drifts toward the wizard; grows by driftAccel per second on the ground */
-    driftSpeed: 28,
-    driftAccel: 18,
-    driftMax: 110,
-    /** px/s once inside the magnet radius */
-    pullSpeed: 320,
+    /** orbs pop out of the enemy for this long, then fly straight to the wizard */
+    popMs: 180,
+    /** fly-in speed (px/s): starts at pullSpeed, accelerates by pullAccel per second, capped at pullMax */
+    pullSpeed: 260,
+    pullAccel: 1400,
+    pullMax: 720,
     /**
      * xp needed to go from level n to n+1. Early levels are discounted (35% at level 1, easing to 100%
      * by level 6) so the first upgrade + pet land within ~15 s: early rewards keep new players playing.

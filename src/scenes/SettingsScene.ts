@@ -56,7 +56,8 @@ export class SettingsScene extends Phaser.Scene {
     stepper("SOUND", () => s.sfx, (v) => { s.sfx = v; });
     stepper("MUSIC", () => s.music, (v) => { s.music = v; });
     toggle("EFFECTS", () => s.quality.toUpperCase(), () => { s.quality = s.quality === "high" ? "low" : "high"; });
-    toggle("CALM MOTION", () => (s.reducedMotion ? "ON" : "OFF"), () => { s.reducedMotion = !s.reducedMotion; });
+    // reducedMotion = OFF: no screen shake, no full-screen flashes, no hit-stop freezes, softer hurt flash
+    toggle("SCREEN SHAKE", () => (s.reducedMotion ? "OFF" : "ON"), () => { s.reducedMotion = !s.reducedMotion; });
     toggle("RUNE DEBUG", () => (s.debugRunes ? "ON" : "OFF"), () => { s.debugRunes = !s.debugRunes; });
     y += 12 - rowGap;
     const half = (pw - UI.panelPad * 2 - UI.gap) / 2;

@@ -317,7 +317,7 @@ export class GameScene extends Phaser.Scene {
 
   // ---------------------------------------------------------------- feel
   hitstop(ms: number) {
-    if (this.over) return;
+    if (this.over || Save.settings.reducedMotion) return; // no freeze frames with SCREEN SHAKE: OFF
     this.hitstopUntil = Math.max(this.hitstopUntil, performance.now() + ms);
     this.setTimeFrozen(true);
   }

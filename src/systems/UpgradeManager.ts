@@ -75,7 +75,6 @@ export class UpgradeManager {
     switch (id) {
       case "haste": g.spells.cdMult *= 0.88; break;
       case "vitality": g.maxHp += 1; g.heal(1); break;
-      case "magnet": g.xp.magnetMult *= 1.45; break;
       case "potion": g.heal(2); break;
       case "power": g.spells.powerMult *= 1.12; break;
       case "wisdom": g.xp.gainMult *= 1.2; break;
