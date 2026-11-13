@@ -7,7 +7,7 @@ average session of **5 minutes or more** (Poki's player-fit target).
 
 | Build | State |
 |---|---|
-| **v1.7.8** | Uploaded to Poki for a player-fit test; **waiting for results** |
+| **v1.7.8** | Player-fit test running. **Interim: 441 players, average 5:15** (v1.6.2: 4:33) |
 | **v1.8.1** | Built and ready (`release/spellbound-arena-v1.8.1.zip`); upload it **after** reading the v1.7.8 results, so each test measures one batch of changes |
 | GitHub | v1.6.0 is the last push. v1.6.1 to v1.8.1 and the boss concept art are committed locally only; pushing also redeploys the GitHub Pages site |
 
@@ -89,7 +89,7 @@ show whether the drawing fix is the reason.
 | 1.7.5 | Visible screen shake, bouncing XP | |
 | 1.7.6 | Level-up effect from pixelfx (replaced in 1.8.1) | |
 | 1.7.7 | Rune unlock text no longer overlaps the sample drawing or a level-up | |
-| 1.7.8 | Rune unlock fits small and notched phones | **Player-fit, results pending** |
+| 1.7.8 | Rune unlock fits small and notched phones | **Player-fit, running: 5:15 at 441 players** |
 | 1.8.0 | Enemies spawn on screen behind a 0.9 s portal, at least 140 px away | |
 | 1.8.1 | Own spawn rift and level-up pillar (the pixelfx art didn't match the game) | Next to upload |
 
