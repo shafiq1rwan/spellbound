@@ -10,7 +10,7 @@ analytics events for its features.
 
 | Step | What | Targets | Size |
 |---|---|---|---|
-| 0 | Read the v1.7.8 results, then upload v1.8.1 (on-screen spawns) | Did the drawing fix work? | — |
+| 0 | Read the v1.7.8 results, then upload v1.8.2 (on-screen spawns, more monsters from several directions, new spawn and level-up effects) | Did the drawing fix work? | — |
 | **A** | Coins, the Spellbook shop, a goal on the game-over screen, the first robe colours | Retry rate (21% start a 2nd run) | Medium |
 | **B** | Crates with drops, the wave 5 mini boss and its chest | Players lost a few % every wave in waves 3–9 | Medium |
 | **C** | Element loadout with **Wind** and **Earth** | Variety, "learn new magic" | Medium–large |

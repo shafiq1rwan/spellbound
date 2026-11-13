@@ -81,7 +81,10 @@ public/assets/fonts/       Jersey 10 (readable text) + its OFL licence
   Settings → **Rune Debug** to see live scores, closure, turning and corner counts for every stroke.
 - **Spells:** each level's stats and description live in `src/config/spells.ts`.
 - **Enemies and waves:** `src/config/enemies.ts` and `src/config/waves.ts`. Waves 1 to 10 are authored
-  (boss on wave 10). After that, waves scale endlessly with a boss every 10th wave.
+  (boss on wave 10). After that, waves scale endlessly with a boss every 10th wave. Waves are timed
+  (30–42 s), not kill counts; boss waves last until the Guardian dies. Each wave sets its pressure
+  (`PRESSURE_BASE`/`PRESSURE_GROWTH`, enemy HP arriving per second), its enemy mix, its group size per
+  spawn and its cap on enemies alive at once.
 - **Game feel:** hit-stop and shake values are in `GAME.feel` (small hits 2 art px, heavy 3; each shake
   lasts at least 120 ms, holds full strength for its first ~40% and alternates direction). XP orbs pop
   out and bounce for `GAME.xp.popMs` (1 s, `bounce`/`bounceFriction`), then fly straight to the wizard
@@ -101,7 +104,9 @@ public/assets/fonts/       Jersey 10 (readable text) + its OFL licence
   (`EnemySpawnManager.edgePoint`/`playArea`), behind a 0.9 s purple portal (`GAME.spawn.portalMs`)
   during which the enemy is visible but harmless and can't be targeted. Never nearer than
   `GAME.spawn.minDistance` (140 art px), which keeps portrait spawns at the top and bottom; very short
-  screens use the farthest spot available.
+  screens use the farthest spot available. Each spawn comes from 1–4 directions at once (one spot, a
+  pincer from opposite sides, three-way, or from wave 5 all four sides), with the group split between
+  them (`directionWeights` in `src/config/waves.ts`, `EnemySpawnManager.patternPoints`).
 
 - **Text:** two fonts. The in-house 5×7 bitmap font (`txt()` in `src/ui/widgets.ts`) is for titles,
   buttons and numbers. Sentences (upgrade descriptions, hints, the menu line) use **Jersey 10** in

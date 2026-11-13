@@ -8,7 +8,7 @@ average session of **5 minutes or more** (Poki's player-fit target).
 | Build | State |
 |---|---|
 | **v1.7.8** | Player-fit test running. **Interim: 441 players, average 5:15** (v1.6.2: 4:33) |
-| **v1.8.2** | Built and ready (`release/spellbound-arena-v1.8.2.zip`), with v1.8.0–v1.8.1 included; upload it **after** reading the v1.7.8 results, so each test measures one batch of changes |
+| **v1.8.2** | Built and ready (`release/spellbound-arena-v1.8.2.zip`): on-screen spawns, more monsters from several directions, own spawn and level-up effects; upload it **after** reading the v1.7.8 results, so each test measures one batch of changes |
 | GitHub | v1.6.0 is the last push. v1.6.1 to v1.8.2 and the boss concept art are committed locally only; pushing also redeploys the GitHub Pages site |
 
 **When the v1.7.8 results arrive, collect:**
