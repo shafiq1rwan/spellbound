@@ -1,0 +1,241 @@
+<title>Spellbound Chapter Bosses</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@500;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+  /* Layout: a bestiary sheet. One band per chapter boss: a big stage with the idle loop, then the move list. */
+  :root {
+    color-scheme: dark;
+    --ink: #0d0e20;          /* page ground, the game's void navy */
+    --panel: #161a33;
+    --line: #2a2e55;
+    --fg: #ece7f8;
+    --muted: #a49dc4;
+    --gold: #ffd36b;         /* the game's UI gold */
+    --frost: #6bddff;
+    --ember: #ff914d;
+    --astral: #c79bff;
+    --display: "Pixelify Sans", "Courier New", monospace;
+    --body: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+    --mono: "JetBrains Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+  }
+  * { box-sizing: border-box; }
+  body {
+    background: var(--ink); color: var(--fg); font: 15px/1.55 var(--body);
+    padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+    padding-block: 28px 56px;
+  }
+  .wrap { max-width: 1040px; margin: 0 auto; display: grid; gap: 40px; }
+  canvas { image-rendering: pixelated; image-rendering: crisp-edges; display: block; max-width: 100%; }
+  h1, h2, h3 { font-family: var(--display); font-weight: 700; margin: 0; text-wrap: balance; letter-spacing: 0.01em; }
+  h1 { font-size: clamp(30px, 5vw, 46px); line-height: 1.05; }
+  h2 { font-size: clamp(26px, 4vw, 36px); line-height: 1.1; }
+  h3 { font-size: 19px; font-weight: 500; }
+  p { margin: 0; max-width: 65ch; }
+  .muted { color: var(--muted); }
+  .eyebrow { font: 500 12px/1.4 var(--mono); letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
+  .mono { font-family: var(--mono); font-size: 12.5px; font-variant-numeric: tabular-nums; }
+
+  header { display: grid; gap: 14px; }
+  .controls { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  button {
+    font: 500 13px/1 var(--mono); color: var(--fg); background: var(--panel); border: 1px solid var(--line);
+    padding: 9px 12px; border-radius: 4px; cursor: pointer;
+  }
+  button[aria-pressed="true"] { border-color: var(--gold); color: var(--gold); }
+  button:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+
+  .compare { display: flex; gap: 16px; align-items: center; padding: 12px 14px; border: 1px dashed var(--line); border-radius: 6px; flex-wrap: wrap; }
+  .compare canvas { width: 96px; background: #1f2440; border-radius: 4px; }
+  .compare .text { display: grid; gap: 4px; min-width: 0; flex: 1 1 240px; }
+
+  .boss { --c: var(--gold); display: grid; gap: 18px; padding-top: 28px; border-top: 2px solid var(--c); }
+  .boss.rime { --c: var(--frost); --floor: #1b2b4a; --floor2: #20345a; }
+  .boss.maw { --c: var(--ember); --floor: #2a1a24; --floor2: #33202c; }
+  .boss.weaver { --c: var(--astral); --floor: #130f2c; --floor2: #1a1538; }
+  .boss .eyebrow { color: var(--c); }
+  .top { display: grid; grid-template-columns: minmax(0, 300px) minmax(0, 1fr); gap: 24px; align-items: start; }
+  .stage {
+    border-radius: 6px; padding: 6px; display: grid; place-items: center;
+    background: repeating-conic-gradient(var(--floor) 0 25%, var(--floor2) 0 50%) 0 0 / 24px 24px;
+  }
+  .stage canvas { width: 288px; }
+  .intro { display: grid; gap: 12px; min-width: 0; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip { font: 500 12px/1 var(--mono); padding: 7px 9px; border-radius: 3px; border: 1px solid var(--line); background: var(--panel); }
+  .chip.weak { border-color: var(--c); color: var(--c); }
+
+  .moves { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px; }
+  .moves.six { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .move { background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 10px; display: grid; gap: 8px; align-content: start; min-width: 0; }
+  .move .cell { background: var(--floor); border-radius: 4px; display: grid; place-items: center; padding: 4px; min-height: 120px; }
+  .move canvas { width: min(192px, 100%); }
+  .move canvas.small { width: 64px; }
+  .move .head { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 2px 8px; align-items: baseline; }
+  .move .head .mono { white-space: nowrap; color: var(--muted); }
+  .move p { font-size: 13.5px; color: var(--muted); }
+
+  footer { color: var(--muted); font-size: 13px; display: grid; gap: 6px; border-top: 1px solid var(--line); padding-top: 18px; }
+  code { font-family: var(--mono); font-size: 12.5px; color: var(--fg); }
+
+  @media (max-width: 900px) and (min-width: 641px) {
+    .moves, .moves.six { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  }
+  @media (max-width: 640px) {
+    .top { grid-template-columns: minmax(0, 1fr); }
+    .stage canvas { width: min(288px, 100%); }
+    .moves, .moves.six { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .move:last-child:nth-child(odd) { grid-column: span 2; }
+    .move:last-child:nth-child(odd) canvas { width: min(192px, 100%); }
+    .move canvas { width: 100%; }
+    .move canvas.small { width: 48px; }
+  }
+</style>
+
+<div class="wrap">
+  <header>
+    <span class="eyebrow">Spellbound Arena · concept art for review</span>
+    <h1>Chapter Bosses</h1>
+    <p class="muted">One new boss for each chapter on the roadmap. They're drawn at the game's own pixel size (96&times;96, like the Ancient Guardian) and shown enlarged. Every animation plays at its in-game timing.</p>
+    <div class="controls" role="group" aria-label="Playback">
+      <button id="play" type="button" aria-pressed="true">Pause</button>
+      <button id="speed1" type="button" aria-pressed="true">1&times; speed</button>
+      <button id="speed05" type="button" aria-pressed="false">&frac12;&times; speed</button>
+    </div>
+  </header>
+
+  <div class="compare">
+    <canvas data-anim="guardian.idle" aria-label="Ancient Guardian idle animation"></canvas>
+    <div class="text">
+      <span class="eyebrow">Chapter 1 · Crypt · waves 1–10 · current</span>
+      <h3>Ancient Guardian</h3>
+      <p class="muted">The boss in the game today, shown at the same scale for comparison. Today it returns at waves 20 and 30; with chapters, each one gets its own boss.</p>
+    </div>
+  </div>
+
+  <section class="boss rime" aria-labelledby="rime-name">
+    <div class="top">
+      <div class="stage"><canvas data-anim="rime.idle" aria-label="Rime Queen idle animation"></canvas></div>
+      <div class="intro">
+        <span class="eyebrow">Chapter 2 · Frozen Ruins · waves 11–20</span>
+        <h2 id="rime-name">Rime Queen</h2>
+        <p>A hooded wraith of ice under a crystal crown. Her robe trails into frost, her claws float at her sides, and three ice shards circle her. She fights from range, filling the arena with ice the player has to break.</p>
+        <div class="chips"><span class="chip weak">Weak to Fire</span><span class="chip">Shrugs off Ice Nova</span><span class="chip">Proposed</span></div>
+      </div>
+    </div>
+    <div class="moves">
+      <div class="move"><div class="cell"><canvas data-anim="rime.cast"></canvas></div><div class="head"><h3>Icicle Rain</h3><span class="mono" data-info="rime.cast"></span></div><p>Raises her arms and her claws charge with frost, then icicles fall on marked spots. Shoot them before they land.</p></div>
+      <div class="move"><div class="cell"><canvas data-anim="rime.slam"></canvas></div><div class="head"><h3>Frost Slam</h3><span class="mono" data-info="rime.slam"></span></div><p>Drives her claws into the ground and sends a ring of ice shards outward. Fireballs melt the shards.</p></div>
+      <div class="move"><div class="cell"><canvas class="small" data-anim="rime.projectile"></canvas></div><div class="head"><h3>Icicle</h3><span class="mono" data-info="rime.projectile"></span></div><p>The falling projectile, with a glint running down its edge.</p></div>
+      <div class="move"><div class="cell"><canvas data-anim="rime.hurt"></canvas></div><div class="head"><h3>Hurt</h3><span class="mono" data-info="rime.hurt"></span></div><p>Flashes white and recoils, and her eyes go dark.</p></div>
+      <div class="move"><div class="cell"><canvas data-anim="rime.death"></canvas></div><div class="head"><h3>Death</h3><span class="mono" data-info="rime.death"></span></div><p>Shatters outward into ice chips that fall and fade.</p></div>
+    </div>
+  </section>
+
+  <section class="boss maw" aria-labelledby="maw-name">
+    <div class="top">
+      <div class="stage"><canvas data-anim="maw.idle" aria-label="Cinder Maw idle animation"></canvas></div>
+      <div class="intro">
+        <span class="eyebrow">Chapter 3 · Ember Wastes · waves 21–30</span>
+        <h2 id="maw-name">Cinder Maw</h2>
+        <p>A horned obsidian skull with magma in its cracks, a crown of fire and lava dripping from its jaw. Its big attack is telegraphed by the mouth: when the jaw starts to glow, fire is coming.</p>
+        <div class="chips"><span class="chip weak">Weak to Ice</span><span class="chip">Ice Nova snuffs the breath</span><span class="chip">Proposed</span></div>
+      </div>
+    </div>
+    <div class="moves">
+      <div class="move"><div class="cell"><canvas data-anim="maw.charge"></canvas></div><div class="head"><h3>Wind-up</h3><span class="mono" data-info="maw.charge"></span></div><p>The jaw creaks open, the throat glows and the flames grow. This is the warning, and an Ice Nova cast now cancels the breath.</p></div>
+      <div class="move"><div class="cell"><canvas data-anim="maw.breath"></canvas></div><div class="head"><h3>Fire Breath</h3><span class="mono" data-info="maw.breath"></span></div><p>A jet of fire pours down toward the wizard.</p></div>
+      <div class="move"><div class="cell"><canvas class="small" data-anim="maw.projectile"></canvas></div><div class="head"><h3>Magma Rock</h3><span class="mono" data-info="maw.projectile"></span></div><p>Spat out in arcs between breaths. Any spell breaks it in the air.</p></div>
+      <div class="move"><div class="cell"><canvas data-anim="maw.hurt"></canvas></div><div class="head"><h3>Hurt</h3><span class="mono" data-info="maw.hurt"></span></div><p>Flashes and jolts back, and its eyes dim.</p></div>
+      <div class="move"><div class="cell"><canvas data-anim="maw.death"></canvas></div><div class="head"><h3>Death</h3><span class="mono" data-info="maw.death"></span></div><p>The fire goes out and the skull crumbles to ash from the top down.</p></div>
+    </div>
+  </section>
+
+  <section class="boss weaver" aria-labelledby="weaver-name">
+    <div class="top">
+      <div class="stage"><canvas data-anim="weaver.idle" aria-label="Void Weaver idle animation"></canvas></div>
+      <div class="intro">
+        <span class="eyebrow">Chapter 4 · Astral Void · waves 31–40</span>
+        <h2 id="weaver-name">Void Weaver</h2>
+        <p>A drifting cosmic jellyfish. Its bell holds a field of stars, one eye watches from the middle, and its tendrils glow at the tips. It doesn't stay put: it blinks across the arena, so the player has to keep re-aiming.</p>
+        <div class="chips"><span class="chip weak">Weak to Lightning</span><span class="chip">Lightning stuns it mid-charge</span><span class="chip">Proposed</span></div>
+      </div>
+    </div>
+    <div class="moves six">
+      <div class="move"><div class="cell"><canvas data-anim="weaver.charge"></canvas></div><div class="head"><h3>Gathering</h3><span class="mono" data-info="weaver.charge"></span></div><p>The eye opens wide and light gathers under the bell.</p></div>
+      <div class="move"><div class="cell"><canvas data-anim="weaver.attack"></canvas></div><div class="head"><h3>Star Volley</h3><span class="mono" data-info="weaver.attack"></span></div><p>The tendrils flare out and it fires a volley of homing star bolts.</p></div>
+      <div class="move"><div class="cell"><canvas data-anim="weaver.blink"></canvas></div><div class="head"><h3>Blink</h3><span class="mono" data-info="weaver.blink"></span></div><p>Collapses into a point of light and reforms somewhere else in the arena.</p></div>
+      <div class="move"><div class="cell"><canvas class="small" data-anim="weaver.projectile"></canvas></div><div class="head"><h3>Star Bolt</h3><span class="mono" data-info="weaver.projectile"></span></div><p>A spinning star that homes in slowly. Arcane missiles intercept it.</p></div>
+      <div class="move"><div class="cell"><canvas data-anim="weaver.hurt"></canvas></div><div class="head"><h3>Hurt</h3><span class="mono" data-info="weaver.hurt"></span></div><p>Flashes and the eye squeezes shut.</p></div>
+      <div class="move"><div class="cell"><canvas data-anim="weaver.death"></canvas></div><div class="head"><h3>Death</h3><span class="mono" data-info="weaver.death"></span></div><p>Implodes into a star that flares once and goes out.</p></div>
+    </div>
+  </section>
+
+  <footer>
+    <p>Names, attacks and weaknesses are proposals to react to, not decisions. Each attack is designed so a rooted wizard can answer it with a spell.</p>
+    <p>Source: <code>tools/art/bosses.mjs</code>. Each frame is generated from a few pose values, so poses and timings are quick to change.</p>
+  </footer>
+</div>
+
+<script>
+  const DATA = /*DATA*/null;
+  const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  let playing = !reduce, speed = 1;
+  const players = [];
+  for (const cv of document.querySelectorAll("canvas[data-anim]")) {
+    const [boss, name] = cv.dataset.anim.split(".");
+    const a = DATA[boss] && DATA[boss][name];
+    if (!a) continue;
+    cv.width = a.w; cv.height = a.h;
+    const ctx = cv.getContext("2d");
+    ctx.imageSmoothingEnabled = false;
+    const img = new Image();
+    const p = { a, ctx, img, f: 0, t: 0, hold: 0, ready: false };
+    img.onload = () => { p.ready = true; draw(p); };
+    img.src = a.src;
+    players.push(p);
+  }
+  for (const el of document.querySelectorAll("[data-info]")) {
+    const [boss, name] = el.dataset.info.split(".");
+    const a = DATA[boss][name];
+    const ms = a.d.reduce((s, v) => s + v, 0);
+    el.textContent = `${a.n} fr · ${ms} ms`;
+  }
+  function draw(p) {
+    const { a, ctx, img } = p;
+    ctx.clearRect(0, 0, a.w, a.h);
+    ctx.drawImage(img, p.f * a.w, 0, a.w, a.h, 0, 0, a.w, a.h);
+  }
+  let last = performance.now();
+  function tick(now) {
+    const dt = Math.min(100, now - last) * speed;
+    last = now;
+    if (playing)
+      for (const p of players) {
+        if (!p.ready) continue;
+        if (p.hold > 0) { p.hold -= dt; if (p.hold <= 0) p.t = 0; continue; }
+        p.t += dt;
+        let changed = false;
+        while (p.t >= p.a.d[p.f]) {
+          p.t -= p.a.d[p.f];
+          if (p.f === p.a.n - 1) {
+            if (p.a.once) { p.f = 0; p.hold = 1100; changed = true; break; }   // one-shot: rest on the intact first frame, then replay
+            p.f = 0;
+          } else p.f++;
+          changed = true;
+        }
+        if (changed) draw(p);
+      }
+    requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+
+  const playBtn = document.getElementById("play");
+  const setPlay = (on) => { playing = on; playBtn.textContent = on ? "Pause" : "Play"; playBtn.setAttribute("aria-pressed", String(on)); };
+  setPlay(playing);
+  playBtn.addEventListener("click", () => setPlay(!playing));
+  const s1 = document.getElementById("speed1"), s05 = document.getElementById("speed05");
+  const setSpeed = (v) => { speed = v; s1.setAttribute("aria-pressed", String(v === 1)); s05.setAttribute("aria-pressed", String(v !== 1)); };
+  s1.addEventListener("click", () => setSpeed(1));
+  s05.addEventListener("click", () => setSpeed(0.5));
+</script>
