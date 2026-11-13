@@ -117,12 +117,9 @@ See `docs/ART_PIPELINE.md` for how the art is made and `docs/QA_REPORT.md` for w
 - **Jersey 10** © 2023 The Soft Type Project Authors (https://github.com/scfried/soft-type-jersey),
   SIL Open Font License 1.1. The licence ships next to the font in `public/assets/fonts/OFL.txt`.
 - **Phaser 3.90** (game engine) © Richard Davey, Phaser Studio Inc., MIT License.
-- **Level-up effect:** pixelfx `ui/level-up` (https://github.com/patch-gg/pixelfx) © 2026 Patch and Hugo
-  Duprez, MIT License; it adapts Sprite Fusion's open-source holy-light and power-up VFX (Hugo Duprez, MIT).
-  Exported as a sprite sheet and cleaned by `tools/art/import-pixelfx.mjs` (see `docs/ART_PIPELINE.md`).
 - Everything else (art, sound, code) is made for this project; see `docs/ART_PIPELINE.md`.
 - `public/THIRD_PARTY_LICENSES.txt` ships in the build with both licence notices (the minified engine
-  bundle drops Phaser's own copyright comment), plus the pixelfx licence.
+  bundle drops Phaser's own copyright comment).
 
 ### External requests at runtime
 

@@ -113,17 +113,20 @@ export class Enemy implements Target {
   private spawnIn() {
     const g = this.g;
     this.state = "spawn";
-    const portal = g.vfx.play("portal", this.x, this.y, { depth: DEPTH.sigil });
-    portal.setScale(this.kind === "golem" ? 1.6 : 1);
+    // a bright rift with a glow under it so it reads on the dark floor; the enemy rises out of it through
+    // a column of light. The rift is the warning: the enemy only starts moving after portalMs.
+    const big = this.kind === "golem" ? 1.5 : this.kind === "skeleton" ? 1.15 : 1;
+    g.vfx.play("portal", this.x, this.y, { depth: DEPTH.sigil, scale: big });
+    g.vfx.glow(this.x, this.y - 3, PAL.violet, 46 * big, GAME.spawn.portalMs * 0.6, 0.5);
     this.sprite.setAlpha(0).setScale(this.scaleBase * 0.6, this.scaleBase * 0.2);
     Audio.play("spawn", { vol: 0.35, rate: 0.9 + Math.random() * 0.2 });
-    // the portal is the warning: the enemy rises through it and only starts moving after portalMs
     const P = GAME.spawn.portalMs;
-    g.time.delayedCall(Math.round(P * 0.45), () => {
+    g.time.delayedCall(Math.round(P * 0.4), () => {
       if (!this.alive) return;
-      g.vfx.burst("dot", this.x, this.y - 4, 6, { tint: PAL.violet });
-      g.tweens.add({ targets: this.sprite, alpha: 1, scaleX: this.scaleBase, scaleY: this.scaleBase, duration: 260, ease: "Back.easeOut" });
-      g.tweens.add({ targets: this.shadow, alpha: 1, duration: 260 });
+      g.vfx.play("portal_beam", this.x, this.y + 1, { depth: this.y - 0.5, add: true, alpha: 0.7, scale: big });
+      g.vfx.burst("dot", this.x, this.y - 4, 6, { tint: PAL.lavender });
+      g.tweens.add({ targets: this.sprite, alpha: 1, scaleX: this.scaleBase, scaleY: this.scaleBase, duration: 300, ease: "Back.easeOut" });
+      g.tweens.add({ targets: this.shadow, alpha: 1, duration: 300 });
     });
     g.time.delayedCall(P, () => {
       if (this.alive && this.state === "spawn") this.state = "move";

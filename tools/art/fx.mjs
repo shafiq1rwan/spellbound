@@ -246,15 +246,146 @@ export function smokePuff(frames = 6, ramp = ["#2A2244", "#4A3D6E", "#6D5C98"]) 
     return im;
   });
 }
-export function spawnPortal(frames = 6) {
+// Enemy spawn: a bright rift opens on the floor (white pop, violet rim with orbiting lavender ticks, a
+// swirling void), motes rise out of it, then it snaps shut. 12 frames = GAME.spawn.portalMs at 75 ms.
+// The rift centre is at (20, 16); the space above is for the rising motes.
+export const PORTAL_ORIGIN = [0.5, 16.5 / 24];
+export function spawnPortal(frames = 12) {
+  const R = rng(31);
+  const motes = Array.from({ length: 9 }, () => ({ a: R() * 6.28, r: 0.3 + R() * 0.6, t0: 0.1 + R() * 0.45, sp: 0.9 + R() * 0.7 }));
   return Array.from({ length: frames }, (_, f) => {
-    const im = new Img(32, 16);
-    const s = [0.35, 0.75, 1, 1, 0.8, 0.4][f];
-    im.ellipse(16, 8, 14 * s, 6 * s, "#140E26");
-    im.ellipse(16, 8, 11 * s, 4.5 * s, "#2B1650");
-    for (let i = 0; i < 10; i++) {
-      const a = (i / 10) * 6.28 + f * 0.6;
-      im.px(16 + Math.cos(a) * 12 * s, 8 + Math.sin(a) * 5 * s, i % 2 ? C.violet : C.lavender);
+    const im = new Img(40, 24);
+    const cx = 20, cy = 16, t = f / (frames - 1);
+    const s = [0.3, 0.75, 1.08, 1, 1, 1, 1, 1, 1, 0.92, 0.6, 0.28][f] ?? 1;
+    const rx = 15 * s, ry = 6.5 * s;
+    if (f === 0) {
+      // the pop: a white spark with a lavender cross so even the first frame reads on a dark floor
+      im.ellipse(cx, cy, 5, 2.2, C.lavender).ellipse(cx, cy, 3, 1.2, "#FFFFFF");
+      im.hline(cx - 9, cy, 18, C.lavender).vline(cx, cy - 6, 9, C.lavender).px(cx, cy, "#FFFFFF");
+      return im;
+    }
+    im.ellipse(cx, cy, rx, ry, "#21123E");
+    im.ellipse(cx, cy, rx * 0.68, ry * 0.68, "#0C0718");
+    // three spiral arms turning inward
+    for (let k = 0; k < 3; k++)
+      for (let j = 0; j < 9; j++) {
+        const u = j / 9, a = k * 2.094 + f * 0.75 + u * 2.6;
+        im.px(cx + Math.cos(a) * rx * (0.15 + u * 0.75), cy + Math.sin(a) * ry * (0.15 + u * 0.75), u > 0.55 ? C.violet : "#5B2FA8");
+      }
+    ringStroke(im, cx, cy, rx, 1, C.violet, { squash: ry / rx });
+    for (let i = 0; i < 14; i++) {
+      const a = (i / 14) * 6.28 + f * 0.45;
+      im.px(cx + Math.cos(a) * rx, cy + Math.sin(a) * ry, i % 4 === 0 ? "#FFFFFF" : C.lavender);
+    }
+    // opening flash: a white ring just outside the rim
+    if (f <= 2) ringStroke(im, cx, cy, rx + 2 * f, 1, f === 1 ? "#FFFFFF" : C.lavender, { squash: ry / rx, fade: f === 2 ? 0.5 : 0 });
+    // motes rising out of the rift
+    for (const m of motes) {
+      const u = (t - m.t0) * m.sp * 2.2;
+      if (u < 0 || u > 1) continue;
+      const x = cx + Math.cos(m.a) * rx * m.r, y = cy + Math.sin(m.a) * ry * m.r - u * 15;
+      im.px(x, y, u < 0.45 ? "#FFFFFF" : C.lavender);
+      if (u < 0.3) im.px(x, y + 1, C.violet);
+    }
+    return im;
+  });
+}
+/** the light column the enemy rises through (drawn additively, origin at its foot) */
+export const BEAM_ORIGIN = [0.5, 39.5 / 40];
+export function portalBeam(frames = 6) {
+  return Array.from({ length: frames }, (_, f) => {
+    const im = new Img(16, 40);
+    const half = [1.5, 3.5, 4, 3.5, 2.5, 1.5][f], top = [22, 6, 2, 2, 4, 8][f];
+    const fade = [0, 0, 0, 0.2, 0.45, 0.7][f];
+    for (let y = top; y < 40; y++) {
+      const v = (y - top) / (40 - top); // 0 top .. 1 foot
+      const tipFade = v < 0.35 ? (0.35 - v) / 0.35 : 0;
+      for (let x = 0; x < 16; x++) {
+        const d = Math.abs(x + 0.5 - 8) / half;
+        if (d > 1 || bayer(x, y) < Math.max(fade, tipFade)) continue;
+        im.px(x, y, d < 0.3 ? "#FFFFFF" : d < 0.65 ? C.lavender : C.violet);
+      }
+    }
+    return im;
+  });
+}
+
+// Level-up: a gold pillar of light bursts up behind the wizard from a ring that sweeps out across the
+// floor, and gold, white and lavender sparkles drift up. The peak is in the first ~0.5 s (the cards open
+// at 0.52 s and freeze it); the rest is a slow thin-out that plays after the pick.
+// Canvas 72x104 with the wizard's feet at (36, 90).
+export const LEVELUP_ORIGIN = [0.5, 90.5 / 104];
+export function levelUp(frames = 16) {
+  const W = 72, H = 104, cx = 36, gy = 90;
+  const G = C.gold; // dark .. light
+  const R = rng(77);
+  const motes = Array.from({ length: 34 }, () => ({
+    x: (R() - 0.5) * 40, t0: R() * 0.65, sp: 0.8 + R() * 0.9,
+    c: [G[2], "#FFFFFF", G[3], C.lavender][Math.floor(R() * 4)], big: R() < 0.35,
+  }));
+  return Array.from({ length: frames }, (_, f) => {
+    const im = new Img(W, H);
+    const t = f / (frames - 1);
+    // ground ring sweeping out (perspective ellipse), a second one trailing it
+    for (const [lag, col] of [[0, G[2]], [2, G[1]]]) {
+      const k = f - lag;
+      if (k < 0) continue;
+      const u = Math.min(1, k / 9);
+      const r = 5 + 29 * (1 - Math.pow(1 - u, 2));
+      ringStroke(im, cx, gy, r, k < 3 ? 2 : 1, col, { squash: 0.38, fade: u > 0.55 ? (u - 0.55) * 2.2 : 0 });
+    }
+    // warm pool of light at the feet
+    if (f >= 1 && f <= 9) {
+      const a = f <= 4 ? 0.55 : 0.55 * (1 - (f - 4) / 6);
+      for (let y = gy - 5; y <= gy + 5; y++)
+        for (let x = cx - 16; x <= cx + 16; x++) {
+          const d = Math.hypot((x + 0.5 - cx) / 16, (y + 0.5 - gy) / 5);
+          if (d <= 1 && bayer(x, y) < a * (1 - d)) im.px(x, y, G[2]);
+        }
+    }
+    // the pillar: flared at the floor, tapering up, with bright bands rushing upward. From frame 9 its
+    // foot lifts off the floor and the whole column rises away rather than thinning out.
+    const grow = f < 3 ? (f + 1) / 3 : 1;
+    const top = Math.round(gy - grow * 92 - (f >= 9 ? (f - 8) * 4 : 0));
+    const foot = f < 9 ? gy : gy - Math.round(Math.pow(f - 8, 1.35) * 9);
+    const half = [4, 10, 11, 10, 9, 8.5, 8, 7.5, 7, 6.5, 6, 5.5, 5, 4.5, 4, 3.5][f] ?? 3;
+    const fade = f < 11 ? 0 : (f - 10) / 7;
+    for (let y = Math.max(0, top); y <= foot; y++) {
+      const v = (y - top) / (gy - top); // 0 top .. 1 floor
+      const tipFade = v < 0.3 ? (0.3 - v) / 0.3 : 0;
+      const footFade = f >= 9 && foot - y < 8 ? (8 - (foot - y)) / 8 : 0;
+      const w = half * (0.55 + 0.45 * v) * (y > gy - 6 ? 1 + (y - (gy - 6)) * 0.12 : 1);
+      const band = (y + f * 9) % 14 < 3;
+      for (let x = Math.floor(cx - w - 1); x <= Math.ceil(cx + w + 1); x++) {
+        const d = Math.abs(x + 0.5 - cx) / w;
+        if (d > 1 || bayer(x, y) < Math.max(fade, tipFade, footFade)) continue;
+        let i = f <= 1 ? (d < 0.6 ? 4 : 3) : d < 0.28 ? 4 : d < 0.55 ? 3 : d < 0.82 ? 2 : 1;
+        if (band && i < 4 && f > 1) i++;
+        im.px(x, y, i === 4 ? "#FFFFFF" : G[i]);
+      }
+    }
+    // side rays: thin streaks shooting up beside the column during the burst
+    if (f >= 1 && f <= 10)
+      for (const [dx, ph] of [[-1, 0], [1, 5], [-1, 9], [1, 13]]) {
+        const x = cx + dx * (half + 3 + (ph % 3));
+        const y0 = gy - 10 - ((f * 11 + ph * 6) % 60);
+        for (let k = 0; k < 9; k++) if (bayer(x, y0 + k) >= fade) im.px(x, y0 + k, k < 3 ? "#FFFFFF" : G[k < 6 ? 3 : 2]);
+      }
+    // white flare across the base on the burst frames
+    if (f >= 1 && f <= 2) im.hline(cx - 20 + f * 4, gy - 1, 40 - f * 8, "#FFFFFF").hline(cx - 14, gy, 28, G[3]);
+    // sparkles drifting up
+    for (const m of motes) {
+      const u = (t - m.t0) * m.sp * 1.7;
+      if (u < 0 || u > 1) continue;
+      const x = Math.round(cx + m.x * (1 - u * 0.35) + Math.sin(u * 9 + m.x) * 1.5), y = Math.round(gy - 4 - u * 82);
+      if (u > 0.75 && bayer(x, y) < (u - 0.75) * 4) continue;
+      im.px(x, y, m.c);
+      if (m.big && u < 0.7) {
+        // four-point twinkle, arms longer while it's fresh
+        const L = u < 0.35 ? 2 : 1;
+        for (let k = 1; k <= L; k++) im.px(x - k, y, m.c).px(x + k, y, m.c).px(x, y - k, m.c).px(x, y + k, m.c);
+        im.px(x, y, "#FFFFFF");
+      }
     }
     return im;
   });

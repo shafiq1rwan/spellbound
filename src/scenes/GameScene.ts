@@ -1,7 +1,6 @@
 // GameScene: the arena. Owns the world camera and all gameplay systems; the HUD, tutorial,
 // upgrade, pause and game-over UIs are separate overlay scenes talking through the bus.
 import Phaser from "phaser";
-import { LEVELUP_FX, lateReady, loadLateAssets } from "../core/LateAssets";
 import { GAME } from "../config/game";
 import { PAL, ELEMENT_COLORS } from "../config/palette";
 import { RUNE_TO_SPELL, SPELLS, SPELL_ORDER } from "../config/spells";
@@ -92,7 +91,6 @@ export class GameScene extends Phaser.Scene {
     const cam = this.cameras.main;
     cam.setBackgroundColor(PAL.void);
     this.add.image(0, 0, "floor").setDepth(DEPTH.floor);
-    loadLateAssets(this); // in case the menu was left before the background load finished
     this.vfx = new VFXManager(this);
     this.ambience = new Ambience(this, this.vfx, 0, 0);
     this.wizard = new Wizard(this, 0, 0, this.vfx);
@@ -447,25 +445,15 @@ export class GameScene extends Phaser.Scene {
     this.game.events.once(Phaser.Core.Events.VISIBLE, () => Audio.mute("hidden", false));
   }
 
-  private levelFx?: Phaser.GameObjects.Sprite;
   /** game time until which a rune unlock is on screen (level-up cards wait so they don't cover it) */
   private presentingUntil = 0;
   /**
-   * pixelfx "ui/level-up" behind the wizard: the pillar bursts before the cards open (0.52 s), the game
-   * pauses under the cards, and the "LEVEL UP!" title drops in after the pick. One sprite, restarted for
-   * back-to-back level-ups. Falls back to a gold glow if the background load hasn't finished.
+   * A gold pillar bursts up behind the wizard from a ring on the floor (baked in tools/art/fx.mjs). It peaks
+   * before the cards open at 0.52 s, freezes under them, and lifts away after the pick.
    */
   private playLevelUpFx() {
     const w = this.wizard;
-    if (!lateReady(this)) {
-      this.vfx.glow(w.x, w.y - 10, PAL.gold, 140, 700, 0.5);
-      return;
-    }
-    const fx = (this.levelFx ??= this.add.sprite(0, 0, LEVELUP_FX.key, 0)
-      .setOrigin(LEVELUP_FX.pivot[0] / LEVELUP_FX.frameW, LEVELUP_FX.pivot[1] / LEVELUP_FX.frameH));
-    fx.setPosition(Math.round(w.x), Math.round(w.y)).setDepth(w.y - 0.5).setVisible(true).setAlpha(1);
-    fx.play(LEVELUP_FX.anim);
-    fx.once(Phaser.Animations.Events.ANIMATION_COMPLETE, () => fx.setVisible(false));
+    this.vfx.play("levelup", Math.round(w.x), Math.round(w.y), { depth: w.y - 0.5 });
   }
 
   private openUpgrade() {

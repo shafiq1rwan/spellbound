@@ -130,7 +130,9 @@ for (const [key, fn] of Object.entries(PETS)) {
   one("hitflash", FX.hitFlash(4), 35);
   one("zap", FX.zap(5), 40);
   one("smoke", FX.smokePuff(6), 70);
-  one("portal", FX.spawnPortal(6), 90);
+  one("portal", FX.spawnPortal(12), 75, { origin: FX.PORTAL_ORIGIN });
+  one("portal_beam", FX.portalBeam(6), 55, { origin: FX.BEAM_ORIGIN });
+  one("levelup", FX.levelUp(16), 60, { origin: FX.LEVELUP_ORIGIN });
   one("shock", FX.shockRing(64, 5), 50);
   one("shock_ice", FX.shockRing(64, 5, "#FFFFFF", C.iceCyan), 50);
   one("xp", FX.xpOrb(6), 90, { loop: true });
