@@ -1,6 +1,7 @@
-// Waves: spawns just outside the visible camera rect (consistent relative to the viewport),
+// Waves: spawns in a band just inside the visible screen (clear of the HUD) behind a short portal,
 // never too close to the wizard, honours spawn caps and eases off while the player is drawing.
 import { GAME } from "../config/game";
+import { Layout } from "../core/Layout";
 import { waveDef, spawnIntervalMs, type WaveDef } from "../config/waves";
 import { PAL } from "../config/palette";
 import { SPELLS, SPELL_ORDER } from "../config/spells";
@@ -8,7 +9,7 @@ import type { EnemyKind } from "../config/enemies";
 import { Audio } from "../core/Audio";
 import { bus, EV } from "../core/bus";
 import { Analytics, cap } from "../core/Analytics";
-import { Enemy } from "../entities/Enemy";
+import { Enemy, ENEMY_HEIGHT } from "../entities/Enemy";
 import { Boss } from "../entities/Boss";
 import type { GameScene } from "../scenes/GameScene";
 
@@ -57,24 +58,47 @@ export class EnemySpawnManager {
     }
   }
 
-  /** a random point just outside the visible area */
-  private edgePoint() {
-    const cam = this.g.cameras.main;
-    const v = cam.worldView;
-    const m = GAME.spawn.margin;
-    const w = this.g.wizard;
-    for (let tries = 0; tries < 12; tries++) {
-      // each side equally likely (not by length): in portrait the left/right edges are only ~95 art px
-      // from the wizard, so spawning by edge length sent 2/3 of enemies in with ~3 s of warning
-      const side = Math.floor(Math.random() * 4), f = Math.random();
+  /**
+   * The area enemies may appear in: the visible screen minus the HUD (hearts/wave/timer/pause at the top,
+   * XP bar and spell slots at the bottom in portrait, the slot column on the left in landscape), inset so
+   * the whole body of an enemy of this kind is on screen. World coordinates.
+   */
+  private playArea(kind: Exclude<EnemyKind, "boss">) {
+    const v = this.g.cameras.main.worldView, sf = Layout.safe;
+    const bodyTop = 2 * ENEMY_HEIGHT[kind] + 6;                   // feet to the top of the sprite
+    const top = sf.top + (this.bossAlive ? 54 : 42);
+    const bottom = Layout.portrait ? sf.bottom + 46 : sf.bottom + 16;
+    const left = Layout.portrait ? sf.left + 10 : sf.left + 38;
+    return { x0: v.x + left, x1: v.right - sf.right - 10, y0: v.y + top + bodyTop, y1: v.bottom - bottom - 4 };
+  }
+
+  /**
+   * A random point in a band just inside the screen edge (not outside it): the enemy is visible from the
+   * moment it exists, and its portal is a warning. Each side equally likely; never nearer than
+   * minDistance to the wizard, which on a portrait phone keeps side spawns high or low (the side edges
+   * are only ~95 art px from the wizard).
+   */
+  private edgePoint(kind: Exclude<EnemyKind, "boss">) {
+    const a = this.playArea(kind), w = this.g.wizard, band = GAME.spawn.band;
+    let best = { x: a.x0, y: a.y0 }, bestD = -1;
+    for (let tries = 0; tries < 16; tries++) {
+      const side = Math.floor(Math.random() * 4), f = Math.random(), d = Math.random() * band;
       let x: number, y: number;
-      if (side === 0) { x = v.x + f * v.width; y = v.y - m; }
-      else if (side === 1) { x = v.x + f * v.width; y = v.bottom + m + 8; }
-      else if (side === 2) { x = v.x - m; y = v.y + f * v.height; }
-      else { x = v.right + m; y = v.y + f * v.height; }
-      if (Math.hypot(x - w.x, y - w.y) >= GAME.spawn.minDistance) return { x, y };
+      if (side === 0) { x = a.x0 + f * (a.x1 - a.x0); y = a.y0 + d; }
+      else if (side === 1) { x = a.x0 + f * (a.x1 - a.x0); y = a.y1 - d; }
+      else if (side === 2) { x = a.x0 + d; y = a.y0 + f * (a.y1 - a.y0); }
+      else { x = a.x1 - d; y = a.y0 + f * (a.y1 - a.y0); }
+      const dist = Math.hypot(x - w.x, y - w.y);
+      if (dist >= GAME.spawn.minDistance) return { x, y };
+      if (dist > bestD) { bestD = dist; best = { x, y }; }
     }
-    return { x: w.x + GAME.spawn.minDistance, y: w.y };
+    // a small screen may have no spot that far: use the farthest one found (corners usually)
+    return best;
+  }
+  /** keep a group member (spread round the group's point) inside the play area */
+  private clampToArea(kind: Exclude<EnemyKind, "boss">, x: number, y: number) {
+    const a = this.playArea(kind);
+    return { x: Math.max(a.x0, Math.min(a.x1, x)), y: Math.max(a.y0, Math.min(a.y1, y)) };
   }
 
   spawnAt(kind: Exclude<EnemyKind, "boss">, x: number, y: number, elite: boolean, instant = false) {
@@ -121,15 +145,16 @@ export class EnemySpawnManager {
     this.nextSpawn = spawnIntervalMs(this.def) * (0.75 + Math.random() * 0.5);
     const [g0, g1] = this.def.group;
     const n = Math.min(this.def.maxAlive - alive, g0 + Math.floor(Math.random() * (g1 - g0 + 1)));
-    const p = this.edgePoint();
     const kind = this.pickKind();
+    const p = this.edgePoint(kind);
     for (let i = 0; i < n; i++) {
       // elites are guaranteed: spread across the wave once the first 30% has passed
       const due = this.def.elites - this.elitesLeft < Math.floor((this.waveT / this.def.durationMs - 0.3) / 0.7 * this.def.elites) + 1;
       const elite = this.elitesLeft > 0 && this.waveT > this.def.durationMs * 0.3 && i === 0 && due;
       if (elite) this.elitesLeft--;
       const k = i === 0 ? kind : this.pickKind();
-      this.g.time.delayedCall(i * 140, () => !this.g.over && this.spawnAt(k, p.x + (Math.random() - 0.5) * 22, p.y + (Math.random() - 0.5) * 22, elite));
+      const q = this.clampToArea(k, p.x + (Math.random() - 0.5) * 22, p.y + (Math.random() - 0.5) * 22);
+      this.g.time.delayedCall(i * 140, () => !this.g.over && this.spawnAt(k, q.x, q.y, elite));
     }
   }
 }

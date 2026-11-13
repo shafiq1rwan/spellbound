@@ -2,6 +2,7 @@
 // lunge), Stone Golem (stomp + telegraphed slam), boss orbs. Shared: spawn-in, hit reactions,
 // knockback, slow/freeze/stun, elite glow, unique deaths.
 import Phaser from "phaser";
+import { GAME } from "../config/game";
 import { ENEMIES, ELITE, type EnemyDef, type EnemyKind } from "../config/enemies";
 import { PAL } from "../config/palette";
 import { origin } from "../core/assets";
@@ -28,6 +29,9 @@ export interface Target {
   push(dx: number, dy: number, force: number): void;
   die(): void;
 }
+
+/** visual centre height above the feet (x, y), per kind: used for VFX, aiming and spawn placement */
+export const ENEMY_HEIGHT: Record<string, number> = { slime: 7, bat: 14, skeleton: 14, golem: 22, boss: 0, orb: 14 };
 
 type State = "spawn" | "move" | "rest" | "windup" | "attack" | "recover" | "dead";
 
@@ -84,7 +88,7 @@ export class Enemy implements Target {
     this.radius = this.def.radius * (this.elite ? 1.15 : 1);
     this.scaleBase = this.elite ? ELITE.scale : 1;
     this.sheet = kind === "orb" ? "boss_orb" : this.elite ? `${kind}_elite` : kind;
-    this.height = { slime: 7, bat: 14, skeleton: 14, golem: 22, boss: 0, orb: 14 }[kind];
+    this.height = ENEMY_HEIGHT[kind];
     this.hover = kind === "bat" ? 13 : kind === "orb" ? 14 : 0;
     this.shadow = g.add.image(x, y, `shadow${this.def.shadow}`).setDepth(DEPTH.shadow).setAlpha(0);
     const [ox, oy] = origin(this.sheet);
@@ -113,13 +117,15 @@ export class Enemy implements Target {
     portal.setScale(this.kind === "golem" ? 1.6 : 1);
     this.sprite.setAlpha(0).setScale(this.scaleBase * 0.6, this.scaleBase * 0.2);
     Audio.play("spawn", { vol: 0.35, rate: 0.9 + Math.random() * 0.2 });
-    g.time.delayedCall(240, () => {
+    // the portal is the warning: the enemy rises through it and only starts moving after portalMs
+    const P = GAME.spawn.portalMs;
+    g.time.delayedCall(Math.round(P * 0.45), () => {
       if (!this.alive) return;
       g.vfx.burst("dot", this.x, this.y - 4, 6, { tint: PAL.violet });
       g.tweens.add({ targets: this.sprite, alpha: 1, scaleX: this.scaleBase, scaleY: this.scaleBase, duration: 260, ease: "Back.easeOut" });
       g.tweens.add({ targets: this.shadow, alpha: 1, duration: 260 });
     });
-    g.time.delayedCall(520, () => {
+    g.time.delayedCall(P, () => {
       if (this.alive && this.state === "spawn") this.state = "move";
     });
   }

@@ -96,9 +96,11 @@ public/assets/fonts/       Jersey 10 (readable text) + its OFL licence
 - **Only what's on screen gets hit** (like Survivor.io): auto-aim, chains, homing and pets pick on-screen
   enemies (`GameScene.visibleTargets`), projectiles vanish at the screen edge, and `CombatSystem`
   ignores damage to anything whose centre is off screen.
-- **Spawns** come from the four screen edges with equal odds (`EnemySpawnManager.edgePoint`). In
-  portrait the side edges are close to the wizard, so spawning by edge length sent most enemies in
-  from the sides with little warning.
+- **Spawns** happen on screen, in a band just inside the edge and clear of the HUD
+  (`EnemySpawnManager.edgePoint`/`playArea`), behind a 0.9 s purple portal (`GAME.spawn.portalMs`)
+  during which the enemy is visible but harmless and can't be targeted. Never nearer than
+  `GAME.spawn.minDistance` (140 art px), which keeps portrait spawns at the top and bottom; very short
+  screens use the farthest spot available.
 
 - **Text:** two fonts. The in-house 5×7 bitmap font (`txt()` in `src/ui/widgets.ts`) is for titles,
   buttons and numbers. Sentences (upgrade descriptions, hints, the menu line) use **Jersey 10** in

@@ -70,11 +70,23 @@ edges and used to be shot before they appeared. Spawns are now split evenly acro
 | v1.6.0 | 3:45, 6:03, alive at 7:44 |
 | On-screen aim only | 2:20, 2:46, 6:44 |
 | v1.6.2: nothing off screen can be hit | 6:24 (wave 10 boss), alive at 7:42 |
+| v1.8.0: enemies spawn on screen (first try: 115 px minimum, 0.7 s portal) | 1:34 (wave 3), 6:29 (wave 10 boss) |
+| v1.8.0: tuned (140 px minimum so portrait spawns are top/bottom, 0.9 s portal) | 4:10 (wave 7), 7:20 (beat the boss, wave 11) |
 | v1.7.3: XP flies straight in | 5:14 (wave 9), level 11; within the usual spread |
 | On-screen aim + even spawn sides (v1.6.1) | 4:20, 6:29 (wave 10 boss, run alone), alive at 7:44; plus 1:26 in a run that shared the CPU with two other browsers |
 
 The casual bot's spread is wide (it tends to get surrounded and collapse), so compare medians over
 several runs.
+
+## v1.8.0: on-screen spawns
+
+Enemies used to appear just outside the screen and walk in; with the v1.6.2 rule that nothing off screen
+can be hit, up to 25 of ~27 late-game enemies were invisible and untouchable at any moment, and the spawn
+portal played where nobody saw it. They now appear inside the screen. A portrait screen is small around
+the wizard (~95 art px to the sides, ~150 px to the farthest on-screen spot at the top/bottom after the HUD),
+so the median spawn distance dropped from 226 to ~150 px at 390×844, which removes 2–4 s of approach per
+enemy. Compensated with a 140 px minimum (top/bottom spawns in portrait) and a 0.9 s portal warning
+(was 0.52 s). Measured with `tools/qa/spawns.mjs`.
 
 ## Late game
 

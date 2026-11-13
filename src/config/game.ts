@@ -68,11 +68,13 @@ export const GAME = {
   },
 
   spawn: {
-    /** spawn ring = just outside the visible camera rect, in world px */
-    margin: 18,
-    /** never spawn nearer than this to the wizard */
-    minDistance: 95,
-    portalMs: 520,
+    /** enemies appear in a band this deep just inside the screen edge (clear of the HUD), in art px */
+    band: 14,
+    /** never spawn nearer than this to the wizard. 140 keeps portrait spawns at the top and bottom (the
+     *  side edges are only ~95 art px away); on very short screens the farthest spot found is used */
+    minDistance: 140,
+    /** the purple portal: the enemy is visible but harmless and untargetable for this long (warning time) */
+    portalMs: 900,
   },
 
   waveBreakMs: 2600,
