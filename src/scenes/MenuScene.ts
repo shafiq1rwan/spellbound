@@ -54,7 +54,7 @@ export class MenuScene extends Phaser.Scene {
     this.play.setDepth(100);
     this.settings.setDepth(100);
     const d = Save.data;
-    this.best = rtxt(this, 0, 0, d.bestWave ? `Best: wave ${d.bestWave} · ${fmtTime(d.bestTimeMs)}` : "", { size: 9, weight: 500, color: 0xc9b8f0 }).setDepth(100);
+    this.best = rtxt(this, 0, 0, d.bestWave ? `Best: wave ${d.bestWave} · ${fmtTime(d.bestTimeMs)}` : "", { size: 12, color: 0xc9b8f0 }).setDepth(100);
     this.layout();
     this.offLayout = Layout.onChange(() => this.layout());
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => this.offLayout?.());
@@ -82,7 +82,7 @@ export class MenuScene extends Phaser.Scene {
     let x = -Math.floor(rowW / 2);
     const rowY = 8;
     for (const p of parts) { p.o.setPosition(x, rowY); x += p.w + gap; c.add(p.o); }
-    const line = rtxt(this, 0, rowY + 10, "Draw shapes to cast spells", { size: 10, weight: 600, oy: 0, color: 0xfff8ec });
+    const line = rtxt(this, 0, rowY + 10, "Draw shapes to cast spells", { size: 13, oy: 0, color: 0xfff8ec });
     c.add(line);
     this.goalH = Math.round(line.y + line.height);
     return c;

@@ -43,7 +43,7 @@ export class UpgradeScene extends Phaser.Scene {
     const stackH = 14 + 6 + 7 + 14 + cardsH;
     const top = Math.max(sf.top + 6, Math.round(sf.top + (H - sf.top - sf.bottom) / 2 - stackH / 2));
     const title = txt(this, W / 2, top + 7, "LEVEL UP!", { scale: 2, color: PAL.gold });
-    const sub = rtxt(this, W / 2, top + 14 + 6, `Level ${this.level} · pick one`, { size: 9, weight: 500, color: PAL.lavender, oy: 0, maxWidth: W - 16 });
+    const sub = rtxt(this, W / 2, top + 14 + 6, `Level ${this.level} · pick one`, { size: 12, color: PAL.lavender, oy: 0, maxWidth: W - 16 });
     const cardsTop = top + 14 + 6 + 7 + 14;
     title.setScale(0.3);
     this.tweens.add({ targets: title, scale: 1, duration: 350, ease: "Back.easeOut" });
@@ -89,8 +89,8 @@ export class UpgradeScene extends Phaser.Scene {
       addIcon(iconCx, 0);
       const tx = L + 32 + 8;
       const lv = txt(this, R, 0, c.levelText || "NEW", { ox: 1, oy: 0, color: rc });
-      const name = rtxt(this, tx, 0, c.name, { size: 11, weight: 700, ox: 0, oy: 0, color: 0xfff8ec, align: "left" });
-      const desc = rtxt(this, tx, 0, c.desc, { size: 9, weight: 500, ox: 0, oy: 0, color: 0xece4ff, maxWidth: R - tx, align: "left" });
+      const name = rtxt(this, tx, 0, c.name, { size: 15, ox: 0, oy: 0, color: 0xfff8ec, align: "left" });
+      const desc = rtxt(this, tx, 0, c.desc, { size: 12, ox: 0, oy: 0, color: 0xece4ff, maxWidth: R - tx, align: "left" });
       // centre the name + description block vertically in the card
       const blockH = name.height + 2 + desc.height;
       const top = Math.round(-blockH / 2);
@@ -106,9 +106,9 @@ export class UpgradeScene extends Phaser.Scene {
       items.push(txt(this, 0, T, c.levelText || "NEW", { oy: 0, color: rc }));
       addIcon(0, T + 7 + 8 + 16);
       const nameT = T + 7 + 8 + 32 + 8;
-      const name = rtxt(this, 0, nameT, c.name, { size: 11, weight: 700, oy: 0, color: 0xfff8ec, maxWidth: w - 2 * P });
+      const name = rtxt(this, 0, nameT, c.name, { size: 15, oy: 0, color: 0xfff8ec, maxWidth: w - 2 * P });
       items.push(name);
-      items.push(rtxt(this, 0, nameT + name.height + 3, c.desc, { size: 9, weight: 500, oy: 0, color: 0xece4ff, maxWidth: w - 2 * P }));
+      items.push(rtxt(this, 0, nameT + name.height + 3, c.desc, { size: 12, oy: 0, color: 0xece4ff, maxWidth: w - 2 * P }));
     }
     if (window.matchMedia?.("(pointer: fine)").matches) items.push(txt(this, L, B, `${i + 1}`, { ox: 0, oy: 1, color: 0x6d5c98 }));
     ct.add(items);

@@ -71,7 +71,7 @@ tools/art/                 build-time pixel-art generator (see docs/ART_PIPELINE
 tools/qa/shoot.mjs         headless-Edge QA driver (screenshots, scripted rune drawing, stress)
 tests/                     recognizer test suite
 public/assets/gfx/         baked PNG sheets + manifest.json (+ bitmap font)
-public/assets/fonts/       Pixelify Sans (readable text) + its OFL licence
+public/assets/fonts/       Jersey 10 (readable text) + its OFL licence
 ```
 
 ## Tuning
@@ -96,9 +96,10 @@ public/assets/fonts/       Pixelify Sans (readable text) + its OFL licence
   from the sides with little warning.
 
 - **Text:** two fonts. The in-house 5×7 bitmap font (`txt()` in `src/ui/widgets.ts`) is for titles,
-  buttons and numbers. Sentences (upgrade descriptions, hints, the menu line) use **Pixelify Sans** in
-  sentence case (`rtxt()`), drawn at device resolution so it stays sharp. Its "fi"/"fl" ligature reads
-  as an "A" at this size, so `rtxt()` breaks it with a zero-width non-joiner.
+  buttons and numbers. Sentences (upgrade descriptions, hints, the menu line) use **Jersey 10** in
+  sentence case (`rtxt()`), drawn at device resolution so it stays sharp. (Pixelify Sans was tried
+  first, but its 5, 2 and 8 look like S, Z and B.) `rtxt()` also breaks "fi"/"fl" ligatures with a
+  zero-width non-joiner.
 
 Gameplay analytics (Poki `measure` events): see `docs/ANALYTICS.md`.
 
@@ -106,6 +107,6 @@ See `docs/ART_PIPELINE.md` for how the art is made and `docs/QA_REPORT.md` for w
 
 ## Credits
 
-- **Pixelify Sans** © 2021 The Pixelify Sans Project Authors (https://github.com/eifetx/Pixelify-Sans),
+- **Jersey 10** © 2023 The Soft Type Project Authors (https://github.com/scfried/soft-type-jersey),
   SIL Open Font License 1.1. The licence ships next to the font in `public/assets/fonts/OFL.txt`.
 - Everything else (art, sound, code) is made for this project; see `docs/ART_PIPELINE.md`.

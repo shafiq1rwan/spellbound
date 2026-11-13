@@ -84,24 +84,24 @@ export function txt(
 }
 
 /**
- * Readable text for sentences: descriptions, hints, the menu line. Pixelify Sans (SIL OFL 1.1, bundled
- * in public/assets/fonts) in sentence case reads far better than the all-caps 1px bitmap font, which
- * stays for titles, buttons and numbers. Rasterised at device resolution (Layout.S) so it stays crisp
- * under the art-pixel camera zoom. Sizes are in art pixels; the font is loaded by loadReadableFont().
+ * Readable text for sentences: descriptions, hints, the menu line. Jersey 10 (SIL OFL 1.1, bundled in
+ * public/assets/fonts) in sentence case reads far better than the all-caps 1px bitmap font, which stays
+ * for titles, buttons and numbers. (Pixelify Sans was tried first: its 5/2/8 look like S/Z/B.)
+ * Rasterised at device resolution (Layout.S) so it stays crisp under the art-pixel camera zoom.
+ * Sizes are in art pixels; the font is loaded by loadReadableFont().
  */
-export const READ_FONT = '"Pixelify Sans", "Trebuchet MS", system-ui, sans-serif';
-/** Pixelify Sans joins "fi"/"fl" into a ligature that reads as "A" at this size: break it with a ZWNJ */
+export const READ_FONT = '"Jersey 10", "Trebuchet MS", system-ui, sans-serif';
+/** break "fi"/"fl" ligatures with a ZWNJ: pixel fonts can draw them as an odd single glyph */
 const ZWNJ = String.fromCharCode(0x200c); // zero-width non-joiner
 const noLig = (s: string) => s.replace(/f(?=[il])/g, "f" + ZWNJ);
 export type RText = Phaser.GameObjects.Text;
 export function rtxt(
   scene: Phaser.Scene, x: number, y: number, s: string,
-  o: { size?: number; weight?: 400 | 500 | 600 | 700; color?: number; ox?: number; oy?: number; maxWidth?: number; align?: "left" | "center" | "right"; shadow?: boolean } = {},
+  o: { size?: number; color?: number; ox?: number; oy?: number; maxWidth?: number; align?: "left" | "center" | "right"; shadow?: boolean } = {},
 ): RText {
   const t = scene.add.text(Math.round(x), Math.round(y), noLig(s), {
     fontFamily: READ_FONT,
-    fontSize: `${o.size ?? 9}px`,
-    fontStyle: String(o.weight ?? 500),
+    fontSize: `${o.size ?? 12}px`,
     color: `#${(o.color ?? 0xfff8ec).toString(16).padStart(6, "0")}`,
     align: o.align ?? "center",
     lineSpacing: 1,
@@ -118,7 +118,7 @@ export function rtxt(
 /** register and load the bundled font (call during loading; resolves even if it fails) */
 export async function loadReadableFont(timeoutMs = 3000) {
   try {
-    const f = new FontFace("Pixelify Sans", "url(assets/fonts/PixelifySans.ttf)", { weight: "400 700" });
+    const f = new FontFace("Jersey 10", "url(assets/fonts/Jersey10.ttf)");
     document.fonts.add(f);
     await Promise.race([f.load(), new Promise((r) => setTimeout(r, timeoutMs))]);
   } catch {
