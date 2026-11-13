@@ -68,7 +68,8 @@ src/
   scenes/                  Boot, Preload, Menu, Game, HUD, Tutorial, Upgrade, Pause, Settings, GameOver
   ui/                      pixel widgets (buttons, 9-slice panels, text), segment stroker
 tools/art/                 build-time pixel-art generator (see docs/ART_PIPELINE.md)
-tools/qa/shoot.mjs         headless-Edge QA driver (screenshots, scripted rune drawing, stress)
+tools/qa/                  headless-Edge QA scripts: shoot (driver), sim-run (balance bot), guided, endgame,
+                           spawns, fxshots, unlock, cardcheck and more; usage is in each file's header
 tests/                     recognizer test suite
 public/assets/gfx/         baked PNG sheets + manifest.json (+ bitmap font)
 public/assets/fonts/       Jersey 10 (readable text) + its OFL licence
@@ -111,6 +112,8 @@ public/assets/fonts/       Jersey 10 (readable text) + its OFL licence
 Gameplay analytics (Poki `measure` events): see `docs/ANALYTICS.md`.
 
 See `docs/ART_PIPELINE.md` for how the art is made and `docs/QA_REPORT.md` for what was verified.
+Playtest results, the release log and what's being tested on Poki are in `docs/PLAYTESTS.md`; plans and
+ideas on hold are in `ROADMAP.md`.
 
 ## Credits
 

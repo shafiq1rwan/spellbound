@@ -18,7 +18,7 @@ after each boss.
 
 | # | Item | Targets | Size |
 |---|---|---|---|
-| 1 | v1.6.1: late-game freeze, effect lag, off-screen effects | Long sessions | Done, pending release |
+| 1 | v1.6.1: late-game freeze, effect lag, off-screen effects | Long sessions | Done (v1.6.1–v1.6.2) |
 | 2 | Mini boss on wave 5 (then every 5 waves) | The 2–4 minute drop-off | Small |
 | 3 | Chapters: new arena, boss and enemy variant every 10 waves | Sameness, "what's next?" | Large |
 | 4 | Endless wave modifiers | Wave 11+ variety | Small |
@@ -26,6 +26,11 @@ after each boss.
 | 6 | Unlockable looks and a best-chapter record | Return visits | Small–medium |
 
 Playtest after #2 before starting #3. It is the cheapest test of whether peaks keep players longer.
+
+Since this plan was written, the v1.6.2 player-fit test showed bigger losses earlier: wave 1–2
+drawing failures (fixed in v1.6.3) and a low **retry rate** (21% start a second run). Retry work may come
+before #2, depending on the v1.7.8 results. Test results and the release log are in
+`docs/PLAYTESTS.md`.
 
 ## 2. Mini bosses (every 5 waves)
 
@@ -61,6 +66,11 @@ cooldown. Each variant has a single trait tied to one of the four spells.
 
 Each boss shares the Guardian's frame (HP bar, entry, summons) with a recolour and **one new attack
 pattern**. The pattern does most of the work in making it feel different.
+
+**Concept art (not in the game yet):** `tools/art/bosses.mjs` draws three bosses at 96×96 with their
+animations: **Rime Queen** (Frozen Ruins), **Cinder Maw** (Ember Wastes) and **Void Weaver** (Astral
+Void). Run `node tools/art/boss-preview.mjs` and open `tools/art/boss-preview.html` to see them animated.
+Waiting on feedback before they're wired into `build.mjs`.
 
 ### The transition: the world transforms around the wizard
 
@@ -127,6 +137,24 @@ Each fusion is offered as an upgrade card when it unlocks.
   win against each boss.
 - **Best chapter** shown on the menu next to the best wave and time.
 - Saved in the existing save data (`src/core/Save.ts`).
+
+## Ideas on hold
+
+Discussed and parked; pick up when there's a reason to.
+
+- **Revive animation.** Today the wizard pops back in one frame (cheer pose, gold glow and sparkles,
+  then a gold shockwave that pushes enemies back and freezes them). Idea, about 1 s with the game frozen,
+  mirroring the death dissolve: sparkles gather in, the level-up pillar bursts up while the wizard fades in
+  from a white silhouette, the dropped crystal floats back to the staff, then the existing shockwave.
+- **Stronger shake for other spells.** Fireball is the one that's felt (2 px, up to 3 px for a meteor).
+  Ice Nova matches the basic Fireball, Lightning only shakes 90 ms on the first enemy, Arcane not at all.
+  Suggested: Nova 2.5 px for 160 ms, Lightning 2.5 px for 140 ms (more when it chains to 3+), Arcane a 1 px
+  tick on a missile kill only. Kept as is for now.
+- **Sprite Fusion pilot** (spritefusion.com pixel-art generator, MCP server). Fits better than SpriteFuse:
+  exact sizes, saved palette, style matching from up to 20 reference images, `animate_sprite`. Unknowns:
+  animation export format, transparency, commercial licence, cost (15 credits a call). Pilot: save the
+  game palette, upload 4–6 existing sprites, generate the King Slime at 64 px with idle and attack, import
+  it and compare it with a code-drawn version. It has to be connected in Claude Code first (`claude mcp add`, then sign in with `/mcp`).
 
 ## Open questions
 
