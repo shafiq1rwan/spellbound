@@ -10,6 +10,7 @@
 // "demo" shows how to draw a rune that was just unlocked (pictogram + ghost drawing above the wizard).
 import Phaser from "phaser";
 import { Layout } from "../core/Layout";
+import { TopStack } from "../ui/topStack";
 import { bus, EV } from "../core/bus";
 import { Analytics } from "../core/Analytics";
 import { SPELLS, type SpellId } from "../config/spells";
@@ -112,7 +113,7 @@ export class TutorialScene extends Phaser.Scene {
     this.tweens.add({ targets: [this.ghost, this.hand], alpha: on ? 0 : 1, duration: 120 });
   }
   private layout() {
-    let x = Math.round(Layout.w / 2), y = Math.round(Layout.safe.top + (Layout.portrait ? 66 : 48));
+    let x = Math.round(Layout.w / 2), y = TopStack.pictoY();
     // landscape unlock: the pictogram sits above the sample drawing (right of the wizard), not in the
     // middle where it crowded the timer and the "NEW RUNE!" banner
     if (this.mode === "demo" && !Layout.portrait) {

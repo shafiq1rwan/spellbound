@@ -2,6 +2,7 @@
 // banners, contextual hints, low-HP vignette, recognizer debug readout. Portrait and landscape layouts.
 import Phaser from "phaser";
 import { Layout } from "../core/Layout";
+import { TopStack } from "../ui/topStack";
 import { bus, EV } from "../core/bus";
 import { Analytics } from "../core/Analytics";
 import { Save, fmtTime } from "../core/Save";
@@ -172,8 +173,8 @@ export class HUDScene extends Phaser.Scene {
       this.placeXp(Math.round(W / 2 + 12), by - 21, bw);
       this.hint.setPosition(Math.round(W / 2), by - 30);
       this.hintW = W - 20;
-      // 22% (not 30%): clear of the level-up effect's "LEVEL UP!" title over the wizard
-      this.banner.setPosition(Math.round(W / 2), Math.round(H * 0.22));
+      // high enough to clear the level-up effect's title over the wizard, low enough to clear the unlock pictogram
+      this.banner.setPosition(Math.round(W / 2), TopStack.bannerY());
     } else {
       const cx = Math.round(sf.left + 18);
       shown.forEach((s, i) => {
@@ -257,8 +258,9 @@ export class HUDScene extends Phaser.Scene {
     this.refreshSlots();
     this.layout();
     const d = SPELLS[id];
-    // landscape: no subtitle (it ran into the wizard's hat); the pictogram beside the sample drawing says it
-    this.showBanner("NEW RUNE!", Layout.portrait ? `${d.runeName.toUpperCase()} = ${d.name.toUpperCase()}` : "", ELEMENT_COLORS[d.element].main);
+    // the subtitle only where it fits above the wizard's hat (not landscape, not very short phones);
+    // the pictogram shows the same thing without words
+    this.showBanner("NEW RUNE!", TopStack.subtitleFits() ? `${d.runeName.toUpperCase()} = ${d.name.toUpperCase()}` : "", ELEMENT_COLORS[d.element].main);
     const s = this.slots.find((q) => q.id === id)!;
     s.c.setScale(0.2);
     this.tweens.add({ targets: s.c, scale: 1, duration: 500, ease: "Back.easeOut" });

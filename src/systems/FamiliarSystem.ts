@@ -5,7 +5,6 @@ import Phaser from "phaser";
 import { SPELLS, SPELL_ORDER, type SpellId } from "../config/spells";
 import { ELEMENT_COLORS, PAL } from "../config/palette";
 import { Audio } from "../core/Audio";
-import { bus, EV } from "../core/bus";
 import { Analytics } from "../core/Analytics";
 import type { Target } from "../entities/Enemy";
 import { DEPTH } from "./VFXManager";
@@ -50,7 +49,9 @@ export class FamiliarSystem {
     g.vfx.burst("twinkle", w.x, w.y - 20, 12, { tint: col.light, speed: [20, 70] });
     g.vfx.glow(w.x, w.y - 20, col.main, 60, 500, 0.8);
     Audio.play("levelup", { vol: 0.5, rate: 1.3 });
-    bus.emit(EV.WAVE_BANNER, `+ ${def.name}`, "", col.main);
+    // under the wizard (next to the upgrade's name), not as a top banner: right after a level-up pick the
+    // level-up effect's "LEVEL UP!" title is over the wizard, and on short screens a banner landed on it
+    g.vfx.floatText(w.x, w.y + 34, `+ ${def.name.toUpperCase()}`, col.main, 1, 1600);
     Analytics.track("familiar", def.tag, "reached", "run");
     this.pets.push({ id, s, glow, shadow, t: Math.random() * 6, ready: g.now + 900, x: w.x, y: w.y - 20 });
   }
