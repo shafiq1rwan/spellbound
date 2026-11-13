@@ -25,8 +25,11 @@ export const GAME = {
   },
 
   xp: {
-    /** orbs pop out of the enemy for this long, then fly straight to the wizard */
-    popMs: 180,
+    /** orbs pop out of the enemy and bounce on the ground for this long, then fly to the wizard */
+    popMs: 1000,
+    /** bounce: share of vertical speed kept per bounce, and of ground speed */
+    bounce: 0.5,
+    bounceFriction: 0.6,
     /** fly-in speed (px/s): starts at pullSpeed, accelerates by pullAccel per second, capped at pullMax */
     pullSpeed: 260,
     pullAccel: 1400,
@@ -59,9 +62,9 @@ export const GAME = {
     hitstopSmallMs: 0,
     hitstopHeavyMs: 55,
     hitstopKillHeavyMs: 70,
-    /** screen shake peaks, in art pixels */
-    shakeSmall: 1,
-    shakeHeavy: 2,
+    /** screen shake peaks, in art pixels (1 art px = 2-4 device px on a phone) */
+    shakeSmall: 2,
+    shakeHeavy: 3,
   },
 
   spawn: {

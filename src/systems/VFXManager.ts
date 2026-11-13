@@ -45,6 +45,7 @@ export class VFXManager {
   private shakeMs = 0;
   private shakeMax = 1;
   private shakeTick = 0;
+  private shakeAngle = Math.random() * Math.PI * 2;
   private baseScroll: { x: number; y: number } | null = null;
 
   constructor(scene: Phaser.Scene) {
@@ -293,6 +294,7 @@ export class VFXManager {
   shake(px: number, ms = 120) {
     if (this.reduced) return; // SCREEN SHAKE: OFF
     const amp = px;
+    ms = Math.max(ms, 120); // shorter shakes only got one kick, which often rounded to nothing
     if (amp <= 0) return;
     if (!this.baseScroll) this.setShakeBase();
     // keep the stronger of the running and new shake
@@ -312,9 +314,17 @@ export class VFXManager {
     this.shakeMs -= dtMs;
     this.shakeTick -= dtMs;
     if (this.shakeTick > 0) return;
-    this.shakeTick = 40;
-    const a = this.shakeAmp * Math.max(0, this.shakeMs / this.shakeMax);
-    const ox = Math.round((Math.random() * 2 - 1) * a), oy = Math.round((Math.random() * 2 - 1) * a);
+    this.shakeTick = 33;
+    // directional kicks that flip side each tick (reads as a shake, not a drift). Random offsets
+    // rounded to whole pixels were 0 most of the time at 1-2 px amplitudes, so small shakes vanished.
+    // full strength for the first ~40%, then fade out
+    const a = this.shakeAmp * Math.min(1, 1.6 * Math.max(0, this.shakeMs / this.shakeMax));
+    this.shakeAngle += Math.PI + (Math.random() - 0.5) * 1.6;
+    let ox = Math.round(Math.cos(this.shakeAngle) * a), oy = Math.round(Math.sin(this.shakeAngle) * a);
+    if (!ox && !oy && a >= 0.35) {
+      if (Math.abs(Math.cos(this.shakeAngle)) >= Math.abs(Math.sin(this.shakeAngle))) ox = Math.sign(Math.cos(this.shakeAngle));
+      else oy = Math.sign(Math.sin(this.shakeAngle));
+    }
     cam.setScroll(this.baseScroll.x + ox, this.baseScroll.y + oy);
   }
 

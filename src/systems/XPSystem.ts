@@ -52,8 +52,8 @@ export class XPSystem {
       };
       this.orbs.push(o);
     }
-    const a = Math.random() * Math.PI * 2, sp = 15 + Math.random() * 25;
-    Object.assign(o, { x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp * 0.6, z: 6, vz: 60 + Math.random() * 30, value, active: true, t: 0, ph: Math.random() * 6, pulled: false });
+    const a = Math.random() * Math.PI * 2, sp = 20 + Math.random() * 30;
+    Object.assign(o, { x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp * 0.6, z: 6, vz: 80 + Math.random() * 25, value, active: true, t: 0, ph: Math.random() * 6, pulled: false });
     const big = value >= 5;
     o.s.setTexture(big ? "xp_big" : "xp").play(big ? "xp_big:play" : "xp:play").setVisible(true).setScale(big ? 1.2 : 1);
     o.glow.setVisible(true).setTint(big ? PAL.iceCyan : PAL.xpMint).setAlpha(0.5);
@@ -65,18 +65,24 @@ export class XPSystem {
     for (const o of this.orbs) {
       if (!o.active) continue;
       o.t += dt;
-      // pop-out arc
-      if (o.z > 0 || o.vz > 0) {
-        o.vz -= 300 * dt;
+      // pop-out arc, then a couple of shrinking bounces on the ground (until the fly-in starts)
+      if (!o.pulled && (o.z > 0 || o.vz > 0)) {
+        o.vz -= 340 * dt;
         o.z = Math.max(0, o.z + o.vz * dt);
         o.x += o.vx * dt;
         o.y += o.vy * dt;
-        if (o.z === 0) o.vz = 0;
+        if (o.z === 0) {
+          if (o.vz < -20) {
+            o.vz = -o.vz * GAME.xp.bounce;
+            o.vx *= GAME.xp.bounceFriction;
+            o.vy *= GAME.xp.bounceFriction;
+          } else o.vz = 0;
+        }
       }
       const dx = w.x - o.x, dy = w.y - 8 - o.y, d = Math.hypot(dx, dy) || 1;
       if (!w.dead) {
-        // a short pop so the drop is visible, then straight to the wizard (playtest: slow drifting
-        // XP felt sluggish). Arrives in ~0.3 s from across the screen.
+        // pop + bounce so the drop is visible, then straight to the wizard (playtest: slow drifting
+        // XP felt sluggish). The fly-in takes ~0.3 s from across the screen.
         const pop = GAME.xp.popMs / 1000;
         if (o.pulled || o.t >= pop) {
           o.pulled = true;
