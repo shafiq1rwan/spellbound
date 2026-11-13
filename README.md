@@ -23,7 +23,7 @@ during the guided tutorial).
 3 hearts, throws nearby enemies back, and the run continues. It only appears when an ad can be offered.
 **Familiars:** a spell's first upgrade (level 2) summons an elemental
 pet (Ember Wisp, Frost Sprite, Spark Imp, Arcane Owl) that auto-casts a weaker version of the spell.
-Difficulty rises a steady ~28% per wave (see `docs/DIFFICULTY.md`). **Spell combination:** freeze enemies with Ice Nova, then hit them with any other spell to
+Monsters come from several directions at once, and difficulty rises a steady ~25% per wave (see `docs/DIFFICULTY.md`). **Spell combination:** freeze enemies with Ice Nova, then hit them with any other spell to
 *shatter* them for double damage. Switching elements also builds the combo meter 3× faster than
 repeating one spell. **Aiming:** draw the rune on top of a monster to target it.
 Otherwise the spell goes for the nearest enemy.

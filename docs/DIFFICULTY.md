@@ -6,13 +6,14 @@ Every wave has a **pressure** target: enemy HP arriving per second. The spawner 
 spawn interval from the wave's enemy mix and group size (`spawnIntervalMs` in `src/config/waves.ts`).
 Changing the mix therefore never silently changes the difficulty.
 
-- **Waves 1–10:** `pressure = 7 × 1.28^(wave − 1)`, a steady +28% per wave. One new spell per wave: Ice Nova at wave 2, Lightning at 3, Arcane at 4.
+- **Waves 1–10:** `pressure = 9 × 1.25^(wave − 1)`, a steady +25% per wave (v1.8.2; was `7 × 1.28^…`). One new spell per wave: Ice Nova at wave 2, Lightning at 3, Arcane at 4.
 - **Endless (11+):** grows a gentler +15% per wave, with the Guardian boss every 10th wave.
 - **Boss waves:** the adds run at 30% of normal pressure, so the Guardian is the real threat.
 
 | Wave | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 (boss) |
 |---|---|---|---|---|---|---|---|---|---|---|
-| Pressure, HP/s (v1.6) | 7 | 9 | 11.5 | 15 | 19 | 24 | 31 | 40 | 51 | boss + 19 |
+| Pressure, HP/s (v1.8.2) | 9 | 11 | 14 | 17.5 | 22 | 27.5 | 34 | 43 | 54 | boss + 20 |
+| Pressure, HP/s (v1.6–1.8.1) | 7 | 9 | 11.5 | 15 | 19 | 24 | 31 | 40 | 51 | boss + 19 |
 | Pressure, HP/s (v1.4–1.5, all runes from wave 1) | 9 | 12 | 16 | 21 | 28 | 38 | 50 | 66 | 88 | boss + 34 |
 | Pressure, HP/s (v1.2 and earlier) | 12 | 20 | 29 | 46 | 79 + elite | 110 | 153 | 186 | 272 | |
 
@@ -72,6 +73,7 @@ edges and used to be shot before they appeared. Spawns are now split evenly acro
 | v1.6.2: nothing off screen can be hit | 6:24 (wave 10 boss), alive at 7:42 |
 | v1.8.0: enemies spawn on screen (first try: 115 px minimum, 0.7 s portal) | 1:34 (wave 3), 6:29 (wave 10 boss) |
 | v1.8.0: tuned (140 px minimum so portrait spawns are top/bottom, 0.9 s portal) | 4:10 (wave 7), 7:20 (beat the boss, wave 11) |
+| v1.8.2: busier early waves, spawns from several directions at once | 5:00 (wave 8), alive at 7:39 (wave 12) |
 | v1.7.3: XP flies straight in | 5:14 (wave 9), level 11; within the usual spread |
 | On-screen aim + even spawn sides (v1.6.1) | 4:20, 6:29 (wave 10 boss, run alone), alive at 7:44; plus 1:26 in a run that shared the CPU with two other browsers |
 
@@ -87,6 +89,24 @@ the wizard (~95 art px to the sides, ~150 px to the farthest on-screen spot at t
 so the median spawn distance dropped from 226 to ~150 px at 390×844, which removes 2–4 s of approach per
 enemy. Compensated with a 140 px minimum (top/bottom spawns in portrait) and a 0.9 s portal warning
 (was 0.52 s). Measured with `tools/qa/spawns.mjs`.
+
+## v1.8.2: more monsters at a time, from several directions
+
+Playtesting v1.8.1 felt too empty: in wave 1 a single slime appeared about every 3 s (every 4–5 s while
+drawing, since spawns slow down then), always from one spot, and a fireball kills a slime in one hit.
+
+- **Spawn patterns.** Each spawn event comes from 1–4 directions at once, and its group is split between
+  them: one spot, a pincer (opposite sides: left + right, top-left + bottom-right), three-way, or from
+  wave 5 all four sides (`directionWeights` in `src/config/waves.ts`). Each point is the on-screen spot
+  closest to that direction that's still at least 140 px from the wizard.
+- **Bigger groups** (wave 1: 2–3 instead of 1; wave 9: 4–6 instead of 2–4) and +2 on each wave's cap of
+  enemies alive at once.
+- **Busier early waves:** pressure starts at 9 HP/s instead of 7 and grows 25% a wave instead of 28%, so
+  wave 1 has ~29% more enemies, wave 5 ~17% more, and by wave 10 it's back to the old curve.
+
+The casual bot is no worse than v1.8.0 (5:00 and alive at 7:39, against 4:10 and 7:20), and kept full or
+nearly full hearts through wave 4. Late game with everything maxed: 82–86 fps at 6× CPU throttle
+(90–94 before).
 
 ## Late game
 
