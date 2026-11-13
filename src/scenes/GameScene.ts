@@ -221,6 +221,9 @@ export class GameScene extends Phaser.Scene {
       if (!this.over && ++this.taps >= 2) this.showBoundHint("tap");
       return;
     }
+    // only the runes the player has: a rounded triangle in wave 1 can't be "stolen" by the locked circle
+    // (playtest v1.6.2: 440 of ~470 first runs drew a shape the game read as a locked rune)
+    this.recognizer.opts.enabled = this.spells.unlocked().map((id) => SPELLS[id].rune);
     const res = this.recognizer.recognize(this.stroke);
     if (Save.settings.debugRunes) bus.emit(EV.DEBUG, res);
     const b = this.renderer2.bounds();

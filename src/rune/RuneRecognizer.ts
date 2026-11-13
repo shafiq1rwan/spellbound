@@ -318,13 +318,17 @@ export class RuneRecognizer {
     const squareRisk = pick === "triangle" || (pick === "circle" && f.corners >= 3);
     let rejectScore = 0;
     if (squareRisk) for (const t of this.rejects) rejectScore = Math.max(rejectScore, 1 - distanceAtBestAngle(cand, t) / HALF_DIAG);
-    if (pick && squareRisk && rejectScore > scores[pick] && f.closure < 0.5)
+    // A square has 3 interior corners; a sloppy open or rounded triangle has 2. Playtests: requiring
+    // 3+ stops ~16% of beginners' triangles fizzling as "squares", while still catching ~98% of squares.
+    if (pick && squareRisk && f.corners >= 3 && rejectScore > scores[pick] && f.closure < 0.5)
       return { rune: null, score: scores[pick], best, bestScore: scores[best], gated, scores, features: f, reason: "square", rejectScore };
     if (pick && scores[pick] >= this.opts.threshold) return { rune: pick, score: scores[pick], best, bestScore: scores[best], gated, scores, features: f };
-    // no gate agreed: allow a very confident template match
+    // no enabled gate agreed: allow a very confident template match among the enabled runes
     // (never for the V: without its orientation gate a caret / half-drawn triangle would cast it)
-    if (best !== "vee" && enabled.includes(best) && scores[best] >= this.opts.strongThreshold && gated.length === 0)
-      return { rune: best, score: scores[best], best, bestScore: scores[best], gated, scores, features: f };
+    let bestOn: RuneName | null = null;
+    for (const r of enabled) if (bestOn === null || scores[r] > scores[bestOn]) bestOn = r;
+    if (bestOn && bestOn !== "vee" && scores[bestOn] >= this.opts.strongThreshold && !gated.some((r) => enabled.includes(r)))
+      return { rune: bestOn, score: scores[bestOn], best, bestScore: scores[best], gated, scores, features: f };
     // not a rune: a (nearly) straight line is a swipe, which the game turns into a light slash attack
     if (isSwipe(f)) return { rune: null, score: 0, best, bestScore: scores[best], gated, scores, features: f, reason: "swipe" };
     return { rune: null, score: pick ? scores[pick] : scores[best], best, bestScore: scores[best], gated, scores, features: f, reason: pick ? "low score" : "no shape match" };

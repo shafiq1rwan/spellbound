@@ -206,3 +206,47 @@ test("respects the enabled rune list", () => {
   const r = only.recognize(humanize(makers.circle(R), R));
   assert.notEqual(r.rune, "circle");
 });
+
+// Beginners' triangles: often left open (55-90% of the last side drawn), rounded, lopsided or tilted.
+// Playtest v1.6.2 showed ~30% of these fizzling (read as a square, or as a still-locked rune).
+function beginnerTriangle(R: () => number): Pt[] {
+  const v = [[(R() - 0.5) * 0.5, -1 + R() * 0.3], [0.6 + R() * 0.5, 0.4 + R() * 0.35], [-0.6 - R() * 0.5, 0.4 + R() * 0.35]];
+  const start = Math.floor(R() * 3);
+  let seq = [...v.slice(start), ...v.slice(0, start)];
+  if (R() < 0.5) seq = [seq[0], seq[2], seq[1]];
+  const close = R() < 0.35 ? 1 : 0.55 + R() * 0.35;
+  const end = [seq[2][0] + (seq[0][0] - seq[2][0]) * close, seq[2][1] + (seq[0][1] - seq[2][1]) * close];
+  let pts = densify([...seq, end]);
+  if (R() < 0.4) {
+    const src = pts;
+    pts = src.map((_, i) => {
+      let x = 0, y = 0, n = 0;
+      for (let j = -3; j <= 3; j++) { const q = src[Math.min(src.length - 1, Math.max(0, i + j))]; x += q.x; y += q.y; n++; }
+      return { x: x / n, y: y / n };
+    });
+  }
+  return pts;
+}
+
+test("wave 1 (triangle only): beginners' triangles cast Fireball (>= 95%)", () => {
+  const wave1 = new RuneRecognizer({ threshold: 0.72, strongThreshold: 0.86, enabled: ["triangle"] });
+  const R = rng(4242);
+  let ok = 0;
+  const N = 400;
+  for (let i = 0; i < N; i++) if (wave1.recognize(humanize(beginnerTriangle(R), R, { rot: 0.5, jitter: 0.05 })).rune === "triangle") ok++;
+  console.log("beginner triangles cast in wave 1", ok, N);
+  assert.ok(ok / N >= 0.95, `${ok}/${N}`);
+});
+
+test("all runes unlocked: beginners' triangles still cast a spell (>= 95%), mostly Fireball (>= 80%)", () => {
+  const R = rng(4243);
+  let tri = 0, any = 0;
+  const N = 400;
+  for (let i = 0; i < N; i++) {
+    const r = rec.recognize(humanize(beginnerTriangle(R), R, { rot: 0.5, jitter: 0.05 })).rune;
+    if (r) any++;
+    if (r === "triangle") tri++;
+  }
+  console.log("beginner triangles, all runes: fireball", tri, "any spell", any, N);
+  assert.ok(any / N >= 0.95 && tri / N >= 0.8, `fireball ${tri}/${N}, any ${any}/${N}`);
+});
