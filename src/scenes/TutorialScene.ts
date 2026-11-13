@@ -20,6 +20,9 @@ import { strokeSegments } from "../ui/stroke";
 import type { GameScene } from "./GameScene";
 import type { Enemy } from "../entities/Enemy";
 
+/** size of an unlock's sample drawing (art px) */
+const DEMO_SIZE = () => Math.min(70, Layout.w * 0.32);
+
 export class TutorialScene extends Phaser.Scene {
   private g!: GameScene;
   private mode: "intro" | "demo" = "intro";
@@ -91,7 +94,7 @@ export class TutorialScene extends Phaser.Scene {
       this.listen(EV.STROKE, (on: boolean) => this.setHidden(on));
       Analytics.track("tutorial", "step-trace", "start", "run");
     } else {
-      const size = Math.min(70, Layout.w * 0.32);
+      const size = DEMO_SIZE();
       this.path = idealGlyph(def.rune).map((p) => ({ x: p.x * size, y: p.y * size }));
     }
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
@@ -109,9 +112,16 @@ export class TutorialScene extends Phaser.Scene {
     this.tweens.add({ targets: [this.ghost, this.hand], alpha: on ? 0 : 1, duration: 120 });
   }
   private layout() {
-    const y = Math.round(Layout.safe.top + (Layout.portrait ? 66 : 48));
-    this.picto.setPosition(Math.round(Layout.w / 2), y);
-    this.mark.setPosition(Math.round(Layout.w / 2), y);
+    let x = Math.round(Layout.w / 2), y = Math.round(Layout.safe.top + (Layout.portrait ? 66 : 48));
+    // landscape unlock: the pictogram sits above the sample drawing (right of the wizard), not in the
+    // middle where it crowded the timer and the "NEW RUNE!" banner
+    if (this.mode === "demo" && !Layout.portrait) {
+      const d = this.demoPos();
+      x = Math.round(d.x);
+      y = Math.round(Math.max(Layout.safe.top + 24, d.y - DEMO_SIZE() / 2 - 26));
+    }
+    this.picto.setPosition(x, y);
+    this.mark.setPosition(x, y);
   }
 
   /** wordless feedback: red cross + shake on a miss, gold check on success */
@@ -170,6 +180,18 @@ export class TutorialScene extends Phaser.Scene {
     return { x: w.x - v.x, y: Math.max(Layout.safe.top + 100, w.y - v.y - 70) };
   }
 
+  /**
+   * Where an unlock's sample drawing goes: below the wizard in portrait, to its right in landscape. The
+   * top of the screen already holds the pictogram and the "NEW RUNE!" banner, and drawing over them
+   * made both unreadable.
+   */
+  private demoPos() {
+    const v = this.g.cameras.main.worldView, w = this.g.wizard;
+    const x = w.x - v.x, y = w.y - v.y;
+    if (Layout.portrait) return { x, y: Math.min(y + 80, Layout.h - Layout.safe.bottom - 100) };
+    return { x: Math.min(x + 100, Layout.w - Layout.safe.right - 50), y: y - 14 };
+  }
+
   /** dashed outline of the rune to trace */
   private drawGuide(cx: number, cy: number, color: number, alpha: number) {
     const g = this.guide;
@@ -212,7 +234,7 @@ export class TutorialScene extends Phaser.Scene {
         return;
       }
     }
-    this.traceDemo(this.targetPos(), col.main);
+    this.traceDemo(this.demoPos(), col.main);
   }
 
   private traceDemo(a: { x: number; y: number }, color: number) {

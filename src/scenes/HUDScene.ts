@@ -100,6 +100,12 @@ export class HUDScene extends Phaser.Scene {
     this.listen(EV.WAVE, (n: number) => { this.waveText.setText(`WAVE ${n}`); this.fitWavePanel(); this.pop(this.waveText); });
     this.listen(EV.WAVE_BANNER, (a: string, b: string, c: number) => this.showBanner(a, b, c));
     this.listen(EV.UNLOCK, (id: SpellId) => this.onUnlock(id));
+    this.listen(EV.CLEAR_TEXT, () => {
+      this.tweens.killTweensOf([this.banner, this.bannerSub, this.hint]);
+      this.banner.setAlpha(0);
+      this.bannerSub.setAlpha(0);
+      this.showHint(null);
+    });
     this.listen(EV.HINT, (s: string | null, ms: number) => this.showHint(s, ms));
     this.listen(EV.BOSS_HP, (f: number | null, name: string) => this.setBoss(f, name));
     this.listen(EV.LOW_HP, (on: boolean) => { this.lowHp = on; });
@@ -251,7 +257,8 @@ export class HUDScene extends Phaser.Scene {
     this.refreshSlots();
     this.layout();
     const d = SPELLS[id];
-    this.showBanner("NEW RUNE!", `${d.runeName.toUpperCase()} = ${d.name.toUpperCase()}`, ELEMENT_COLORS[d.element].main);
+    // landscape: no subtitle (it ran into the wizard's hat); the pictogram beside the sample drawing says it
+    this.showBanner("NEW RUNE!", Layout.portrait ? `${d.runeName.toUpperCase()} = ${d.name.toUpperCase()}` : "", ELEMENT_COLORS[d.element].main);
     const s = this.slots.find((q) => q.id === id)!;
     s.c.setScale(0.2);
     this.tweens.add({ targets: s.c, scale: 1, duration: 500, ease: "Back.easeOut" });

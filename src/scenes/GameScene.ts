@@ -84,7 +84,7 @@ export class GameScene extends Phaser.Scene {
       stats: { kills: 0, score: 0, timeMs: 0, casts: 0 }, drawing: false, levelingUp: false,
       enemies: [], boss: null, stroke: [], hitstopUntil: 0, frozenTime: false, slowmo: 1,
       lastHurtBy: "unknown", misses: 0, tutorialMisses: 0, survivalMark: 0, swipeReadyAt: 0,
-      castThisRun: new Set<string>(), reviveUsed: false, runEnded: false, worldPaused: false, taps: 0, boundHintShown: false,
+      castThisRun: new Set<string>(), reviveUsed: false, runEnded: false, presentingUntil: 0, worldPaused: false, taps: 0, boundHintShown: false,
     });
   }
 
@@ -118,6 +118,8 @@ export class GameScene extends Phaser.Scene {
 
     this.on(EV.COMBO, (n) => this.showCombo(n as number));
     this.on(EV.PAUSE_REQ, () => this.pauseGame());
+    // a new rune is being presented (banner + sample drawing): hold level-ups until it's done
+    this.on(EV.UNLOCK, () => { this.presentingUntil = this.now + 4300; });
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => this.cleanup());
     this.game.events.on(Phaser.Core.Events.HIDDEN, this.onHidden, this);
 
@@ -446,6 +448,8 @@ export class GameScene extends Phaser.Scene {
   }
 
   private levelFx?: Phaser.GameObjects.Sprite;
+  /** game time until which a rune unlock is on screen (level-up cards wait so they don't cover it) */
+  private presentingUntil = 0;
   /**
    * pixelfx "ui/level-up" behind the wizard: the pillar bursts before the cards open (0.52 s), the game
    * pauses under the cards, and the "LEVEL UP!" title drops in after the pick. One sprite, restarted for
@@ -487,6 +491,7 @@ export class GameScene extends Phaser.Scene {
       }
       Poki.gameplayStop();
       this.suspendOverlays();
+      bus.emit(EV.CLEAR_TEXT); // no banner or hint showing through behind "LEVEL UP!"
       this.scene.pause();
       this.scene.launch("Upgrade", { choices, level: this.xp.level - this.xp.pendingLevels + 1 });
     });
@@ -594,6 +599,6 @@ export class GameScene extends Phaser.Scene {
     this.vfx.update(dt);
     this.ambience.update(dt, this.cameras.main.worldView);
     this.comboText.setPosition(Math.round(this.wizard.x), Math.round(this.wizard.y - 50));
-    if (this.xp.pendingLevels > 0 && !this.levelingUp && !this.drawing && !this.over) this.openUpgrade();
+    if (this.xp.pendingLevels > 0 && !this.levelingUp && !this.drawing && !this.over && this.now >= this.presentingUntil && !this.scene.isActive("Tutorial")) this.openUpgrade();
   }
 }

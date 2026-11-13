@@ -11,6 +11,7 @@ export const EV = {
   COMBO: "combo",           // (stacks)
   COOLDOWNS: "cooldowns",   // ()
   UNLOCK: "unlock",         // (spellId)
+  CLEAR_TEXT: "clearText",  // () hide banners and hints now (e.g. the level-up cards are opening)
   HINT: "hint",             // (text|null, ms)
   CAST: "cast",             // (spellId)
   FAIL: "fail",             // ()
