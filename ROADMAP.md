@@ -1,163 +1,172 @@
 # Roadmap
 
-Where Spellbound Arena goes after v1.6. The aim is more reasons to keep playing past the first few
-minutes, and more variety for players who last 15+ minutes.
+**Goal:** an average session of **6 minutes** in Poki's player-fit test (v1.6.2: 4:33). Test results,
+the release log and what's on Poki now are in `docs/PLAYTESTS.md`.
 
-## Why
+## Plan
 
-Playtest of v1.6.0 (11 players):
-- Average session **4:16**, median **3:48**. 5 of 11 played longer than 5 minutes.
-- An **early-bounce group** leaves between 0:55 and 2:10.
-- The longest sessions (11:51, 16:13, one player reached wave 34) said the arena **all looks the same**.
-  Waves 1 and 34 share the same arena and enemies, and the same Guardian appears at waves 10, 20 and 30.
+One batch of changes per Poki test, so each test shows what moved the numbers. Every batch adds
+analytics events for its features.
 
-The plan gives each run a peak about every 2.5 minutes, and a sense of arriving somewhere new
-after each boss.
-
-## Planned order
-
-| # | Item | Targets | Size |
+| Step | What | Targets | Size |
 |---|---|---|---|
-| 1 | v1.6.1: late-game freeze, effect lag, off-screen effects | Long sessions | Done (v1.6.1–v1.6.2) |
-| 2 | Mini boss on wave 5 (then every 5 waves) | The 2–4 minute drop-off | Small |
-| 3 | Chapters: new arena, boss and enemy variant every 10 waves | Sameness, "what's next?" | Large |
-| 4 | Endless wave modifiers | Wave 11+ variety | Small |
-| 5 | Spell fusions after maxing out | Wave 25+ | Medium |
-| 6 | Unlockable looks and a best-chapter record | Return visits | Small–medium |
+| 0 | Read the v1.7.8 results, then upload v1.8.1 (on-screen spawns) | Did the drawing fix work? | — |
+| **A** | Coins, the Spellbook shop, a goal on the game-over screen, the first robe colours | Retry rate (21% start a 2nd run) | Medium |
+| **B** | Crates with drops, the wave 5 mini boss and its chest | Players lost a few % every wave in waves 3–9 | Medium |
+| **C** | Element loadout with **Wind** and **Earth** | Variety, "learn new magic" | Medium–large |
+| **D** | Chapter 2: Frozen Ruins, the transition, the Rime Queen | Waves 10–20, "it all looks the same" | Large |
+| Later | Chapters 3–4, more elements, wave modifiers, spell fusions, more cosmetics | Long sessions, return visits | — |
 
-Playtest after #2 before starting #3. It is the cheapest test of whether peaks keep players longer.
+## A. Coins and the Spellbook shop
 
-Since this plan was written, the v1.6.2 player-fit test showed bigger losses earlier: wave 1–2
-drawing failures (fixed in v1.6.3) and a low **retry rate** (21% start a second run). Retry work may come
-before #2, depending on the v1.7.8 results. Test results and the release log are in
-`docs/PLAYTESTS.md`.
+The strongest retry hook in this genre: "35 more coins for Meteor Shower" makes players start another run.
 
-## 2. Mini bosses (every 5 waves)
+- **Coins** drop from enemies, plus a bonus for each wave cleared. They're saved between runs.
+- **No real money.** As far as we know, Poki doesn't support in-app purchases (check with Poki). A
+  **rewarded ad** can let players try a spell for one run.
+- **Price the first item so it's affordable after about 2 runs** (for example, a 4-minute run earns
+  about 60 coins and the cheapest spell costs 100). The first run sets the goal; the second buys it.
+- **Bought spells play differently; they aren't stronger.** Otherwise grinding makes the game easy.
+- **The game-over screen shows a goal:** progress to the next shop item, or an unlock such as "Reach wave 5
+  to unlock the Ember robe". Make TRY AGAIN the biggest button.
+- Start with the shop, the goal, two spells (Meteor Shower and Black Hole are the most eye-catching) and
+  3–4 robe colours.
 
-Wave 5 arrives at about 2:25, right where the early-bounce group leaves. A big moment there gives
-those players a goal at the right time. It must not be a difficulty wall at that point, though.
+Spells for sale replace what an existing rune casts. **No new shapes:** each new rune makes recognition
+harder, and drawing failures were the biggest loss in v1.6.2.
 
-- **A spectacle more than a wall.** A big version of a known enemy with its own HP bar and one clear,
-  telegraphed mechanic:
-  - **King Slime:** splits into small slimes when hit hard.
-  - **Bone Knight:** telegraphs a charge (a line on the floor), then rushes.
-- **Other spawns drop to a trickle** during the fight, as on boss waves today (30% pressure).
-- **A real reward:** it drops a chest with a free upgrade card and a heart.
-- **It previews the chapter:** from Chapter 2 on, the wave 15, 25, … mini boss is the big version
-  of that chapter's new enemy variant.
-- **Analytics:** `miniboss` `<name>` `start` / `complete` / `fail`, to compare drop-off at wave 5
-  before and after.
+| Rune | Starting spell | Spells to buy |
+|---|---|---|
+| Triangle | Fireball | Meteor Shower (meteors rain on a spot), Firework (splits into sparks) |
+| Circle | Ice Nova | Frost Wall (a ring that blocks enemies), Blizzard (slows the whole screen) |
+| Zigzag | Lightning | Thunderstorm (random strikes for 3 s), Ball Lightning |
+| V | Arcane Barrage | Void Lance (pierces in a line), Black Hole (pulls enemies in) |
 
-Art: scaled-up, recoloured versions of the existing slime and skeleton from the in-house generator
-(`tools/art/`), plus a crown or helmet and the chest.
+Analytics: `coins` earned per run, `shop` opened, `buy` `<item>`, `trial` `<spell>` (ad), and goal shown
+→ retry.
 
-## 3. Chapters (every 10 waves)
+## B. Drops and mini bosses
 
-| Waves | Chapter | Arena | Ambient | New enemy variant | Boss |
-|---|---|---|---|---|---|
-| 1–10 | 1 | Crypt (current) | dust, wisps | — | Ancient Guardian (current) |
-| 11–20 | 2 | Frozen Ruins | snow | **Ice slime**: shrugs off Ice Nova, takes double from Fire | new boss, Frost theme |
-| 21–30 | 3 | Ember Wastes | embers | **Storm bat**: splits when hit by Lightning | new boss, Fire theme |
-| 31–40 | 4 | Astral Void | stars | **Armored skeleton**: only Arcane pierces the armor | new boss, Arcane theme |
-| 41+ | | Cycle through the arenas with harder modifiers | | | Bosses return with new patterns |
+**Crates.** The wizard can't move, so drops come in crates that you break with any spell. Each drop is a
+drawing moment. One crate is guaranteed in wave 2 (the wave with the most deaths); after that, elites drop
+them.
 
-The enemy variants make choosing a spell matter. Today the best play is to cast whatever is off
-cooldown. Each variant has a single trait tied to one of the four spells.
-
-Each boss shares the Guardian's frame (HP bar, entry, summons) with a recolour and **one new attack
-pattern**. The pattern does most of the work in making it feel different.
-
-**Concept art (not in the game yet):** `tools/art/bosses.mjs` draws three bosses at 96×96 with their
-animations: **Rime Queen** (Frozen Ruins), **Cinder Maw** (Ember Wastes) and **Void Weaver** (Astral
-Void). Run `node tools/art/boss-preview.mjs` and open `tools/art/boss-preview.html` to see them animated.
-Waiting on feedback before they're wired into `build.mjs`.
-
-### The transition: the world transforms around the wizard
-
-The wizard is rooted, and players just learned "you can't move". So the wizard doesn't travel:
-**the place changes around them**. This reads as "your magic conquered this place".
-
-About 3 seconds, during the break after the boss dies:
-1. **Boss dies:** slow motion, XP orbs vacuum in (this already happens).
-2. **The binding circle under the wizard flares**, and the screen pulses once.
-3. **A ring of light spreads outward from the wizard and repaints everything it passes.** Floor tiles
-   change (crypt stone → frozen tiles), props swap (tombstones → ice crystals), ambient particles
-   switch (dust → snow). Enemies left on screen dissolve as the ring touches them.
-4. **Title card:** "CHAPTER 2" plus the arena name, a short music sting, and a reward: full hearts.
-5. **The next wave starts** in the new arena with its new enemy variant.
-
-Implementation: draw the new arena underneath and reveal it with a growing circular mask, then
-swap props and the ambient emitter as the ring passes them. Arenas are mostly palette swaps of the
-current tileset (`swap` in `tools/art/lib/px.mjs`) plus a few new props per chapter.
-
-Alternatives considered:
-- **Portal or teleport flash:** simplest, but it's a cut. It loses the "I changed this place" feeling
-  and reads like a loading screen.
-- **Floor collapses, you drop deeper:** dramatic, but it fights the rooted identity and costs more art.
-
-### Rhythm
-
-| Wave | Event |
+| Drop | Effect |
 |---|---|
-| 5 | Mini boss + chest |
-| 10 | Boss → arena transforms → Chapter 2 |
-| 15 | Mini boss (big ice slime) |
-| 20 | New boss → Chapter 3 |
-| 25 | Mini boss |
-| 30 | New boss → Chapter 4 |
+| Shield bubble | Blocks the next 2 hits |
+| Heart | +1 heart |
+| Bomb | Blasts everything on screen |
+| Magnet | Pulls in all XP on the floor |
+| Frenzy | Spells recharge twice as fast for 8 s |
 
-## 4. Endless wave modifiers (wave 11+)
+**Mini boss on wave 5** (then every 5 waves). Wave 5 comes at about 2:25, where many players leave. It
+should be a spectacle, not a difficulty wall:
+- A big version of a known enemy with its own HP bar and one telegraphed mechanic. **King Slime** splits
+  into small slimes when hit hard; **Bone Knight** marks a line on the floor, then charges.
+- Other spawns drop to a trickle during the fight, as on boss waves.
+- It drops a **chest** with a free upgrade card and a heart.
+- From Chapter 2 on, the mini boss is the big version of that chapter's new enemy.
 
-Some waves roll a twist, announced with a banner and a screen tint:
+Analytics: `crate` `<drop>`, `miniboss` `<name>` `start` / `complete` / `fail`.
 
-| Modifier | Effect |
+## C. Elements and the loadout
+
+New elements are chosen **before a run**: four are equipped, one per rune. The triangle casts Fire or
+Earth depending on the loadout, so there are still only four shapes to draw.
+
+Each element needs its own job and a combo with the others; otherwise it's just a recolour. The game
+already rewards switching elements (the combo meter builds 3× faster; Ice then Fire shatters).
+
+| Element | Rune | Job | Combo |
+|---|---|---|---|
+| **Wind** | Circle | A tornado that drags enemies in, or a gust that pushes them back | Wind + Fire = firestorm |
+| **Earth** | Triangle | A boulder or ground spikes: slow, huge damage, stuns | Shatters frozen enemies harder |
+| Star | V | Falling stars on random enemies; some hits are lucky crits | Marked enemies take more from other spells |
+| Water | Zigzag | A wave that soaks enemies | Soaked + Lightning = double damage |
+| Holy | V | A beam that sometimes heals 1 heart | Double damage to skeletons |
+| Shadow | Triangle | A lifesteal bolt | Darkness makes enemies wander |
+
+Start with **Wind and Earth**: they play the most differently from the current four. Each element is
+about 1–2 days (effects art in `tools/art/fx.mjs`, logic, upgrades).
+
+**Passive spells** are another way to learn new magic without drawing: upgrade cards such as a fire ring
+orbiting the wizard, a frost aura that slows enemies nearby, a thunder strike every 5 s or a recharging
+shield.
+
+## Cosmetics
+
+Generated in code, so they're cheap. They mainly bring players back on other days; for the first session
+(what player-fit measures), only the "unlock at wave N" goal helps. So start small (step A) and grow
+the collection after passing.
+
+| Cosmetic | Examples |
 |---|---|
-| Blood Moon | Faster enemies, double XP |
-| Swarm | All bats |
-| Elite Hunt | Few enemies, all elites |
-| Fog | Enemies are hidden until they come close |
+| Robe and hat colours | Ember (red and gold), Frost (white and cyan), Forest (green), Void (black and violet) |
+| Staff crystals | Star, moon, flame, skull |
+| Rune ink (the stroke you draw) | Gold, rainbow, fire trail, ghostly |
+| Floor circles | Rune ring, star circle, flower circle |
+| Pet skins (later) | Ember Wisp as a little dragon, Arcane Owl as a cat |
 
-At most one per wave, and never on boss or mini-boss waves.
+Unlocked by goals (reach wave 5, 10 or 20, beat the Guardian, shatter 100 enemies) or bought with coins.
+Saved in `src/core/Save.ts`.
 
-## 5. Spell fusions (after maxing out)
+## D. Chapters: a new place every 10 waves
 
-All 29 regular upgrades run out around level 30 (usually wave 25–30). Since v1.6.1 every level after
-that applies **Mastery** (+6% damage, heal 1). That fixes the freeze, but it's only a number.
+| Waves | Place | Ambient | New enemy | Boss |
+|---|---|---|---|---|
+| 1–10 | Crypt (current) | dust, wisps | — | Ancient Guardian (current) |
+| 11–20 | Frozen Ruins | snow | Ice slime: shrugs off Ice, takes double from Fire | Rime Queen |
+| 21–30 | Ember Wastes | embers | Storm bat: splits when hit by Lightning | Cinder Maw |
+| 31–40 | Astral Void | stars | Armoured skeleton: only Arcane pierces it | Void Weaver |
+| 41+ | The places cycle with harder modifiers | | | Bosses return with new patterns |
 
-Instead, once everything is maxed, unlock **fusions** cast by drawing two runes back to back:
-- Fire + Ice → **Steam Burst** (blinding cloud, enemies wander)
-- Lightning + Arcane → **Storm Orbs** (orbiting orbs that zap)
-- Fire + Lightning, Ice + Arcane, … one per pair
+- **Enemy variants** make the choice of spell matter. Today the best play is whatever is off cooldown.
+- **Bosses** share the Guardian's frame (HP bar, entry, summons) with one new attack pattern each.
+  Concept art: `tools/art/bosses.mjs` (96×96, animated). Run `node tools/art/boss-preview.mjs`, then open
+  `tools/art/boss-preview.html`. Not wired into `build.mjs` yet.
+- **A chapter could unlock an element** (beat the Guardian, learn Wind), giving a goal beyond the shop.
 
-Each fusion is offered as an upgrade card when it unlocks.
+**The transition (about 3 s, after the boss dies).** The wizard is rooted, so the place changes around them
+instead of teleporting:
+1. Slow motion and the XP vacuum (already in the game).
+2. The binding circle flares; the screen pulses once.
+3. A ring of light spreads out from the wizard and repaints what it passes: stone → frozen tiles,
+   tombstones → ice crystals, dust → snow. Leftover enemies dissolve.
+4. "CHAPTER 2: FROZEN RUINS" title card, a music sting, hearts refilled.
+5. The next wave starts with the new enemy.
 
-## 6. Reasons to come back
+Build it by drawing the new arena underneath and revealing it with a growing circular mask. Arenas are
+mostly palette swaps of the current tileset (`swap` in `tools/art/lib/px.mjs`) plus a few props each.
 
-- **Unlockable looks** (hat and staff colours) for reaching wave 10, 20 and 30, and for the first
-  win against each boss.
-- **Best chapter** shown on the menu next to the best wave and time.
-- Saved in the existing save data (`src/core/Save.ts`).
+**Rhythm:** a peak about every 2.5 minutes. Mini boss at wave 5, the boss and Chapter 2 at 10, mini boss
+at 15, the boss and Chapter 3 at 20, and so on.
+
+## Later
+
+- **Wave modifiers (wave 11+),** at most one per wave, never on boss waves: Blood Moon (faster enemies,
+  double XP), Swarm (all bats), Elite Hunt (few enemies, all elites), Fog (enemies hidden until close).
+- **Spell fusions** once every upgrade is maxed (around wave 25–30, where Mastery takes over today): draw
+  two runes back to back, e.g. Fire + Ice → Steam Burst, Lightning + Arcane → Storm Orbs. Offered as
+  upgrade cards.
+- **Best chapter** on the menu next to the best wave and time.
 
 ## Ideas on hold
 
-Discussed and parked; pick up when there's a reason to.
-
-- **Revive animation.** Today the wizard pops back in one frame (cheer pose, gold glow and sparkles,
-  then a gold shockwave that pushes enemies back and freezes them). Idea, about 1 s with the game frozen,
-  mirroring the death dissolve: sparkles gather in, the level-up pillar bursts up while the wizard fades in
-  from a white silhouette, the dropped crystal floats back to the staff, then the existing shockwave.
-- **Stronger shake for other spells.** Fireball is the one that's felt (2 px, up to 3 px for a meteor).
-  Ice Nova matches the basic Fireball, Lightning only shakes 90 ms on the first enemy, Arcane not at all.
-  Suggested: Nova 2.5 px for 160 ms, Lightning 2.5 px for 140 ms (more when it chains to 3+), Arcane a 1 px
-  tick on a missile kill only. Kept as is for now.
-- **Sprite Fusion pilot** (spritefusion.com pixel-art generator, MCP server). Fits better than SpriteFuse:
-  exact sizes, saved palette, style matching from up to 20 reference images, `animate_sprite`. Unknowns:
-  animation export format, transparency, commercial licence, cost (15 credits a call). Pilot: save the
-  game palette, upload 4–6 existing sprites, generate the King Slime at 64 px with idle and attack, import
-  it and compare it with a code-drawn version. It has to be connected in Claude Code first (`claude mcp add`, then sign in with `/mcp`).
+- **Revive animation.** Today the wizard pops back in one frame, then a gold shockwave pushes enemies
+  back. Idea (about 1 s, game frozen, mirroring the death dissolve): sparkles gather in, the level-up
+  pillar bursts up while the wizard fades in from a white silhouette, and the crystal floats back to the
+  staff. Then the shockwave.
+- **Stronger shake for other spells.** Only Fireball's shake is really felt. Suggested: Ice Nova 2.5 px for
+  160 ms, Lightning 2.5 px for 140 ms (more when it chains to 3+), Arcane a 1 px tick on a missile kill.
+- **Sprite Fusion pilot** (spritefusion.com pixel-art generator, MCP server): exact sizes, a saved palette,
+  style matching from up to 20 reference images, animation. Unknowns: the animation export format,
+  transparency, the commercial licence, and cost (15 credits a call). Pilot: generate the King Slime at
+  64 px in the game's style and compare it with a code-drawn one. It has to be connected in Claude Code
+  first (`claude mcp add`, then sign in with `/mcp`).
 
 ## Open questions
 
-- Should a chapter's arena persist on retry ("continue from Chapter 2"), or does every run start in the Crypt?
-- Does Chapter 2 also raise the difficulty, or only change the look and enemy mix?
-- Is the full heal at each chapter too generous once mini-boss chests also give hearts?
+- Should elements be bought, unlocked by beating a chapter boss, or both?
+- Does a retry continue from the chapter reached, or does every run start in the Crypt?
+- Does Chapter 2 raise the difficulty, or only change the look and the enemy mix?
+- Is a full heal at each chapter too generous once mini-boss chests and crates also give hearts?
