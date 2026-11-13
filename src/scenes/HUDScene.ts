@@ -166,7 +166,8 @@ export class HUDScene extends Phaser.Scene {
       this.placeXp(Math.round(W / 2 + 12), by - 21, bw);
       this.hint.setPosition(Math.round(W / 2), by - 30);
       this.hintW = W - 20;
-      this.banner.setPosition(Math.round(W / 2), Math.round(H * 0.3));
+      // 22% (not 30%): clear of the level-up effect's "LEVEL UP!" title over the wizard
+      this.banner.setPosition(Math.round(W / 2), Math.round(H * 0.22));
     } else {
       const cx = Math.round(sf.left + 18);
       shown.forEach((s, i) => {

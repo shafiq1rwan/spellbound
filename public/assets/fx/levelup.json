@@ -1,0 +1,12 @@
+{
+  "source": "pixelfx ui/level-up (MIT), exported at 15 fps; demo-hero shadow removed",
+  "frameWidth": 176,
+  "frameHeight": 138,
+  "frames": 49,
+  "fps": 15,
+  "pivot": [
+    88,
+    114
+  ],
+  "columns": 7
+}

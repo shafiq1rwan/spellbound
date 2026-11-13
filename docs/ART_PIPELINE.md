@@ -46,6 +46,22 @@ Outputs:
 - `pixel.png` + `pixel.xml`: the bitmap font.
 - `art-preview/`: upscaled QA previews, one per sheet.
 
+## Imported effect: pixelfx level-up
+
+One effect comes from pixelfx (MIT): `ui/level-up`, played behind the wizard on level-up. Its code is not
+run in this repo. It's exported once by hand and imported as images:
+
+```
+node <pixelfx>/tools/render.mjs ui/level-up --sheet --no-actor --fps 15 --bg none --out art-preview/pixelfx
+node tools/art/import-pixelfx.mjs
+```
+
+The import writes `public/assets/fx/levelup.png` (49 frames, 176×138, 15 fps, pivot at the feet) and removes
+the pixelfx demo hero, which `--no-actor` leaves behind as a dark shadow and a gold rim round its silhouette.
+The game loads it in the background after the menu appears (`src/core/LateAssets.ts`); until then a level-up
+falls back to a gold glow. The "LEVEL UP!" letters use pixelfx's own 5×7 font from its MIT source
+(`src/core/font.js`), not the separately licensed Patch Pixel gallery font.
+
 ## Shared palette (`tools/art/palette.mjs`, mirrored in `src/config/palette.ts`)
 
 | Core | Hex | | Core | Hex |

@@ -166,7 +166,8 @@ export class UpgradeScene extends Phaser.Scene {
     this.tweens.add({ targets: flash, alpha: 0, duration: 400 });
     this.time.delayedCall(380, () => {
       g.upgrades.apply(c.id);
-      g.vfx.floatText(g.wizard.x, g.wizard.y - 50, c.name.toUpperCase(), RARITY_COLORS[c.rarity], 1, 1200);
+      // below the feet: the level-up effect's "LEVEL UP!" title drops in above the wizard right after the pick
+      g.vfx.floatText(g.wizard.x, g.wizard.y + 22, c.name.toUpperCase(), RARITY_COLORS[c.rarity], 1, 1200);
       this.scene.stop();
       g.resumeFromUpgrade();
     });

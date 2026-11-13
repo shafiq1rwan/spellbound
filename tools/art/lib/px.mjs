@@ -5,8 +5,8 @@
 // automatic outlines, palette swaps, Bayer dithering, a separate additive "light" pass
 // and seeded randomness so every build is byte-identical.
 
-import { deflateSync } from "node:zlib";
-import { writeFileSync, mkdirSync } from "node:fs";
+import { deflateSync, inflateSync } from "node:zlib";
+import { writeFileSync, mkdirSync, readFileSync } from "node:fs";
 import { dirname } from "node:path";
 
 // ---------------------------------------------------------------- colour helpers
@@ -393,6 +393,33 @@ export function encodePNG(img) {
     chunk("IEND", Buffer.alloc(0)),
   ]);
 }
+/** read an 8-bit RGBA, non-interlaced PNG (what the PNG writers here and pixelfx's exporter produce) */
+export function loadPNG(path) {
+  const buf = readFileSync(path);
+  if (buf.readUInt32BE(0) !== 0x89504e47) throw new Error(`${path}: not a PNG`);
+  let pos = 8, w = 0, h = 0;
+  const idat = [];
+  while (pos < buf.length) {
+    const len = buf.readUInt32BE(pos), type = buf.toString("ascii", pos + 4, pos + 8), data = buf.subarray(pos + 8, pos + 8 + len);
+    if (type === "IHDR") {
+      w = data.readUInt32BE(0); h = data.readUInt32BE(4);
+      if (data[8] !== 8 || data[9] !== 6 || data[12] !== 0) throw new Error(`${path}: only 8-bit RGBA, non-interlaced PNGs are supported`);
+    } else if (type === "IDAT") idat.push(data);
+    else if (type === "IEND") break;
+    pos += 12 + len;
+  }
+  const raw = inflateSync(Buffer.concat(idat)), stride = w * 4, img = new Img(w, h), out = new Uint8Array(img.buf);
+  const paeth = (a, b, c) => { const p = a + b - c, pa = Math.abs(p - a), pb = Math.abs(p - b), pc = Math.abs(p - c); return pa <= pb && pa <= pc ? a : pb <= pc ? b : c; };
+  for (let y = 0; y < h; y++) {
+    const f = raw[y * (stride + 1)], src = y * (stride + 1) + 1, dst = y * stride, prev = dst - stride;
+    for (let i = 0; i < stride; i++) {
+      const a = i >= 4 ? out[dst + i - 4] : 0, b = y ? out[prev + i] : 0, c = y && i >= 4 ? out[prev + i - 4] : 0, v = raw[src + i];
+      out[dst + i] = (f === 0 ? v : f === 1 ? v + a : f === 2 ? v + b : f === 3 ? v + ((a + b) >> 1) : v + paeth(a, b, c)) & 255;
+    }
+  }
+  return img;
+}
+
 export function savePNG(path, img) {
   mkdirSync(dirname(path), { recursive: true });
   writeFileSync(path, encodePNG(img));
