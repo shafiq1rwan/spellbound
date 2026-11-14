@@ -1,30 +1,26 @@
 # Playtests and releases
 
 What each Poki test measured, what changed because of it, and what to compare next. The goal is an
-average session of **5 minutes or more** (Poki's player-fit target).
+average session of **5 minutes or more** (Poki's own Player Fit exit criterion is over 3 minutes).
 
 ## Where things stand (14 November 2026)
 
 | Build | State |
 |---|---|
-| **v1.7.8** | Player-fit done: **500 players, average 5:17**. The best result so far |
-| **v1.8.2** | Player-fit done: **500 players, average 4:50**. Lost to v1.7.8, so v1.8.0–1.8.2 are **dropped** |
-| **v1.9.1** | Built on v1.7.8: drawing rescues for overdrawn and open triangles, no fizzle on cooldown, no bats in wave 2 (v1.9.0), and screen shake off by default (v1.9.1). **Next to upload** (`release/spellbound-arena-v1.9.1.zip`) |
-| GitHub | v1.9.0 pushed to `main` (14 Nov 2026); each push redeploys the GitHub Pages site |
+| **v1.9.1** | Player-fit done: **500 gameplays, average 6:21**, the best so far (v1.7.8: 5:17). **Web Fit Test requested with this build, unchanged** |
+| **v1.7.8** | Player-fit done: 500 players, average 5:17. v1.9.x is built on it |
+| **v1.8.2** | Player-fit done: 500 players, average 4:50. Lost to v1.7.8, so v1.8.0–1.8.2 are **dropped** |
+| GitHub | v1.9.1 pushed to `main`; each push redeploys the GitHub Pages site. `main` stays at v1.9.1 until the Web Fit result is in |
 
-**Compare v1.9.1 against v1.7.8:**
+**Web Fit Test (Poki):** about 10,000 players on poki.com over several days. Passing leads to the Final
+Poki Review; failing means back to playtesting and Player Fit, and the test can be requested again with a
+new version. The thumbnail can't change while it runs (`output/poki/`).
 
-| Metric | v1.7.8 | A win looks like |
-|---|---|---|
-| `tutorial` `fail-1` | 65% of tutorial runs (302 of 466) | under 40% |
-| `drawing` `misses-10` | 58% of runs (285 of 492) | under 40% |
-| `drawing` `miss-vee` / `miss-circle` | 85% / 83% of runs | much lower |
-| `drawing` `rescue-lap` / `rescue-close` | (new) | how many runs a rescue saved |
-| Wave 1 completion | 82% (361 of 442), 19 deaths | 85%+ |
-| **Wave 2 completion** | **75%** (265 of 354), **46 deaths** | 85%+ |
-| Wave 3 completion | 84% (218 of 259) | no lower |
-| Second run started | 22% (109 of 492) | no lower |
-| Average playtime | 5:17 | 5:45+ |
+**Next, only if Web Fit passes** (one batch per test, as before):
+- **Retry hooks** (roadmap step A): coins, the Spellbook shop, a goal on the game-over screen. Second runs
+  are flat at 23%, and TRY AGAIN fell to 58% of game overs.
+- **Or a drawing pass:** join a triangle drawn in two or three strokes, and add events that say why each
+  miss failed. Half of new players still fail the tutorial triangle once.
 
 ## Results so far
 
@@ -123,6 +119,39 @@ More pressure in the first waves cost more players than the extra action gained.
 v1.8.0–1.8.2 and build on v1.7.8. Early-game difficulty is a strong lever, and it works in the
 direction of *easier*.
 
+### v1.9.1 player-fit (500 gameplays, average 6:21)
+
+Built on v1.7.8 with drawing rescues, no fizzle on cooldown, slimes-only wave 2 (v1.9.0) and screen shake
+off by default (v1.9.1). The playtime-by-minute chart wasn't collected for this test.
+
+| Metric | v1.7.8 | v1.9.1 | Target | |
+|---|---|---|---|---|
+| Average playtime | 5:17 | **6:21** | 5:45+ | ✅ (and the roadmap's 6:00) |
+| Tutorial completed | 90% (418 of 466) | **95%** (456 of 480) | | ✅ |
+| `tutorial` `fail-1` | 65% | **52%** (250 of 480); 5+ fails 10% → 5% | under 40% | ⚠️ |
+| Wave 1 completion | 82%, 19 deaths | **85%** (417 of 490), 18 deaths | 85%+ | ✅ |
+| Wave 2 completion | 75%, 46 deaths | **82%** (338 of 410), 26 deaths | 85%+ | ⚠️ |
+| Wave 3 completion | 84% | **86%** (286 of 334) | no lower | ✅ |
+| Wave 4 completion | 93% | 87% (247 of 283), 7 deaths | | ⚠️ watch |
+| Reached wave 10 | 22% | **28%** (147 of 516) | | ✅ |
+| Survived 5 / 10 minutes | 27% / 12% | **33% / 17%** | | ✅ |
+| Second run started | 22% | 23% (117 of 516) | no lower | ➖ |
+| TRY AGAIN, share of game overs | 66% | 58% (73 of 125) | | ⚠️ |
+
+- **The rescues fire in most runs:** `rescue-lap` in **83%** of runs, `rescue-close` in **67%**. Most
+  players overdraw or leave their triangles open, and those strokes used to fizzle.
+- **Misses are still common:** `misses-10` in 56% of runs (58% before), `miss-vee` 84%, `miss-circle` 78%.
+  Runs are ~20% longer, so per minute it's probably a little better, but drawing is still the main friction.
+  A likely remaining cause: triangles drawn in several strokes (each piece is read alone).
+- **Wave 2 without bats:** bat deaths 46 → 21 even though more players reached later waves; wave 2 deaths
+  46 → 26. Most of wave 2's remaining loss is players who stop without dying (about 45 runs, 11%).
+- **No fizzle on cooldown:** combo x10 in 57% of runs (47% before), Shatter 40% (30%).
+- **Screen shake off by default:** only 4 players turned it back on.
+- Deaths: slime 59, skeleton 22, bat 21, boss beam 20, golem 9 (more players reach skeletons and the boss).
+- `cant-move-tap` 37% (26% before) and `cant-move-hit` 187 runs (224): the hint fires once on whichever
+  comes first, and with fewer early hits the tap comes first more often. It showed in about the same share
+  of runs overall. REVIVE: 7 taps in 125 game overs.
+
 ## Release log
 
 | Version | What changed | Tested on Poki |
@@ -143,12 +172,12 @@ direction of *easier*.
 | ~~1.8.0~~ | Enemies spawn on screen behind a 0.9 s portal, at least 140 px away (dropped) | in v1.8.2 |
 | ~~1.8.1~~ | Own spawn rift and level-up pillar (dropped) | in v1.8.2 |
 | ~~1.8.2~~ | More monsters at a time, from several directions at once (dropped) | Player-fit, 500 players: 4:50 |
-| 1.9.1 | Screen shake off by default (also full-screen flashes and hit-stop; Settings → SCREEN SHAKE turns it on). `settings` `screen-shake-on` shows how many turn it back on | Next to upload |
+| 1.9.1 | Screen shake off by default (also full-screen flashes and hit-stop; Settings → SCREEN SHAKE turns it on). `settings` `screen-shake-on` shows how many turn it back on | **Player-fit, 500 gameplays: 6:21.** Web Fit requested |
 | 1.9.0 | **Built on v1.7.8.** Overdrawn triangles read as their first lap and open ones closed (`rescue-lap`/`rescue-close` events); a rune drawn on cooldown no longer fizzles or resets the combo; wave 2 is slimes only, bats debut in wave 3 at half weight | in v1.9.1 |
 
 ## Next lever: the retry rate
 
-Still about 1 in 5 (22% in v1.7.8). Most sessions end at the first death, and many end mid-wave without one. Each retry adds a
+Still about 1 in 5 (22% in v1.7.8, 23% in v1.9.1), and TRY AGAIN fell from 66% to 58% of game overs in v1.9.1. Most sessions end at the first death, and many end mid-wave without one. Each retry adds a
 whole run, so this may matter as much as the drawing fix. Wait for the interaction events before
 building. Cheapest ideas first:
 
