@@ -10,7 +10,7 @@ average session of **5 minutes or more** (Poki's player-fit target).
 | **v1.7.8** | Player-fit done: **500 players, average 5:17**. The best result so far |
 | **v1.8.2** | Player-fit done: **500 players, average 4:50**. Lost to v1.7.8, so v1.8.0–1.8.2 are **dropped** |
 | **v1.9.0** | Built on v1.7.8: drawing rescues for overdrawn and open triangles, no fizzle on cooldown, no bats in wave 2. **Next to upload** (`release/spellbound-arena-v1.9.0.zip`) |
-| GitHub | v1.6.0 is the last push. Later versions are committed locally only; pushing also redeploys the GitHub Pages site |
+| GitHub | v1.9.0 pushed to `main` (14 Nov 2026); each push redeploys the GitHub Pages site |
 
 **Compare v1.9.0 against v1.7.8:**
 
