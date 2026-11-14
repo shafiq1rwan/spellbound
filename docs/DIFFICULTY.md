@@ -6,14 +6,15 @@ Every wave has a **pressure** target: enemy HP arriving per second. The spawner 
 spawn interval from the wave's enemy mix and group size (`spawnIntervalMs` in `src/config/waves.ts`).
 Changing the mix therefore never silently changes the difficulty.
 
-- **Waves 1–10:** `pressure = 9 × 1.25^(wave − 1)`, a steady +25% per wave (v1.8.2; was `7 × 1.28^…`). One new spell per wave: Ice Nova at wave 2, Lightning at 3, Arcane at 4.
+- **Waves 1–10:** `pressure = 7 × 1.28^(wave − 1)`, a steady +28% per wave. One new spell per wave: Ice Nova at wave 2, Lightning at 3, Arcane at 4.
+- **New monsters:** slimes only in waves 1–2, bats and skeletons from wave 3, golems from wave 6 (v1.9.0; bats used to arrive in wave 2).
 - **Endless (11+):** grows a gentler +15% per wave, with the Guardian boss every 10th wave.
 - **Boss waves:** the adds run at 30% of normal pressure, so the Guardian is the real threat.
 
 | Wave | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 (boss) |
 |---|---|---|---|---|---|---|---|---|---|---|
-| Pressure, HP/s (v1.8.2) | 9 | 11 | 14 | 17.5 | 22 | 27.5 | 34 | 43 | 54 | boss + 20 |
-| Pressure, HP/s (v1.6–1.8.1) | 7 | 9 | 11.5 | 15 | 19 | 24 | 31 | 40 | 51 | boss + 19 |
+| Pressure, HP/s (v1.6–1.7.8, v1.9) | 7 | 9 | 11.5 | 15 | 19 | 24 | 31 | 40 | 51 | boss + 19 |
+| Pressure, HP/s (v1.8.2, dropped) | 9 | 11 | 14 | 17.5 | 22 | 27.5 | 34 | 43 | 54 | boss + 20 |
 | Pressure, HP/s (v1.4–1.5, all runes from wave 1) | 9 | 12 | 16 | 21 | 28 | 38 | 50 | 66 | 88 | boss + 34 |
 | Pressure, HP/s (v1.2 and earlier) | 12 | 20 | 29 | 46 | 79 + elite | 110 | 153 | 186 | 272 | |
 
@@ -74,13 +75,18 @@ edges and used to be shot before they appeared. Spawns are now split evenly acro
 | v1.8.0: enemies spawn on screen (first try: 115 px minimum, 0.7 s portal) | 1:34 (wave 3), 6:29 (wave 10 boss) |
 | v1.8.0: tuned (140 px minimum so portrait spawns are top/bottom, 0.9 s portal) | 4:10 (wave 7), 7:20 (beat the boss, wave 11) |
 | v1.8.2: busier early waves, spawns from several directions at once | 5:00 (wave 8), alive at 7:39 (wave 12) |
+| v1.9.0: wave 2 slimes only, bats from wave 3 | alive at 7:40 (wave 12), full hearts at every wave start |
 | v1.7.3: XP flies straight in | 5:14 (wave 9), level 11; within the usual spread |
 | On-screen aim + even spawn sides (v1.6.1) | 4:20, 6:29 (wave 10 boss, run alone), alive at 7:44; plus 1:26 in a run that shared the CPU with two other browsers |
 
 The casual bot's spread is wide (it tends to get surrounded and collapse), so compare medians over
 several runs.
 
-## v1.8.0: on-screen spawns
+## v1.8.0: on-screen spawns (dropped in v1.9.0)
+
+v1.8.0–1.8.2 were tested together against v1.7.8 and lost (4:50 against 5:17 average, wave 1 deaths
+19 → 58); v1.9.0 is built on v1.7.8 without them. Kept here as a record of what was tried.
+
 
 Enemies used to appear just outside the screen and walk in; with the v1.6.2 rule that nothing off screen
 can be hit, up to 25 of ~27 late-game enemies were invisible and untouchable at any moment, and the spawn
@@ -90,7 +96,7 @@ so the median spawn distance dropped from 226 to ~150 px at 390×844, which remo
 enemy. Compensated with a 140 px minimum (top/bottom spawns in portrait) and a 0.9 s portal warning
 (was 0.52 s). Measured with `tools/qa/spawns.mjs`.
 
-## v1.8.2: more monsters at a time, from several directions
+## v1.8.2: more monsters at a time, from several directions (dropped in v1.9.0)
 
 Playtesting v1.8.1 felt too empty: in wave 1 a single slime appeared about every 3 s (every 4–5 s while
 drawing, since spawns slow down then), always from one spot, and a fireball kills a slime in one hit.
@@ -107,6 +113,20 @@ drawing, since spawns slow down then), always from one spot, and a fireball kill
 The casual bot is no worse than v1.8.0 (5:00 and alive at 7:39, against 4:10 and 7:20), and kept full or
 nearly full hearts through wave 4. Late game with everything maxed: 82–86 fps at 6× CPU throttle
 (90–94 before).
+
+## v1.9.0: no bats in wave 2
+
+Both 500-player tests lost the most players in wave 2 (v1.6.2: 80% completion, 41 deaths; v1.7.8: 75%
+completion, 46 deaths, the lowest of any wave). Wave 2 is where the first new rune (Ice Nova) arrives with
+its sample drawing, and it was also where bats arrived: 2.2× a slime's speed, coming in from the close side
+edges in portrait. Bats were the second biggest killer (46 runs) after slimes (56).
+
+- **Wave 2:** slimes only (was slime 3 : bat 1). Same pressure, so it spawns slightly fewer, slower enemies.
+- **Wave 3:** bats debut at half their old weight (slime 3 : bat 1 : skeleton 1, was 3 : 2 : 1). Fewer
+  enemies at the same pressure (the average enemy is tougher), so wave 3 doesn't become the new wall.
+
+Everything else is v1.7.8's curve. If wave 2 completion rises to 85%+ and wave 3 doesn't drop below its
+84%, keep it.
 
 ## Late game
 

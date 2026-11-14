@@ -1,6 +1,6 @@
 # Roadmap
 
-**Goal:** an average session of **6 minutes** in Poki's player-fit test (v1.6.2: 4:33). Test results,
+**Goal:** an average session of **6 minutes** in Poki's player-fit test (v1.6.2: 4:33; v1.7.8: 5:17). Test results,
 the release log and what's on Poki now are in `docs/PLAYTESTS.md`.
 
 ## Plan
@@ -10,7 +10,7 @@ analytics events for its features.
 
 | Step | What | Targets | Size |
 |---|---|---|---|
-| 0 | Read the v1.7.8 results, then upload v1.8.2 (on-screen spawns, more monsters from several directions, new spawn and level-up effects) | Did the drawing fix work? | — |
+| 0 | Upload **v1.9.0** (built on v1.7.8: drawing rescues, no fizzle on cooldown, no bats in wave 2). v1.8.2 tested worse and was dropped | Drawing misses, wave 2 (75%), tutorial fails (65%) | Small |
 | **A** | Coins, the Spellbook shop, a goal on the game-over screen, the first robe colours | Retry rate (21% start a 2nd run) | Medium |
 | **B** | Crates with drops, the wave 5 mini boss and its chest | Players lost a few % every wave in waves 3–9 | Medium |
 | **C** | Element loadout with **Wind** and **Earth** | Variety, "learn new magic" | Medium–large |

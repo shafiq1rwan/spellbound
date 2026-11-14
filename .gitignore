@@ -4,5 +4,5 @@ art-preview
 *.log
 .vite
 qa-shots
-release
+/release
 dist-base

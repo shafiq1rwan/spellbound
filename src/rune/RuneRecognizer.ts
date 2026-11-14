@@ -29,6 +29,11 @@ export interface RecognizeResult {
   reason?: string;
   /** how well the stroke matched a known NON-rune shape (e.g. a square), 0..1 */
   rejectScore?: number;
+  /**
+   * set when the raw stroke failed (or read as a weaker rune) and a corrected copy cast instead:
+   * "lap" = overdrawn, only the first lap was read; "close" = left open, read with its last side closed
+   */
+  rescue?: "lap" | "close";
 }
 
 export interface RecognizerOptions {
@@ -265,6 +270,52 @@ export function isSwipe(f: Features) {
   return f.straight >= 0.85 && f.corners === 0 && f.netTurn < 75;
 }
 
+// ------------------------------------------------------------------ rescues (playtest v1.7.8)
+// 85% of runs had a failed stroke shaped like a V and 82% one shaped like a circle, before either rune was
+// even unlocked. Those are triangles drawn the way people actually draw them: overdrawn past the start
+// corner (or traced twice round, copying the looping ghost hand), which reads as a circle, and left open
+// after two or two-and-a-half sides, which reads as a V. Both failed 55-100% of the time.
+
+/**
+ * An overdrawn stroke cut where it first comes back to its start (the first lap), or null if it never
+ * does, or barely goes on past it.
+ */
+export function firstLap(points: Pt[]): Pt[] | null {
+  const b = bbox(points), size = Math.max(b.w, b.h);
+  if (size <= 0 || points.length < 8) return null;
+  const p0 = points[0];
+  const d0 = (q: Pt) => Math.hypot(q.x - p0.x, q.y - p0.y);
+  let len = 0, hit = -1;
+  for (let i = 1; i < points.length; i++) {
+    len += Math.hypot(points[i].x - points[i - 1].x, points[i].y - points[i - 1].y);
+    // a lap is at least ~2 sizes long (a triangle's perimeter is 2.4-3x its size, a circle's 3.1x)
+    if (len >= 2 * size && d0(points[i]) < 0.25 * size) { hit = i; break; }
+  }
+  if (hit < 0) return null;
+  while (hit + 1 < points.length && d0(points[hit + 1]) <= d0(points[hit])) hit++; // closest approach
+  if (pathLength(points.slice(hit)) < 0.3 * size) return null; // nothing real after it: not overdrawn
+  return points.slice(0, hit + 1);
+}
+
+/** the stroke with a straight segment from its end back to its start */
+export function closeStroke(points: Pt[]): Pt[] {
+  const a = points[points.length - 1], b = points[0];
+  const out = points.slice();
+  for (let k = 1; k <= 12; k++) out.push({ x: a.x + ((b.x - a.x) * k) / 12, y: a.y + ((b.y - a.y) * k) / 12 });
+  return out;
+}
+
+/** enclosed area / bbox area of a closed polyline (a triangle ~0.5; a thin sliver or a hook far less) */
+function fillRatio(points: Pt[]): number {
+  let a = 0;
+  for (let i = 0; i < points.length; i++) {
+    const p = points[i], q = points[(i + 1) % points.length];
+    a += p.x * q.y - q.x * p.y;
+  }
+  const b = bbox(points);
+  return Math.abs(a) / 2 / Math.max(b.w * b.h, 1e-6);
+}
+
 /** non-rune shapes that would otherwise be read as a rune */
 export function rejectPaths(): Pt[][] {
   const out: Pt[][] = [];
@@ -295,8 +346,35 @@ export class RuneRecognizer {
   }
 
   recognize(points: Pt[]): RecognizeResult {
-    const f = features(points);
+    const r = this.match(points);
+    if (points.length < 5 || r.reason === "too few points" || r.reason === "swipe") return r;
     const enabled = this.opts.enabled ?? RUNES;
+    // 1. overdrawn: read the first lap. Wins if the raw stroke failed or the lap is a cleaner match
+    //    (a triangle drawn 1.2 times round reads as a circle; its first lap is a clean triangle)
+    const lap = firstLap(points);
+    if (lap) {
+      const r2 = this.match(lap);
+      if (r2.rune && (!r.rune || r2.score > r.score)) return { ...r2, rescue: "lap" };
+    }
+    // 2. left open after two or two-and-a-half sides: close it and read it as a triangle. Only for strokes
+    //    with a corner (smooth open arcs are circles) and a gated V or zigzag always keeps its own spell.
+    //    The closed shape must enclose a real area, so hooks and slivers stay misses.
+    const f = r.features;
+    if (enabled.includes("triangle") && r.rune !== "triangle" && r.rune !== "vee" && r.rune !== "zigzag" &&
+        r.reason !== "square" && f.closure >= 0.3 && f.corners >= 1) {
+      const closed = closeStroke(points);
+      if (fillRatio(closed) >= 0.28) {
+        const r3 = this.match(closed, ["triangle"]);
+        if (r3.rune === "triangle" && (!r.rune || r3.score > r.score + 0.03)) return { ...r3, rescue: "close" };
+      }
+    }
+    return r;
+  }
+
+  /** one read of the stroke as drawn (no rescues) */
+  private match(points: Pt[], only?: RuneName[]): RecognizeResult {
+    const f = features(points);
+    const enabled = only ?? this.opts.enabled ?? RUNES;
     const scores = { triangle: 0, circle: 0, zigzag: 0, vee: 0 } as Record<RuneName, number>;
     const empty = (reason: string): RecognizeResult => ({ rune: null, score: 0, best: "triangle", bestScore: 0, gated: [], scores, features: f, reason });
     if (points.length < 5) return empty("too few points");

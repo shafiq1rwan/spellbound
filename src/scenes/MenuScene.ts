@@ -8,6 +8,7 @@ import { PAL, ELEMENT_COLORS, type Element } from "../config/palette";
 import { VFXManager, DEPTH } from "../systems/VFXManager";
 import { Ambience } from "../systems/Ambience";
 import { Button, txt, rtxt, type RText } from "../ui/widgets";
+import { loadLateAssets } from "../core/LateAssets";
 
 export class MenuScene extends Phaser.Scene {
   private vfx!: VFXManager;
@@ -66,6 +67,7 @@ export class MenuScene extends Phaser.Scene {
     this.input.keyboard?.on("keydown-SPACE", () => this.startRun());
     Audio.startMusic();
     cam.fadeIn(250, 11, 12, 30);
+    loadLateAssets(this); // level-up effect etc., in the background
   }
 
   /** pictogram [triangle] -> [fireball] -> [skull] over one short line; the tutorial teaches the rest */

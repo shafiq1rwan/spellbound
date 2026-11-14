@@ -23,7 +23,7 @@ during the guided tutorial).
 3 hearts, throws nearby enemies back, and the run continues. It only appears when an ad can be offered.
 **Familiars:** a spell's first upgrade (level 2) summons an elemental
 pet (Ember Wisp, Frost Sprite, Spark Imp, Arcane Owl) that auto-casts a weaker version of the spell.
-Monsters come from several directions at once, and difficulty rises a steady ~25% per wave (see `docs/DIFFICULTY.md`). **Spell combination:** freeze enemies with Ice Nova, then hit them with any other spell to
+Difficulty rises a steady ~28% per wave, and wave 2 (the first new rune) is slimes only (see `docs/DIFFICULTY.md`). **Spell combination:** freeze enemies with Ice Nova, then hit them with any other spell to
 *shatter* them for double damage. Switching elements also builds the combo meter 3× faster than
 repeating one spell. **Aiming:** draw the rune on top of a monster to target it.
 Otherwise the spell goes for the nearest enemy.
@@ -69,7 +69,7 @@ src/
   ui/                      pixel widgets (buttons, 9-slice panels, text), segment stroker
 tools/art/                 build-time pixel-art generator (see docs/ART_PIPELINE.md)
 tools/qa/                  headless-Edge QA scripts: shoot (driver), sim-run (balance bot), guided, endgame,
-                           spawns, fxshots, unlock, cardcheck and more; usage is in each file's header
+                           spawns, unlock, cardcheck and more; usage is in each file's header
 tests/                     recognizer test suite
 public/assets/gfx/         baked PNG sheets + manifest.json (+ bitmap font)
 public/assets/fonts/       Jersey 10 (readable text) + its OFL licence
@@ -77,7 +77,9 @@ public/assets/fonts/       Jersey 10 (readable text) + its OFL licence
 
 ## Tuning
 
-- **Recognizer:** `GAME.rune.threshold` and `strongThreshold` in `src/config/game.ts`. Turn on
+- **Recognizer:** `GAME.rune.threshold` and `strongThreshold` in `src/config/game.ts`. When a stroke fails,
+  two rescues run (`RuneRecognizer.recognize`): an overdrawn stroke is read again as its first lap, and an
+  open stroke with a corner is read again with its last side closed (as a triangle only). Turn on
   Settings → **Rune Debug** to see live scores, closure, turning and corner counts for every stroke.
 - **Spells:** each level's stats and description live in `src/config/spells.ts`.
 - **Enemies and waves:** `src/config/enemies.ts` and `src/config/waves.ts`. Waves 1 to 10 are authored
@@ -100,13 +102,10 @@ public/assets/fonts/       Jersey 10 (readable text) + its OFL licence
 - **Only what's on screen gets hit** (like Survivor.io): auto-aim, chains, homing and pets pick on-screen
   enemies (`GameScene.visibleTargets`), projectiles vanish at the screen edge, and `CombatSystem`
   ignores damage to anything whose centre is off screen.
-- **Spawns** happen on screen, in a band just inside the edge and clear of the HUD
-  (`EnemySpawnManager.edgePoint`/`playArea`), behind a 0.9 s purple portal (`GAME.spawn.portalMs`)
-  during which the enemy is visible but harmless and can't be targeted. Never nearer than
-  `GAME.spawn.minDistance` (140 art px), which keeps portrait spawns at the top and bottom; very short
-  screens use the farthest spot available. Each spawn comes from 1–4 directions at once (one spot, a
-  pincer from opposite sides, three-way, or from wave 5 all four sides), with the group split between
-  them (`directionWeights` in `src/config/waves.ts`, `EnemySpawnManager.patternPoints`).
+- **Spawns** come from the four screen edges with equal odds (`EnemySpawnManager.edgePoint`). In
+  portrait the side edges are close to the wizard, so spawning by edge length sent most enemies in
+  from the sides with little warning. (v1.8.0–1.8.2 spawned on screen and from several directions at once;
+  that tested worse and was dropped, see `docs/PLAYTESTS.md`.)
 
 - **Text:** two fonts. The in-house 5×7 bitmap font (`txt()` in `src/ui/widgets.ts`) is for titles,
   buttons and numbers. Sentences (upgrade descriptions, hints, the menu line) use **Jersey 10** in
@@ -125,9 +124,12 @@ ideas on hold are in `ROADMAP.md`.
 - **Jersey 10** © 2023 The Soft Type Project Authors (https://github.com/scfried/soft-type-jersey),
   SIL Open Font License 1.1. The licence ships next to the font in `public/assets/fonts/OFL.txt`.
 - **Phaser 3.90** (game engine) © Richard Davey, Phaser Studio Inc., MIT License.
+- **Level-up effect:** pixelfx `ui/level-up` (https://github.com/patch-gg/pixelfx) © 2026 Patch and Hugo
+  Duprez, MIT License; it adapts Sprite Fusion's open-source holy-light and power-up VFX (Hugo Duprez, MIT).
+  Exported as a sprite sheet and cleaned by `tools/art/import-pixelfx.mjs` (see `docs/ART_PIPELINE.md`).
 - Everything else (art, sound, code) is made for this project; see `docs/ART_PIPELINE.md`.
 - `public/THIRD_PARTY_LICENSES.txt` ships in the build with both licence notices (the minified engine
-  bundle drops Phaser's own copyright comment).
+  bundle drops Phaser's own copyright comment), plus the pixelfx licence.
 
 ### External requests at runtime
 

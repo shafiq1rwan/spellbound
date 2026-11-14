@@ -250,3 +250,57 @@ test("all runes unlocked: beginners' triangles still cast a spell (>= 95%), most
   console.log("beginner triangles, all runes: fireball", tri, "any spell", any, N);
   assert.ok(any / N >= 0.95 && tri / N >= 0.8, `fireball ${tri}/${N}, any ${any}/${N}`);
 });
+
+// Playtest v1.7.8: 85% of runs had a failed stroke labelled "vee" and 82% one labelled "circle", mostly
+// before those runes were unlocked. Those were triangles left open, or overdrawn past the start corner.
+function triangleCorners(R: () => number) {
+  const v = [[(R() - 0.5) * 0.5, -1 + R() * 0.3], [0.6 + R() * 0.5, 0.4 + R() * 0.35], [-0.6 - R() * 0.5, 0.4 + R() * 0.35]];
+  const start = Math.floor(R() * 3);
+  const seq = [...v.slice(start), ...v.slice(0, start)];
+  return R() < 0.5 ? seq : [seq[0], seq[2], seq[1]];
+}
+const lerp2 = (a: number[], b: number[], t: number) => [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t];
+
+test("overdrawn triangles (1.1 to 2 laps) cast Fireball, in wave 1 and with all runes (>= 95%)", () => {
+  for (const enabled of [["triangle"], undefined] as (RuneName[] | undefined)[]) {
+    const r = new RuneRecognizer({ threshold: 0.72, strongThreshold: 0.86, enabled });
+    const R = rng(3131);
+    let ok = 0;
+    const N = 300;
+    for (let i = 0; i < N; i++) {
+      const s = triangleCorners(R);
+      const extra = R() * 1.0; // how far past the start corner: 0..1 lap
+      const vs = [...s, s[0]];
+      if (extra < 1 / 3) vs.push(lerp2(s[0], s[1], 0.15 + extra * 2.4));
+      else if (extra < 2 / 3) vs.push(s[1], lerp2(s[1], s[2], (extra - 1 / 3) * 3));
+      else vs.push(s[1], s[2], lerp2(s[2], s[0], (extra - 2 / 3) * 3));
+      if (r.recognize(humanize(densify(vs), R, { rot: 0.5, jitter: 0.05 })).rune === "triangle") ok++;
+    }
+    console.log("overdrawn triangles", enabled ?? "all", ok, N);
+    assert.ok(ok / N >= 0.95, `${ok}/${N}`);
+  }
+});
+
+test("wave 1: triangles left open after 2 to 2.5 sides cast Fireball (>= 95%)", () => {
+  const wave1 = new RuneRecognizer({ threshold: 0.72, strongThreshold: 0.86, enabled: ["triangle"] });
+  const R = rng(5151);
+  let ok = 0;
+  const N = 300;
+  for (let i = 0; i < N; i++) {
+    const s = triangleCorners(R);
+    const vs = R() < 0.5 ? s : [...s, lerp2(s[2], s[0], 0.2 + R() * 0.35)];
+    if (wave1.recognize(humanize(densify(vs), R, { rot: 0.5, jitter: 0.05 })).rune === "triangle") ok++;
+  }
+  console.log("open triangles in wave 1", ok, N);
+  assert.ok(ok / N >= 0.95, `${ok}/${N}`);
+});
+
+test("rescues never turn a circle, zigzag or V into Fireball once that rune is unlocked", () => {
+  const R = rng(6161);
+  let wrong = 0;
+  const N = 150;
+  for (const rune of ["circle", "zigzag", "vee"] as RuneName[])
+    for (let i = 0; i < N; i++) if (rec.recognize(humanize(makers[rune](R), R, { rot: rune === "vee" ? 0.3 : 0.45 })).rune === "triangle") wrong++;
+  console.log("other runes read as triangle", wrong, N * 3);
+  assert.ok(wrong / (N * 3) <= 0.01, `${wrong}/${N * 3}`);
+});

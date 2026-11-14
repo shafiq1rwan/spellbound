@@ -2,7 +2,6 @@
 // damage numbers, decals, bouncing debris, lightning). Quality setting scales particle counts.
 import Phaser from "phaser";
 import { Save } from "../core/Save";
-import { origin } from "../core/assets";
 import { PAL } from "../config/palette";
 import { strokeSegments } from "../ui/stroke";
 
@@ -103,7 +102,6 @@ export class VFXManager {
       pool.push(s); // keep the pool ordered oldest-first
     }
     if (o.loop) this.loopers.add(s); else this.loopers.delete(s);
-    s.setOrigin(...origin(key)); // e.g. the portal and level-up sheets are anchored at the floor, not centred
     s.setActive(true).setVisible(true).setPosition(x, y).setScale(o.scale ?? 1).setAngle(o.angle ?? 0)
       .setDepth(o.depth ?? DEPTH.fx).setAlpha(o.alpha ?? 1).setFlipX(!!o.flipX)
       .setBlendMode(o.add ? Phaser.BlendModes.ADD : Phaser.BlendModes.NORMAL);
