@@ -91,7 +91,7 @@ public/assets/fonts/       Jersey 10 (readable text) + its OFL licence
   lasts at least 120 ms, holds full strength for its first ~40% and alternates direction). XP orbs pop
   out and bounce for `GAME.xp.popMs` (1 s, `bounce`/`bounceFriction`), then fly straight to the wizard
   (`pullSpeed`/`pullAccel`/`pullMax`, ~0.3 s).
-- **SCREEN SHAKE: OFF** (Settings, `reducedMotion` in the save) turns off screen shake, full-screen
+- **SCREEN SHAKE: OFF** is the default since v1.9.1 (Settings, `reducedMotion` in the save). It turns off screen shake, full-screen
   flashes and hit-stop freezes, and softens the hurt flash. It's read live, so it applies mid-run.
 - **Effect budgets** (`src/systems/VFXManager.ts`): at most 420 live particles (× quality), 16 big
   glows (each at most 96 art px across), 24 lightning bolts and 32 sprites per effect type; 60 XP orbs

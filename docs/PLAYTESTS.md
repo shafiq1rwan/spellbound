@@ -9,10 +9,10 @@ average session of **5 minutes or more** (Poki's player-fit target).
 |---|---|
 | **v1.7.8** | Player-fit done: **500 players, average 5:17**. The best result so far |
 | **v1.8.2** | Player-fit done: **500 players, average 4:50**. Lost to v1.7.8, so v1.8.0–1.8.2 are **dropped** |
-| **v1.9.0** | Built on v1.7.8: drawing rescues for overdrawn and open triangles, no fizzle on cooldown, no bats in wave 2. **Next to upload** (`release/spellbound-arena-v1.9.0.zip`) |
+| **v1.9.1** | Built on v1.7.8: drawing rescues for overdrawn and open triangles, no fizzle on cooldown, no bats in wave 2 (v1.9.0), and screen shake off by default (v1.9.1). **Next to upload** (`release/spellbound-arena-v1.9.1.zip`) |
 | GitHub | v1.9.0 pushed to `main` (14 Nov 2026); each push redeploys the GitHub Pages site |
 
-**Compare v1.9.0 against v1.7.8:**
+**Compare v1.9.1 against v1.7.8:**
 
 | Metric | v1.7.8 | A win looks like |
 |---|---|---|
@@ -143,7 +143,8 @@ direction of *easier*.
 | ~~1.8.0~~ | Enemies spawn on screen behind a 0.9 s portal, at least 140 px away (dropped) | in v1.8.2 |
 | ~~1.8.1~~ | Own spawn rift and level-up pillar (dropped) | in v1.8.2 |
 | ~~1.8.2~~ | More monsters at a time, from several directions at once (dropped) | Player-fit, 500 players: 4:50 |
-| 1.9.0 | **Built on v1.7.8.** Overdrawn triangles read as their first lap and open ones closed (`rescue-lap`/`rescue-close` events); a rune drawn on cooldown no longer fizzles or resets the combo; wave 2 is slimes only, bats debut in wave 3 at half weight | Next to upload |
+| 1.9.1 | Screen shake off by default (also full-screen flashes and hit-stop; Settings → SCREEN SHAKE turns it on). `settings` `screen-shake-on` shows how many turn it back on | Next to upload |
+| 1.9.0 | **Built on v1.7.8.** Overdrawn triangles read as their first lap and open ones closed (`rescue-lap`/`rescue-close` events); a rune drawn on cooldown no longer fizzles or resets the combo; wave 2 is slimes only, bats debut in wave 3 at half weight | in v1.9.1 |
 
 ## Next lever: the retry rate
 

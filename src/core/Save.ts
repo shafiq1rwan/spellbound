@@ -20,7 +20,8 @@ export interface SaveData {
 const KEY = "spellbound-arena.v2";
 const DEFAULTS: SaveData = {
   version: 2, bestTimeMs: 0, bestWave: 0, bestKills: 0, bestScore: 0, runs: 0, tutorialDone: false,
-  settings: { sfx: 0.8, music: 0.5, quality: "high", reducedMotion: false, debugRunes: false },
+  // reducedMotion = Settings > SCREEN SHAKE: OFF. Off by default since v1.9.1; players can turn it on
+  settings: { sfx: 0.8, music: 0.5, quality: "high", reducedMotion: true, debugRunes: false },
 };
 
 class SaveManager {
@@ -36,11 +37,7 @@ class SaveManager {
     } catch {
       this.data = structuredClone(DEFAULTS);
     }
-    if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches && !this.hasKey()) this.data.settings.reducedMotion = true;
     return this.data;
-  }
-  private hasKey() {
-    try { return localStorage.getItem(KEY) !== null; } catch { return false; }
   }
   save() {
     try { localStorage.setItem(KEY, JSON.stringify(this.data)); } catch { /* storage unavailable: keep in memory */ }
