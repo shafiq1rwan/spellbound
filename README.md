@@ -115,8 +115,6 @@ public/assets/fonts/       Jersey 10 (readable text) + its OFL licence
   of the widest time with that many digits ("0:00", then "00:00"), so the plate only widens at 10:00 (the
   font's "1" is narrower than other digits). The plate's width is kept even so it sits on whole pixels.
   The boss name and bar sit below the hearts.
-  The pause button is as tall as the plate (19 px, with a 10 px icon so it centres exactly) and its tap area
-  reaches 4 px past its edges (`Button` option `hitPad`).
   `node tools/qa/pokiframe.mjs [w h dpr]` screenshots the menu, HUD (8 hearts and a hint), a rune unlock and
   a boss wave on an emulated touch phone, with stand-ins for Poki's button and the camera.
 

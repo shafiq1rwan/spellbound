@@ -72,7 +72,7 @@ export class HUDScene extends Phaser.Scene {
     this.waveText = txt(this, 0, 0, "WAVE 1", { color: PAL.gold });
     this.timeText = txt(this, 0, 0, "0:00", { color: 0xd8d0f0 });
     this.timeDivider = this.add.rectangle(0, 0, 1, 7, 0x6d5c98);
-    this.pauseBtn = new Button(this, 0, 0, "", () => { Analytics.track("button", "pause", "interact"); bus.emit(EV.PAUSE_REQ); }, { icon: "ic_pause", h: 19, hitPad: 4 }); // as tall as the wave plate
+    this.pauseBtn = new Button(this, 0, 0, "", () => { Analytics.track("button", "pause", "interact"); bus.emit(EV.PAUSE_REQ); }, { icon: "ic_pause" });
     Analytics.track("button", "pause", "visible", "run");
     // boss bar
     this.bossC = this.add.container(0, 0).setVisible(false);
