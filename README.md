@@ -108,13 +108,13 @@ public/assets/fonts/       Jersey 10 (readable text) + its OFL licence
   that tested worse and was dropped, see `docs/PLAYTESTS.md`.)
 - **Phones inside Poki** (`GAME.mobile`, `Layout.compute`): Poki's iframe reports no camera cut-out, so on
   touch screens the game assumes a 32 CSS px one at the top (portrait) or both sides (landscape). Poki
-  also draws its own button over the top-left corner on mobile, so the top bar reads
-  `[Poki] hearts … [WAVE n | m:ss] [pause]`, centred on one line (`HUDScene.placeTopBar`). The timer
-  shares the wave plate, 5 px either side of the divider; its slot is the width of the widest time with
-  that many digits ("0:00", then "00:00"), so the plate only widens at 10:00 (the font's "1" is narrower
-  than other digits). On touch screens the hearts start right of Poki's button
-  (`GAME.mobile.pokiButtonCss`, 72 CSS px). They stay beside the plate when 5 fit (wrapping into balanced
-  rows, e.g. 4 + 4); on narrower screens they get their own row under it. The boss name and bar sit below.
+  also draws its own button over the top-left corner on mobile, so the top bar leaves the left empty and
+  is symmetric (`HUDScene.placeTopBar`): the `WAVE n | m:ss` plate centred at the top, the hearts centred
+  in one row just under it (8 hearts fit on the narrowest phone), and pause alone at the right on the
+  plate's centre line. The timer shares the plate, 5 px either side of the divider; its slot is the width
+  of the widest time with that many digits ("0:00", then "00:00"), so the plate only widens at 10:00 (the
+  font's "1" is narrower than other digits). The plate's width is kept even so it sits on whole pixels.
+  The boss name and bar sit below the hearts.
   The pause button is as tall as the plate (19 px, with a 10 px icon so it centres exactly) and its tap area
   reaches 4 px past its edges (`Button` option `hitPad`).
   `node tools/qa/pokiframe.mjs [w h dpr]` screenshots the menu, HUD (8 hearts and a hint), a rune unlock and

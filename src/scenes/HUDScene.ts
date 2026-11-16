@@ -159,7 +159,7 @@ export class HUDScene extends Phaser.Scene {
     const top = sf.top + 4;
     this.barY = top + 10;
     this.placeTopBar();
-    this.bossC.setPosition(Math.round(W / 2), Math.round(top + 48)); // name clears the health row on narrow phones
+    this.bossC.setPosition(Math.round(W / 2), Math.round(top + 48)); // name clears the hearts under the plate
     this.debugText.setPosition(sf.left + 4, top + 30);
     // only spells you have are shown (no "?" slots to fumble with), centred as a group
     const shown = this.slots.filter((s) => this.g.spells.levels[s.id] > 0);
@@ -194,35 +194,32 @@ export class HUDScene extends Phaser.Scene {
     this.stackBanner();
   }
   /**
-   * Top bar: [Poki's button] hearts ... [WAVE n | timer] [pause]. On narrow screens the hearts get
-   * their own row below the panel, still clear of Poki. Called on layout and when content width changes.
+   * Top bar, symmetric: the WAVE n | timer plate centred at the top, the hearts centred just under it, and
+   * pause alone at the right, all on the plate's centre line. On phones Poki's own button takes the
+   * top-left corner, so the left is left empty. Called on layout, when the wave number or the timer's digit
+   * count changes the plate's width, and when max hearts change.
    */
   private barY = 14;
   private placeTopBar() {
     const W = Layout.w, sf = Layout.safe, y = this.barY;
-    const px = Math.round(W - sf.right - 6 - this.pauseBtn.bw / 2);
-    this.pauseBtn.setPosition(px, y);
+    this.pauseBtn.setPosition(Math.round(W - sf.right - 6 - this.pauseBtn.bw / 2), y);
     this.fitWavePanel();
-    const pw = this.wavePanel.width;
-    const wx = Math.round(px - this.pauseBtn.bw / 2 - 4 - pw / 2);
+    const pw = this.wavePanel.width, wx = Math.round(W / 2);
     this.wavePanel.setPosition(wx, y - 9);
     const left = wx - pw / 2 + 7;
     const waveW = this.waveText.ink().w;
     this.waveText.setAnchor(0, 0.5).setPosition(left, y + 0.5);
     this.timeDivider.setPosition(left + waveW + TIMER_GAP + 0.5, y + 0.5);
-    // the same gap either side of the divider; the time keeps a fixed left edge, its slot sized above
+    // the same gap either side of the divider; the time keeps a fixed left edge, its slot sized by measureTimer
     this.timeText.setAnchor(0, 0.5).setPosition(left + waveW + TIMER_GAP * 2 + 1, y + 0.5);
-    // Hearts stay beside the panel if five fit; otherwise use a dedicated row below it.
-    const x0 = Math.round(Math.max(sf.left + 8, Layout.pokiLeft + 4));
-    const room = wx - pw / 2 - 6 - x0;
+    // hearts: one row centred under the plate, 9 px apart (8 hearts = 70 px fit on the narrowest phone)
     const n = Math.max(1, this.maxHp || this.hearts.length || 5);
-    const ownRow = room < Math.min(n, 5) * 9 - 2;
-    const heartRoom = ownRow ? W - sf.right - 8 - x0 : room;
-    let perRow = Math.max(1, Math.floor((heartRoom + 2) / 9));
-    const rows = Math.ceil(n / perRow);
-    perRow = Math.ceil(n / rows);
-    this.hearts.forEach((h, i) => h.setPosition((i % perRow) * 9, Math.floor(i / perRow) * 9));
-    this.heartRow.setPosition(x0, ownRow ? Math.round(y + 17) : Math.round(y + 0.5 - (rows * 9 - 2) / 2));
+    const perRow = Math.max(1, Math.min(n, Math.floor((W - sf.left - sf.right - 16 + 2) / 9)));
+    this.hearts.forEach((h, i) => {
+      const row = Math.floor(i / perRow), inRow = Math.min(perRow, n - row * perRow);
+      h.setPosition(Math.round(((perRow - inRow) * 9) / 2) + (i % perRow) * 9, row * 9);
+    });
+    this.heartRow.setPosition(Math.round(wx - (perRow * 9 - 2) / 2), Math.round(y + 13));
   }
 
   /** reserve the width of the widest time with as many digits as `t` ("0:00" for "0:17") */
@@ -238,7 +235,7 @@ export class HUDScene extends Phaser.Scene {
     if (!this.timerW) this.measureTimer(this.timeText.text);
     const iw = this.waveText.ink().w + TIMER_GAP * 2 + 1 + this.timerW;
     let w = iw + 2 * 7;
-    if ((w - iw) % 2) w += 1;
+    if (w % 2) w += 1; // even, so the plate centred on the screen sits on whole pixels
     this.wavePanel.setOrigin(0.5, 0).setSize(w, 19);
   }
   private placeXp(cx: number, y: number, w: number) {
