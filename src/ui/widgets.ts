@@ -204,7 +204,8 @@ export const UI = {
   padX: 9,          // horizontal text padding inside a button face
 };
 
-type ButtonOpts = { icon?: string; iconScale?: number; scale?: number; color?: number; w?: number; h?: number; minW?: number };
+/** hitPad: extra art px on every side that still count as a tap (small buttons stay easy to hit on phones) */
+type ButtonOpts = { icon?: string; iconScale?: number; scale?: number; color?: number; w?: number; h?: number; minW?: number; hitPad?: number };
 
 /**
  * Pixel button with exact centring. Geometry comes from the button art (tools/art/ui.mjs):
@@ -226,6 +227,7 @@ export class Button extends Phaser.GameObjects.Container {
   private faceCy = 0;
   private labelDx = 0;
   private iconDx = 0;
+  private hitPad = 0;
 
   constructor(scene: Phaser.Scene, x: number, y: number, text: string, onClick: () => void, o: ButtonOpts = {}) {
     super(scene, Math.round(x), Math.round(y));
@@ -272,7 +274,12 @@ export class Button extends Phaser.GameObjects.Container {
     this.placeContent(0);
     this.setSize(w, h);
 
-    this.up.setInteractive({ useHandCursor: true });
+    this.hitPad = o.hitPad ?? 0;
+    const hp = this.hitPad;
+    this.up.setInteractive({
+      useHandCursor: true,
+      ...(hp ? { hitArea: new Phaser.Geom.Rectangle(-hp, -hp, w + 2 * hp, h + 2 * hp), hitAreaCallback: Phaser.Geom.Rectangle.Contains } : {}),
+    });
     const z = this.up;
     z.on("pointerover", () => {
       if (!this.enabled) return;
@@ -326,7 +333,8 @@ export class Button extends Phaser.GameObjects.Container {
   }
   /** test against screen-space art coords (for blocking rune input under buttons) */
   contains(x: number, y: number) {
-    return this.visible && x >= this.x - this.bw / 2 && x <= this.x + this.bw / 2 && y >= this.y + this.top && y <= this.y + this.top + this.bh;
+    const p = this.hitPad;
+    return this.visible && x >= this.x - this.bw / 2 - p && x <= this.x + this.bw / 2 + p && y >= this.y + this.top - p && y <= this.y + this.top + this.bh + p;
   }
 }
 

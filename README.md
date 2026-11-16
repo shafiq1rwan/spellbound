@@ -115,6 +115,8 @@ public/assets/fonts/       Jersey 10 (readable text) + its OFL licence
   than other digits). On touch screens the hearts start right of Poki's button
   (`GAME.mobile.pokiButtonCss`, 72 CSS px). They stay beside the plate when 5 fit (wrapping into balanced
   rows, e.g. 4 + 4); on narrower screens they get their own row under it. The boss name and bar sit below.
+  The pause button is as tall as the plate (19 px, with a 10 px icon so it centres exactly) and its tap area
+  reaches 4 px past its edges (`Button` option `hitPad`).
   `node tools/qa/pokiframe.mjs [w h dpr]` screenshots the menu, HUD (8 hearts and a hint), a rune unlock and
   a boss wave on an emulated touch phone, with stand-ins for Poki's button and the camera.
 
