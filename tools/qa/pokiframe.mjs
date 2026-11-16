@@ -31,5 +31,9 @@ await p.screenshot({ path: `qa-shots/poki_hud_${W}x${H}.png` });
 await p.evaluate(() => { const g = window.__game.scene.getScene("Game"); for (const e of g.enemies) if (e.alive) e.die(); g.spawner.startWave(2); });
 await p.waitForTimeout(900);
 await p.screenshot({ path: `qa-shots/poki_unlock_${W}x${H}.png` });
-console.log(`${W}x${H}@${DPR}: saved qa-shots/poki_menu_${W}x${H}.png poki_hud_${W}x${H}.png and poki_unlock_${W}x${H}.png`);
+// boss wave: the boss name and HP bar under the top bar
+await p.evaluate(() => { const g = window.__game.scene.getScene("Game"); for (const e of g.enemies) if (e.alive) e.die(); g.spawner.startWave(10); });
+await p.waitForTimeout(2500);
+await p.screenshot({ path: `qa-shots/poki_boss_${W}x${H}.png` });
+console.log(`${W}x${H}@${DPR}: saved qa-shots/poki_menu_${W}x${H}.png poki_hud, poki_unlock and poki_boss_${W}x${H}.png`);
 await b.close();

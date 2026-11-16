@@ -98,7 +98,7 @@ export class HUDScene extends Phaser.Scene {
     this.offLayout = Layout.onChange(() => this.layout());
     this.listen(EV.HP, (hp: number, max: number, delta: number) => this.setHp(hp, max, delta));
     this.listen(EV.XP, (xp: number, need: number, lvl: number) => { this.xpFrac = xp / need; this.lvText.setText(`LV ${lvl}`); });
-    this.listen(EV.WAVE, (n: number) => { this.waveText.setText(`WAVE ${n}`); this.fitWavePanel(); this.pop(this.waveText); });
+    this.listen(EV.WAVE, (n: number) => { this.waveText.setText(`WAVE ${n}`); this.placeTopBar(); this.pop(this.waveText); });
     this.listen(EV.WAVE_BANNER, (a: string, b: string, c: number) => this.showBanner(a, b, c));
     this.listen(EV.UNLOCK, (id: SpellId) => this.onUnlock(id));
     this.listen(EV.CLEAR_TEXT, () => {
@@ -148,14 +148,9 @@ export class HUDScene extends Phaser.Scene {
     this.vignette.setDisplaySize(W, H);
     this.hurtFlash.setDisplaySize(W, H);
     const top = sf.top + 4;
-    // top bar: everything centred on one line (y = top + 10)
-    const barY = top + 10;
-    this.wavePanel.setPosition(Math.round(W / 2), barY - 9);
-    this.fitWavePanel();
-    this.waveText.setPosition(Math.round(W / 2), barY + 0.5);
-    this.timeText.setPosition(Math.round(W / 2), barY + 18);
-    this.pauseBtn.setPosition(Math.round(W - sf.right - 6 - this.pauseBtn.bw / 2), barY);
-    this.bossC.setPosition(Math.round(W / 2), Math.round(top + 42));
+    this.barY = top + 10;
+    this.placeTopBar();
+    this.bossC.setPosition(Math.round(W / 2), Math.round(top + 48)); // name clears the timer under the wave plate
     this.debugText.setPosition(sf.left + 4, top + 30);
     // only spells you have are shown (no "?" slots to fumble with), centred as a group
     const shown = this.slots.filter((s) => this.g.spells.levels[s.id] > 0);
@@ -170,7 +165,7 @@ export class HUDScene extends Phaser.Scene {
       });
       const bw = Math.round(Math.min(W - 60, 150));
       this.placeXp(Math.round(W / 2 + 12), by - 21, bw);
-      this.hint.setPosition(Math.round(W / 2), by - 39); // above the hearts row
+      this.hint.setPosition(Math.round(W / 2), by - 30);
       this.hintW = W - 20;
       // high enough to clear the level-up effect's title over the wizard, low enough to clear the unlock pictogram
       this.banner.setPosition(Math.round(W / 2), TopStack.bannerY());
@@ -183,12 +178,40 @@ export class HUDScene extends Phaser.Scene {
       });
       const bw = Math.round(Math.min(W * 0.45, 190));
       this.placeXp(Math.round(W / 2 + 12), Math.round(H - sf.bottom - 9), bw);
-      this.hint.setPosition(Math.round(W / 2), Math.round(H - sf.bottom - 27)); // above the hearts row
+      this.hint.setPosition(Math.round(W / 2), Math.round(H - sf.bottom - 17));
       this.hintW = Math.round(W * 0.6);
       this.banner.setPosition(Math.round(W / 2), Math.round(H * 0.3));
     }
     this.stackBanner();
   }
+  /**
+   * Top bar, every item centred on one line (barY): [Poki's button] hearts ... [WAVE n] [pause], with the
+   * timer under the wave plate. On phones the hearts start right of Poki's button; they fill the space up
+   * to the plate and wrap into balanced rows when they don't fit (8 hearts on a 360-wide phone: 4 + 4).
+   * Called on layout, when the wave number changes the plate's width, and when max hearts change.
+   */
+  private barY = 14;
+  private placeTopBar() {
+    const W = Layout.w, sf = Layout.safe, y = this.barY;
+    const px = Math.round(W - sf.right - 6 - this.pauseBtn.bw / 2);
+    this.pauseBtn.setPosition(px, y);
+    this.fitWavePanel();
+    const pw = this.wavePanel.width;
+    const wx = Math.round(px - this.pauseBtn.bw / 2 - 4 - pw / 2);
+    this.wavePanel.setPosition(wx, y - 9);
+    this.waveText.setPosition(wx, y + 0.5);
+    this.timeText.setPosition(wx, y + 18);
+    // hearts: from the left edge (or Poki's button) up to the plate, 9 px apart, centred on the bar line
+    const x0 = Math.round(Math.max(sf.left + 8, Layout.pokiLeft + 4));
+    const room = wx - pw / 2 - 6 - x0;
+    const n = Math.max(1, this.maxHp || this.hearts.length || 5);
+    let perRow = Math.max(1, Math.floor((room + 2) / 9));
+    const rows = Math.ceil(n / perRow);
+    perRow = Math.ceil(n / rows);
+    this.hearts.forEach((h, i) => h.setPosition((i % perRow) * 9, Math.floor(i / perRow) * 9));
+    this.heartRow.setPosition(x0, Math.round(y + 0.5 - (rows * 9 - 2) / 2));
+  }
+
   /** wave plate: 6px of padding around the text, sized so the text lands on whole pixels */
   private fitWavePanel() {
     const iw = this.waveText.ink().w;
@@ -203,20 +226,19 @@ export class HUDScene extends Phaser.Scene {
     this.xpShine.setPosition(cx - w / 2, y - 1);
     this.xpFill.setData("w", w);
     this.lvText.setPosition(cx - w / 2 - 6, y);
-    // hearts sit just above the XP bar, lined up with its left edge. Not top-left: on phones Poki draws
-    // its own button over that corner. Up to 8 hearts (5 + three Heart Runes) fit over the bar.
-    this.heartRow.setPosition(Math.round(cx - w / 2 - 2), Math.round(y - 15));
   }
 
   // ---------------------------------------------------------------- hearts
   private setHp(hp: number, max: number, delta: number) {
     this.hp = hp;
+    const grew = max !== this.maxHp;
     this.maxHp = max;
     while (this.hearts.length < max) {
       const h = this.add.image(this.hearts.length * 9, 0, "heart_full").setOrigin(0, 0);
       this.hearts.push(h);
       this.heartRow.add(h);
     }
+    if (grew) this.placeTopBar(); // a new heart may need to wrap
     this.hearts.forEach((h, i) => {
       h.setVisible(i < max);
       h.setTexture(i < hp ? "heart_full" : "heart_empty");

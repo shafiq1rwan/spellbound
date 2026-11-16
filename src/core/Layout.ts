@@ -16,6 +16,8 @@ class LayoutManager {
   w = 195;
   h = 422;
   safe: Insets = { top: 0, right: 0, bottom: 0, left: 0 };
+  /** art px at the left of the top bar covered by Poki's own button on phones (0 elsewhere) */
+  pokiLeft = 0;
   portrait = true;
   private listeners = new Set<() => void>();
 
@@ -42,6 +44,7 @@ class LayoutManager {
       };
     }
     const touch = typeof matchMedia === "function" && matchMedia("(pointer: coarse)").matches;
+    this.pokiLeft = touch ? Math.ceil(GAME.mobile.pokiButtonCss * (this.dpr / this.S)) : 0;
     if (touch) {
       const k = this.dpr / this.S, M = GAME.mobile, cut = Math.ceil(M.cutoutCss * k);
       if (this.portrait) this.safe.top = Math.max(this.safe.top, cut);
