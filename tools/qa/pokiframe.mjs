@@ -31,6 +31,10 @@ await p.screenshot({ path: `qa-shots/poki_hud_${W}x${H}.png` });
 await p.evaluate(() => { const g = window.__game.scene.getScene("Game"); for (const e of g.enemies) if (e.alive) e.die(); g.spawner.startWave(2); });
 await p.waitForTimeout(900);
 await p.screenshot({ path: `qa-shots/poki_unlock_${W}x${H}.png` });
+// a long run: the timer past 10:00 widens the plate once
+await p.evaluate(() => { window.__game.scene.getScene("Game").stats.timeMs = 671000; });
+await p.waitForTimeout(300);
+await p.screenshot({ path: `qa-shots/poki_10min_${W}x${H}.png` });
 // boss wave: the boss name and HP bar under the top bar
 await p.evaluate(() => { const g = window.__game.scene.getScene("Game"); for (const e of g.enemies) if (e.alive) e.die(); g.spawner.startWave(10); });
 await p.waitForTimeout(2500);

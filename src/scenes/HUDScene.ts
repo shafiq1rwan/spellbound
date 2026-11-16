@@ -12,6 +12,9 @@ import { Button, txt, rtxt, slice, type PixelText, type RText } from "../ui/widg
 import type { GameScene } from "./GameScene";
 import type { RecognizeResult } from "../rune/RuneRecognizer";
 
+/** px between the wave number, the divider and the timer inside the wave plate */
+const TIMER_GAP = 5;
+
 interface Slot { id: SpellId; c: Phaser.GameObjects.Container; frame: Phaser.GameObjects.NineSlice; icon: Phaser.GameObjects.Image; cd: Phaser.GameObjects.Rectangle; pips: Phaser.GameObjects.Rectangle[]; glow: Phaser.GameObjects.Image; lock: Phaser.GameObjects.BitmapText; wasReady: boolean; x: number; y: number }
 
 export class HUDScene extends Phaser.Scene {
@@ -20,7 +23,12 @@ export class HUDScene extends Phaser.Scene {
   private heartRow!: Phaser.GameObjects.Container;
   private wavePanel!: Phaser.GameObjects.NineSlice;
   private waveText!: PixelText;
-  private timeText!: Phaser.GameObjects.BitmapText;
+  private timeText!: PixelText;
+  private timeDivider!: Phaser.GameObjects.Rectangle;
+  /** width reserved for the timer: the widest time with this many digits ("0:00", then "00:00" from 10:00).
+   *  "1" is narrower than the other digits, so sizing to the live text would make the plate twitch */
+  private timerW = 0;
+  private timerPattern = "";
   private pauseBtn!: Button;
   private slots: Slot[] = [];
   private xpFrame!: Phaser.GameObjects.NineSlice;
@@ -63,6 +71,7 @@ export class HUDScene extends Phaser.Scene {
     this.wavePanel = slice(this, "panel_dark", 0, 0, 58, 19);
     this.waveText = txt(this, 0, 0, "WAVE 1", { color: PAL.gold });
     this.timeText = txt(this, 0, 0, "0:00", { color: 0xd8d0f0 });
+    this.timeDivider = this.add.rectangle(0, 0, 1, 7, 0x6d5c98);
     this.pauseBtn = new Button(this, 0, 0, "", () => { Analytics.track("button", "pause", "interact"); bus.emit(EV.PAUSE_REQ); }, { icon: "ic_pause" });
     Analytics.track("button", "pause", "visible", "run");
     // boss bar
@@ -150,7 +159,7 @@ export class HUDScene extends Phaser.Scene {
     const top = sf.top + 4;
     this.barY = top + 10;
     this.placeTopBar();
-    this.bossC.setPosition(Math.round(W / 2), Math.round(top + 48)); // name clears the timer under the wave plate
+    this.bossC.setPosition(Math.round(W / 2), Math.round(top + 48)); // name clears the health row on narrow phones
     this.debugText.setPosition(sf.left + 4, top + 30);
     // only spells you have are shown (no "?" slots to fumble with), centred as a group
     const shown = this.slots.filter((s) => this.g.spells.levels[s.id] > 0);
@@ -185,10 +194,8 @@ export class HUDScene extends Phaser.Scene {
     this.stackBanner();
   }
   /**
-   * Top bar, every item centred on one line (barY): [Poki's button] hearts ... [WAVE n] [pause], with the
-   * timer under the wave plate. On phones the hearts start right of Poki's button; they fill the space up
-   * to the plate and wrap into balanced rows when they don't fit (8 hearts on a 360-wide phone: 4 + 4).
-   * Called on layout, when the wave number changes the plate's width, and when max hearts change.
+   * Top bar: [Poki's button] hearts ... [WAVE n | timer] [pause]. On narrow screens the hearts get
+   * their own row below the panel, still clear of Poki. Called on layout and when content width changes.
    */
   private barY = 14;
   private placeTopBar() {
@@ -199,23 +206,38 @@ export class HUDScene extends Phaser.Scene {
     const pw = this.wavePanel.width;
     const wx = Math.round(px - this.pauseBtn.bw / 2 - 4 - pw / 2);
     this.wavePanel.setPosition(wx, y - 9);
-    this.waveText.setPosition(wx, y + 0.5);
-    this.timeText.setPosition(wx, y + 18);
-    // hearts: from the left edge (or Poki's button) up to the plate, 9 px apart, centred on the bar line
+    const left = wx - pw / 2 + 7;
+    const waveW = this.waveText.ink().w;
+    this.waveText.setAnchor(0, 0.5).setPosition(left, y + 0.5);
+    this.timeDivider.setPosition(left + waveW + TIMER_GAP + 0.5, y + 0.5);
+    // the same gap either side of the divider; the time keeps a fixed left edge, its slot sized above
+    this.timeText.setAnchor(0, 0.5).setPosition(left + waveW + TIMER_GAP * 2 + 1, y + 0.5);
+    // Hearts stay beside the panel if five fit; otherwise use a dedicated row below it.
     const x0 = Math.round(Math.max(sf.left + 8, Layout.pokiLeft + 4));
     const room = wx - pw / 2 - 6 - x0;
     const n = Math.max(1, this.maxHp || this.hearts.length || 5);
-    let perRow = Math.max(1, Math.floor((room + 2) / 9));
+    const ownRow = room < Math.min(n, 5) * 9 - 2;
+    const heartRoom = ownRow ? W - sf.right - 8 - x0 : room;
+    let perRow = Math.max(1, Math.floor((heartRoom + 2) / 9));
     const rows = Math.ceil(n / perRow);
     perRow = Math.ceil(n / rows);
     this.hearts.forEach((h, i) => h.setPosition((i % perRow) * 9, Math.floor(i / perRow) * 9));
-    this.heartRow.setPosition(x0, Math.round(y + 0.5 - (rows * 9 - 2) / 2));
+    this.heartRow.setPosition(x0, ownRow ? Math.round(y + 17) : Math.round(y + 0.5 - (rows * 9 - 2) / 2));
   }
 
-  /** wave plate: 6px of padding around the text, sized so the text lands on whole pixels */
+  /** reserve the width of the widest time with as many digits as `t` ("0:00" for "0:17") */
+  private measureTimer(t: string) {
+    this.timerPattern = t.replace(/\d/g, "0");
+    this.timeText.setText(this.timerPattern);
+    this.timerW = this.timeText.ink().w;
+    this.timeText.setText(t);
+  }
+
+  /** wave plate "WAVE n | m:ss": 7 px padding, the timer slot sized by measureTimer (it widens once, at 10:00) */
   private fitWavePanel() {
-    const iw = this.waveText.ink().w;
-    let w = iw + 2 * 9;
+    if (!this.timerW) this.measureTimer(this.timeText.text);
+    const iw = this.waveText.ink().w + TIMER_GAP * 2 + 1 + this.timerW;
+    let w = iw + 2 * 7;
     if ((w - iw) % 2) w += 1;
     this.wavePanel.setOrigin(0.5, 0).setSize(w, 19);
   }
@@ -337,7 +359,14 @@ export class HUDScene extends Phaser.Scene {
     this.t += dt / 1000;
     const g = this.g;
     if (!g || !g.scene) return;
-    this.timeText.setText(fmtTime(g.stats.timeMs));
+    const t = fmtTime(g.stats.timeMs);
+    if (t !== this.timeText.text) {
+      if (t.replace(/\d/g, "0") !== this.timerPattern) {
+        this.measureTimer(t);
+        this.placeTopBar();
+      }
+      this.timeText.setText(t);
+    }
     // xp bar eases toward its value
     this.xpShown += (this.xpFrac - this.xpShown) * Math.min(1, dt / 120);
     if (this.xpFrac < this.xpShown - 0.5) this.xpShown = 0;

@@ -109,10 +109,12 @@ public/assets/fonts/       Jersey 10 (readable text) + its OFL licence
 - **Phones inside Poki** (`GAME.mobile`, `Layout.compute`): Poki's iframe reports no camera cut-out, so on
   touch screens the game assumes a 32 CSS px one at the top (portrait) or both sides (landscape). Poki
   also draws its own button over the top-left corner on mobile, so the top bar reads
-  `[Poki] hearts … [WAVE n] [pause]`, every item centred on one line, with the timer under the wave
-  plate (`HUDScene.placeTopBar`). On touch screens the hearts start right of Poki's button
-  (`GAME.mobile.pokiButtonCss`, 72 CSS px); they fill the space up to the plate and wrap into balanced rows
-  when they don't fit (8 hearts on a 360-wide phone: 4 + 4). The boss name and bar sit below the timer.
+  `[Poki] hearts … [WAVE n | m:ss] [pause]`, centred on one line (`HUDScene.placeTopBar`). The timer
+  shares the wave plate, 5 px either side of the divider; its slot is the width of the widest time with
+  that many digits ("0:00", then "00:00"), so the plate only widens at 10:00 (the font's "1" is narrower
+  than other digits). On touch screens the hearts start right of Poki's button
+  (`GAME.mobile.pokiButtonCss`, 72 CSS px). They stay beside the plate when 5 fit (wrapping into balanced
+  rows, e.g. 4 + 4); on narrower screens they get their own row under it. The boss name and bar sit below.
   `node tools/qa/pokiframe.mjs [w h dpr]` screenshots the menu, HUD (8 hearts and a hint), a rune unlock and
   a boss wave on an emulated touch phone, with stand-ins for Poki's button and the camera.
 
