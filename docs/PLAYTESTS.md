@@ -8,10 +8,11 @@ average session of **5 minutes or more** (Poki's own Player Fit exit criterion i
 | Build | State |
 |---|---|
 | **v1.9.1** | Player-fit done: **500 gameplays, average 6:21**, the best so far (v1.7.8: 5:17). **Web Fit Test requested with this build, unchanged** |
-| **v1.9.2** | Merged into `main` (16 November 2026): v1.9.1 plus the HUD kept clear of the phone camera and Poki's top-left button (seen in fullscreen on a Pixel 7a); top bar is now the WAVE | timer plate centred with the hearts under it, pause at the right. Also: the menu skull matches the other icons. Zip: `release/spellbound-arena-v1.9.2.zip`. Use it for the Web Fit Test if Poki allows swapping the build |
+| **v1.9.3** | On `main`, not pushed yet: v1.9.2 plus the fix for a **freeze on the first level-up after TRY AGAIN** (in every build since v1.7.6, including v1.7.8 and v1.9.1 tested on Poki: any player who retried froze at their next level-up, which may have cut second runs and playtime short), a safety net so an error can never freeze the game again (reported as an `error` event), and the Settings TUTORIAL button removed. Zip: `release/spellbound-arena-v1.9.3.zip` |
+| **v1.9.2** | Merged into `main` (16 November 2026): v1.9.1 plus the HUD kept clear of the phone camera and Poki's top-left button (seen in fullscreen on a Pixel 7a); top bar is now the WAVE | timer plate centred with the hearts under it, pause at the right. Also: the menu skull matches the other icons. Zip: `release/spellbound-arena-v1.9.2.zip`. Superseded by v1.9.3 |
 | **v1.7.8** | Player-fit done: 500 players, average 5:17. v1.9.x is built on it |
 | **v1.8.2** | Player-fit done: 500 players, average 4:50. Lost to v1.7.8, so v1.8.0–1.8.2 are **dropped** |
-| GitHub | `main` is at v1.9.2 (merged 16 November 2026); each push to `main` redeploys the GitHub Pages site |
+| GitHub | `main` is at v1.9.3 locally; each push to `main` redeploys the GitHub Pages site |
 
 **Web Fit Test (Poki):** about 10,000 players on poki.com over several days. Passing leads to the Final
 Poki Review; failing means back to playtesting and Player Fit, and the test can be requested again with a
@@ -173,6 +174,7 @@ off by default (v1.9.1). The playtime-by-minute chart wasn't collected for this 
 | ~~1.8.0~~ | Enemies spawn on screen behind a 0.9 s portal, at least 140 px away (dropped) | in v1.8.2 |
 | ~~1.8.1~~ | Own spawn rift and level-up pillar (dropped) | in v1.8.2 |
 | ~~1.8.2~~ | More monsters at a time, from several directions at once (dropped) | Player-fit, 500 players: 4:50 |
+| 1.9.3 | Fix: freeze on the first level-up after TRY AGAIN (since v1.7.6). Errors inside a frame no longer freeze the game and are reported (`error` event). Settings TUTORIAL button removed | Next to upload |
 | 1.9.2 | Phones: HUD clear of the camera cut-out and Poki's top-left button; top bar: WAVE | timer plate centred, hearts under it, pause at the right (all devices) | On `main` |
 | 1.9.1 | Screen shake off by default (also full-screen flashes and hit-stop; Settings → SCREEN SHAKE turns it on). `settings` `screen-shake-on` shows how many turn it back on | **Player-fit, 500 gameplays: 6:21.** Web Fit requested |
 | 1.9.0 | **Built on v1.7.8.** Overdrawn triangles read as their first lap and open ones closed (`rescue-lap`/`rescue-close` events); a rune drawn on cooldown no longer fizzles or resets the combo; wave 2 is slimes only, bats debut in wave 3 at half weight | in v1.9.1 |

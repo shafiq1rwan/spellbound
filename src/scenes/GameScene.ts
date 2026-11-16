@@ -85,6 +85,8 @@ export class GameScene extends Phaser.Scene {
       enemies: [], boss: null, stroke: [], hitstopUntil: 0, frozenTime: false, slowmo: 1,
       lastHurtBy: "unknown", misses: 0, tutorialMisses: 0, survivalMark: 0, swipeReadyAt: 0,
       castThisRun: new Set<string>(), reviveUsed: false, runEnded: false, presentingUntil: 0, worldPaused: false, taps: 0, boundHintShown: false,
+      // the scene object is reused by TRY AGAIN / Menu -> Play, but its sprites are destroyed with the run
+      levelFx: undefined,
     });
   }
 
@@ -466,8 +468,13 @@ export class GameScene extends Phaser.Scene {
       this.vfx.glow(w.x, w.y - 10, PAL.gold, 140, 700, 0.5);
       return;
     }
-    const fx = (this.levelFx ??= this.add.sprite(0, 0, LEVELUP_FX.key, 0)
-      .setOrigin(LEVELUP_FX.pivot[0] / LEVELUP_FX.frameW, LEVELUP_FX.pivot[1] / LEVELUP_FX.frameH));
+    // reused within a run; a sprite from an earlier run is destroyed (no scene), so make a new one. Using the
+    // old one threw on the first level-up after TRY AGAIN and froze the game (v1.9.2 fix)
+    if (!this.levelFx?.scene) {
+      this.levelFx = this.add.sprite(0, 0, LEVELUP_FX.key, 0)
+        .setOrigin(LEVELUP_FX.pivot[0] / LEVELUP_FX.frameW, LEVELUP_FX.pivot[1] / LEVELUP_FX.frameH);
+    }
+    const fx = this.levelFx;
     fx.setPosition(Math.round(w.x), Math.round(w.y)).setDepth(w.y - 0.5).setVisible(true).setAlpha(1);
     fx.play(LEVELUP_FX.anim);
     fx.once(Phaser.Animations.Events.ANIMATION_COMPLETE, () => fx.setVisible(false));

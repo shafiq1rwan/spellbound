@@ -14,6 +14,7 @@ import { UpgradeScene } from "./scenes/UpgradeScene";
 import { PauseScene } from "./scenes/PauseScene";
 import { SettingsScene } from "./scenes/SettingsScene";
 import { GameOverScene } from "./scenes/GameOverScene";
+import { bus } from "./core/bus";
 
 Save.load();
 Audio.setVolumes(Save.settings.sfx, Save.settings.music);
@@ -61,4 +62,25 @@ document.addEventListener("touchmove", (e) => e.preventDefault(), { passive: fal
 document.addEventListener("gesturestart", (e) => e.preventDefault());
 
 // handles for QA scripts (tools/qa)
-Object.assign(window as unknown as Record<string, unknown>, { __game: game, __audio: Audio, __analytics: Analytics });
+Object.assign(window as unknown as Record<string, unknown>, { __game: game, __audio: Audio, __analytics: Analytics, __bus: bus });
+
+// Safety net: Phaser schedules the next frame only after the current one returns, so an uncaught error in
+// any update froze the whole game on its last image (seen in v1.9.1 on a level-up after TRY AGAIN). Catch it
+// per frame, keep the loop running, and report it once per message so it shows in Poki's event data.
+game.events.once(Phaser.Core.Events.PRE_STEP, () => {
+  const loop = game.loop as unknown as { callback: (time: number, delta: number) => void };
+  const step = loop.callback;
+  const seen = new Set<string>();
+  loop.callback = (time, delta) => {
+    try {
+      step(time, delta);
+    } catch (err) {
+      const msg = err instanceof Error ? `${err.name}: ${err.message}` : String(err);
+      if (!seen.has(msg)) {
+        seen.add(msg);
+        console.error("[frame error]", err);
+        Analytics.track("error", msg, "reached", "session");
+      }
+    }
+  };
+});

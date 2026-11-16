@@ -22,7 +22,7 @@ export class SettingsScene extends Phaser.Scene {
     const s = Save.settings;
     const rowGap = H < 250 ? 2 : 5;
     const rows = 5;
-    // stack: pad | title | gap | 5 rows | gap | [replay][back] | pad
+    // stack: pad | title | gap | 5 rows | gap | [back] | pad
     const ph = UI.panelPad * 2 + 14 + 10 + rows * UI.btnH + (rows - 1) * rowGap + 12 + UI.btnH;
     const pw = Math.min(W - 16, 200);
     const box = panelBox(this, "panel", W / 2, Math.max(4, Math.round(H / 2 - ph / 2)), pw, ph);
@@ -60,9 +60,9 @@ export class SettingsScene extends Phaser.Scene {
     toggle("SCREEN SHAKE", () => (s.reducedMotion ? "OFF" : "ON"), () => { s.reducedMotion = !s.reducedMotion; });
     toggle("RUNE DEBUG", () => (s.debugRunes ? "ON" : "OFF"), () => { s.debugRunes = !s.debugRunes; });
     y += 12 - rowGap;
+    // (a TUTORIAL replay button lived here until v1.9.3; removed, it only took effect on the next run)
     const half = (pw - UI.panelPad * 2 - UI.gap) / 2;
-    new Button(this, box.inner.left + half / 2, cy(), "TUTORIAL", () => { Analytics.track("settings", "replay-tutorial", "selected"); Save.data.tutorialDone = false; Save.save(); Audio.play("ui_select"); }, { w: Math.floor(half) });
-    new Button(this, box.inner.right - half / 2, cy(), "BACK", () => this.close(), { w: Math.floor(half) });
+    new Button(this, box.cx, cy(), "BACK", () => this.close(), { w: Math.floor(half) });
     this.input.keyboard?.on("keydown-ESC", () => this.close());
   }
   private close() {

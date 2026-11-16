@@ -106,6 +106,9 @@ public/assets/fonts/       Jersey 10 (readable text) + its OFL licence
   portrait the side edges are close to the wizard, so spawning by edge length sent most enemies in
   from the sides with little warning. (v1.8.0–1.8.2 spawned on screen and from several directions at once;
   that tested worse and was dropped, see `docs/PLAYTESTS.md`.)
+- **Errors never freeze the game** (`src/main.ts`): Phaser schedules the next frame only after the current one
+  returns, so one uncaught error used to freeze everything on its last image. Each frame now runs inside a
+  try/catch; the error is logged and reported once per message as the `error` analytics event.
 - **Phones inside Poki** (`GAME.mobile`, `Layout.compute`): Poki's iframe reports no camera cut-out, so on
   touch screens the game assumes a 32 CSS px one at the top (portrait) or both sides (landscape). Poki
   also draws its own button over the top-left corner on mobile, so the top bar leaves the left empty and

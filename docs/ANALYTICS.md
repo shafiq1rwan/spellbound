@@ -41,7 +41,8 @@ before the SDK is ready are queued and flushed once it is.
 | `combo` | `x10`, `x20`, `shatter` | `reached` *(once/run)* | Combo milestones; first Ice→other Shatter | Do players discover spell mixing? |
 | `button` | `pause` | `visible` *(once/run)* → `interact` | HUD pause button | |
 | `gameover` | `retry`, `menu` | `visible` → `interact` | Game-over buttons | **Do players retry after dying?** |
-| `settings` | e.g. `sound-50`, `effects-low`, `screen-shake-off`, `replay-tutorial` (before v1.7.3 the shake toggle was `calm-motion-on/off`) | `selected` | Settings changed | Are defaults right? |
+| `settings` | e.g. `sound-50`, `effects-low`, `screen-shake-off` (`replay-tutorial` until v1.9.3, when the button was removed; before v1.7.3 the shake toggle was `calm-motion-on/off`) | `selected` | Settings changed | Are defaults right? |
+| `error` | the error's name and message, cleaned (e.g. `typeerror:-cannot-read-properties-of-undefi`) | `reached` *(once per message per session)* | An error inside a frame, caught by the safety net in `src/main.ts` so the game keeps running (v1.9.3) | Is any bug hitting real players, and how often? Before v1.9.3 such an error froze the game |
 
 ## Note on Poki's "Plays" column
 
