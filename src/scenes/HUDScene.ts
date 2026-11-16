@@ -11,6 +11,10 @@ import { SPELLS, SPELL_ORDER, type SpellId } from "../config/spells";
 import { Button, txt, rtxt, slice, type PixelText, type RText } from "../ui/widgets";
 import type { GameScene } from "./GameScene";
 import type { RecognizeResult } from "../rune/RuneRecognizer";
+import { GAME } from "../config/game";
+
+/** the most hearts a run can have: the starting hearts plus three Heart Rune upgrades */
+const MAX_HEARTS = GAME.player.maxHp + 3;
 
 interface Slot { id: SpellId; c: Phaser.GameObjects.Container; frame: Phaser.GameObjects.NineSlice; icon: Phaser.GameObjects.Image; cd: Phaser.GameObjects.Rectangle; pips: Phaser.GameObjects.Rectangle[]; glow: Phaser.GameObjects.Image; lock: Phaser.GameObjects.BitmapText; wasReady: boolean; x: number; y: number }
 
@@ -150,7 +154,16 @@ export class HUDScene extends Phaser.Scene {
     const top = sf.top + 4;
     // top bar: everything centred on one line (y = top + 10)
     const barY = top + 10;
-    this.heartRow.setPosition(Math.round(sf.left + 8), barY - 3);
+    // hearts sit top-left, or just under Poki's own button where it covers that corner (phones). If a full
+    // row there (8 hearts: 5 + three Heart Runes) would reach the timer ("10:00" is ~26 px wide), it goes
+    // below the timer instead (narrow phones, e.g. 360x640 at 1.5x).
+    const pc = Layout.pokiCorner, hx = Math.round(sf.left + 8);
+    let hy = barY - 3;
+    if (pc.h && hx < pc.w) {
+      hy = Math.max(hy, pc.h + 2);
+      if (hy < barY + 24 && hx + MAX_HEARTS * 9 > W / 2 - 13 - 3) hy = barY + 25;
+    }
+    this.heartRow.setPosition(hx, Math.round(hy));
     this.wavePanel.setPosition(Math.round(W / 2), barY - 9);
     this.fitWavePanel();
     this.waveText.setPosition(Math.round(W / 2), barY + 0.5);

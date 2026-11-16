@@ -3,6 +3,14 @@ export const GAME = {
   /** target art-pixels across the shorter screen side; pixel scale = round(shortSide / this) */
   viewShortSide: 215,
   maxDevicePixelRatio: 2,
+  /**
+   * Phones (touch screens). Inside Poki's iframe the browser reports no camera cut-out
+   * (env(safe-area-inset-*) is 0), so a punch-hole camera sat on the wave plate in fullscreen; assume one
+   * this tall (CSS px) at the top in portrait and at both sides in landscape. Poki also draws its own
+   * button over the top-left corner of the game on mobile (about 65x50 CSS px, 23 px down on a Pixel 7a);
+   * nothing important goes in that box.
+   */
+  mobile: { cutoutCss: 32, pokiButtonCss: { w: 72, h: 80 } },
 
   player: {
     maxHp: 5,

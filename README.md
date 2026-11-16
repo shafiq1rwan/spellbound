@@ -106,6 +106,12 @@ public/assets/fonts/       Jersey 10 (readable text) + its OFL licence
   portrait the side edges are close to the wizard, so spawning by edge length sent most enemies in
   from the sides with little warning. (v1.8.0–1.8.2 spawned on screen and from several directions at once;
   that tested worse and was dropped, see `docs/PLAYTESTS.md`.)
+- **Phones inside Poki** (`GAME.mobile`, `Layout.compute`): Poki's iframe reports no camera cut-out, so on
+  touch screens the game assumes a 32 CSS px one at the top (portrait) or both sides (landscape). Poki
+  also draws its own button over the top-left corner on mobile, so `Layout.pokiCorner` (72×80 CSS px) is
+  kept clear: the hearts sit just under it, or under the timer when a full row of 8 wouldn't fit beside
+  it. `node tools/qa/pokiframe.mjs [w h dpr]` screenshots the menu, HUD and a rune unlock with stand-ins
+  for both.
 
 - **Text:** two fonts. The in-house 5×7 bitmap font (`txt()` in `src/ui/widgets.ts`) is for titles,
   buttons and numbers. Sentences (upgrade descriptions, hints, the menu line) use **Jersey 10** in
