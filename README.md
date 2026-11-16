@@ -108,10 +108,10 @@ public/assets/fonts/       Jersey 10 (readable text) + its OFL licence
   that tested worse and was dropped, see `docs/PLAYTESTS.md`.)
 - **Phones inside Poki** (`GAME.mobile`, `Layout.compute`): Poki's iframe reports no camera cut-out, so on
   touch screens the game assumes a 32 CSS px one at the top (portrait) or both sides (landscape). Poki
-  also draws its own button over the top-left corner on mobile, so `Layout.pokiCorner` (72×80 CSS px) is
-  kept clear: the hearts sit just under it, or under the timer when a full row of 8 wouldn't fit beside
-  it. `node tools/qa/pokiframe.mjs [w h dpr]` screenshots the menu, HUD and a rune unlock with stand-ins
-  for both.
+  also draws its own button over the top-left corner on mobile, so the HUD leaves that corner empty: the
+  hearts sit above the XP bar, lined up with its left edge (on every device), and hints sit above them.
+  `node tools/qa/pokiframe.mjs [w h dpr]` screenshots the menu, HUD (8 hearts and a hint) and a rune
+  unlock on an emulated touch phone, with stand-ins for Poki's button and the camera.
 
 - **Text:** two fonts. The in-house 5×7 bitmap font (`txt()` in `src/ui/widgets.ts`) is for titles,
   buttons and numbers. Sentences (upgrade descriptions, hints, the menu line) use **Jersey 10** in

@@ -24,7 +24,7 @@ await p.screenshot({ path: `qa-shots/poki_menu_${W}x${H}.png` });
 await p.evaluate(() => window.__game.scene.getScene("Menu").startRun?.());
 await p.waitForFunction(() => window.__game?.scene.isActive("Game"), null, { timeout: 30000 });
 await p.waitForTimeout(2500);
-await p.evaluate(() => { const g = window.__game.scene.getScene("Game"); g.maxHp = 8; g.hp = 6; g.heal(1); });
+await p.evaluate(() => { const g = window.__game.scene.getScene("Game"); g.maxHp = 8; g.hp = 6; g.heal(1); g.boundHintShown = false; g.showBoundHint("hit"); });
 await p.waitForTimeout(400);
 await p.screenshot({ path: `qa-shots/poki_hud_${W}x${H}.png` });
 // the most crowded top of the screen: the wave 2 rune unlock (banner + pictogram) with 8 hearts

@@ -7,10 +7,10 @@ export const GAME = {
    * Phones (touch screens). Inside Poki's iframe the browser reports no camera cut-out
    * (env(safe-area-inset-*) is 0), so a punch-hole camera sat on the wave plate in fullscreen; assume one
    * this tall (CSS px) at the top in portrait and at both sides in landscape. Poki also draws its own
-   * button over the top-left corner of the game on mobile (about 65x50 CSS px, 23 px down on a Pixel 7a);
-   * nothing important goes in that box.
+   * button over the top-left corner of the game on mobile (about 65x50 CSS px, 23 px down on a Pixel 7a),
+   * so the HUD leaves that corner empty: the hearts sit above the XP bar instead.
    */
-  mobile: { cutoutCss: 32, pokiButtonCss: { w: 72, h: 80 } },
+  mobile: { cutoutCss: 32 },
 
   player: {
     maxHp: 5,

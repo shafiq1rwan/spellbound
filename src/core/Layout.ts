@@ -16,8 +16,6 @@ class LayoutManager {
   w = 195;
   h = 422;
   safe: Insets = { top: 0, right: 0, bottom: 0, left: 0 };
-  /** art px from the top-left corner covered by Poki's own button on phones (0 x 0 elsewhere) */
-  pokiCorner = { w: 0, h: 0 };
   portrait = true;
   private listeners = new Set<() => void>();
 
@@ -51,8 +49,7 @@ class LayoutManager {
         this.safe.left = Math.max(this.safe.left, cut);
         this.safe.right = Math.max(this.safe.right, cut);
       }
-      this.pokiCorner = { w: Math.ceil(M.pokiButtonCss.w * k), h: Math.ceil(M.pokiButtonCss.h * k) };
-    } else this.pokiCorner = { w: 0, h: 0 };
+    }
   }
 
   onChange(fn: () => void) {

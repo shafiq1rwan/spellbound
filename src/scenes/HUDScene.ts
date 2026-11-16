@@ -11,10 +11,6 @@ import { SPELLS, SPELL_ORDER, type SpellId } from "../config/spells";
 import { Button, txt, rtxt, slice, type PixelText, type RText } from "../ui/widgets";
 import type { GameScene } from "./GameScene";
 import type { RecognizeResult } from "../rune/RuneRecognizer";
-import { GAME } from "../config/game";
-
-/** the most hearts a run can have: the starting hearts plus three Heart Rune upgrades */
-const MAX_HEARTS = GAME.player.maxHp + 3;
 
 interface Slot { id: SpellId; c: Phaser.GameObjects.Container; frame: Phaser.GameObjects.NineSlice; icon: Phaser.GameObjects.Image; cd: Phaser.GameObjects.Rectangle; pips: Phaser.GameObjects.Rectangle[]; glow: Phaser.GameObjects.Image; lock: Phaser.GameObjects.BitmapText; wasReady: boolean; x: number; y: number }
 
@@ -154,16 +150,6 @@ export class HUDScene extends Phaser.Scene {
     const top = sf.top + 4;
     // top bar: everything centred on one line (y = top + 10)
     const barY = top + 10;
-    // hearts sit top-left, or just under Poki's own button where it covers that corner (phones). If a full
-    // row there (8 hearts: 5 + three Heart Runes) would reach the timer ("10:00" is ~26 px wide), it goes
-    // below the timer instead (narrow phones, e.g. 360x640 at 1.5x).
-    const pc = Layout.pokiCorner, hx = Math.round(sf.left + 8);
-    let hy = barY - 3;
-    if (pc.h && hx < pc.w) {
-      hy = Math.max(hy, pc.h + 2);
-      if (hy < barY + 24 && hx + MAX_HEARTS * 9 > W / 2 - 13 - 3) hy = barY + 25;
-    }
-    this.heartRow.setPosition(hx, Math.round(hy));
     this.wavePanel.setPosition(Math.round(W / 2), barY - 9);
     this.fitWavePanel();
     this.waveText.setPosition(Math.round(W / 2), barY + 0.5);
@@ -184,7 +170,7 @@ export class HUDScene extends Phaser.Scene {
       });
       const bw = Math.round(Math.min(W - 60, 150));
       this.placeXp(Math.round(W / 2 + 12), by - 21, bw);
-      this.hint.setPosition(Math.round(W / 2), by - 30);
+      this.hint.setPosition(Math.round(W / 2), by - 39); // above the hearts row
       this.hintW = W - 20;
       // high enough to clear the level-up effect's title over the wizard, low enough to clear the unlock pictogram
       this.banner.setPosition(Math.round(W / 2), TopStack.bannerY());
@@ -197,7 +183,7 @@ export class HUDScene extends Phaser.Scene {
       });
       const bw = Math.round(Math.min(W * 0.45, 190));
       this.placeXp(Math.round(W / 2 + 12), Math.round(H - sf.bottom - 9), bw);
-      this.hint.setPosition(Math.round(W / 2), Math.round(H - sf.bottom - 17));
+      this.hint.setPosition(Math.round(W / 2), Math.round(H - sf.bottom - 27)); // above the hearts row
       this.hintW = Math.round(W * 0.6);
       this.banner.setPosition(Math.round(W / 2), Math.round(H * 0.3));
     }
@@ -217,6 +203,9 @@ export class HUDScene extends Phaser.Scene {
     this.xpShine.setPosition(cx - w / 2, y - 1);
     this.xpFill.setData("w", w);
     this.lvText.setPosition(cx - w / 2 - 6, y);
+    // hearts sit just above the XP bar, lined up with its left edge. Not top-left: on phones Poki draws
+    // its own button over that corner. Up to 8 hearts (5 + three Heart Runes) fit over the bar.
+    this.heartRow.setPosition(Math.round(cx - w / 2 - 2), Math.round(y - 15));
   }
 
   // ---------------------------------------------------------------- hearts
@@ -279,7 +268,7 @@ export class HUDScene extends Phaser.Scene {
     this.tweens.add({ targets: s.c, scale: 1, duration: 500, ease: "Back.easeOut" });
     this.tweens.add({ targets: s.glow, alpha: { from: 1, to: 0 }, duration: 500, repeat: 3 });
     this.time.delayedCall(500, () => this.scene.launch("Tutorial", { mode: "demo", spell: id }));
-    if (id === "nova") this.time.delayedCall(4200, () => this.showHint("Tip: freeze enemies with Ice, then hit them with Fire for double damage!", 4500));
+    if (id === "nova") this.time.delayedCall(4700, () => this.showHint("Tip: freeze enemies with Ice, then hit them with Fire for double damage!", 4500));
   }
 
   // ---------------------------------------------------------------- banners & hints
