@@ -8,6 +8,10 @@ Changing the mix therefore never silently changes the difficulty.
 
 - **Waves 1–10:** `pressure = 7 × 1.28^(wave − 1)`, a steady +28% per wave. One new spell per wave: Ice Nova at wave 2, Lightning at 3, Arcane at 4.
 - **New monsters:** slimes only in waves 1–2, bats and skeletons from wave 3, golems from wave 6 (v1.9.0; bats used to arrive in wave 2).
+  v1.10.0 adds one every couple of waves after that: Big Slime at 8, Fire Imp at 12, Bomb Beetle at 14,
+  Shield Knight at 16; the introducing wave weights its monster 3 and opens with it, and from wave 17 each
+  wave features one monster (weight x2.2). Pressure still counts HP, and a Big Slime counts with its three
+  slimes, so a new monster changes the mix, not the HP arriving per second.
 - **Endless (11+):** grows a gentler +15% per wave, with the Guardian boss every 10th wave.
 - **Boss waves:** the adds run at 30% of normal pressure, so the Guardian is the real threat.
 

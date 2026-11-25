@@ -45,6 +45,13 @@ export const C = {
   cloth: ["#3B1F63", "#6A3BA8", "#A77BFF"],
   ghostEye: ["#A77BFF", "#E6D2FF"],
 
+  // v1.10.0 monsters
+  steel: ["#2E3350", "#5A6488", "#9AA6CC", "#E2E8FF"],
+  imp: ["#4A1420", "#8E2A2E", "#D4473A", "#FF7A4D", "#FFB58A"],
+  impWing: ["#5A1A3A", "#9A3A5A"],
+  beetle: ["#0C2228", "#17565E", "#2E9AA0", "#86E6D8"],
+  bomb: ["#262A44", "#4A507A", "#8A92C0"],
+
   stone: ["#221F33", "#36324C", "#4E4A68", "#6E6A8A", "#9290AD"],
   rune: ["#2D8FB8", "#6BDDFF", "#D4F8FF"],
   moss: ["#2F5A35", "#4E8A44", "#79C060"],

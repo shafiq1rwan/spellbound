@@ -63,7 +63,7 @@ src/
   config/                  ALL balancing data: game.ts, spells.ts, enemies.ts, waves.ts, upgrades.ts, palette.ts
   core/                    Layout (responsive pixel scale), Audio + synth, Save, Poki adapter, assets, event bus
   rune/                    RuneRecognizer ($1 + feature gates), RuneInput (pointer capture), RuneDrawingRenderer
-  entities/                Wizard, Enemy (slime/bat/skeleton/golem/orb), Boss, Projectile
+  entities/                Wizard, Enemy (slime/bat/skeleton/golem, v1.10 big slime/imp/beetle/knight, orbs), Boss, Projectile
   systems/                 SpellManager, CombatSystem, VFXManager, EnemySpawnManager, XPSystem, UpgradeManager, Ambience
   scenes/                  Boot, Preload, Menu, Game, HUD, Tutorial, Upgrade, Pause, Settings, GameOver
   ui/                      pixel widgets (buttons, 9-slice panels, text), segment stroker
@@ -87,6 +87,13 @@ public/assets/fonts/       Jersey 10 (readable text) + its OFL licence
   (30–42 s), not kill counts; boss waves last until the Guardian dies. Each wave sets its pressure
   (`PRESSURE_BASE`/`PRESSURE_GROWTH`, enemy HP arriving per second), its enemy mix, its group size per
   spawn and its cap on enemies alive at once.
+- **Late-wave monsters (v1.10.0):** one new monster every couple of waves after the golem, so long runs
+  keep changing: Big Slime (wave 8, splits into 3 slimes), Fire Imp (12, hovers at range and throws a slow
+  fireball that can be shot down; immune to Fire; at most 3 alive, `maxAlive` in `ENEMIES`), Bomb Beetle (14, lights its fuse beside the wizard for 2
+  damage; popped early it blasts the monsters around it), Shield Knight (16, its shield blocks one hit). The
+  wave that brings one in opens with it, shows `NEW: <NAME>` and a one-line tip (`NEW_MONSTERS` and
+  `MONSTER_INFO` in `src/config/waves.ts`). From wave 17 each wave features a different monster. Immunity and
+  shields are handled in `CombatSystem.damage`; the split and the beetle's blast in `CombatSystem.kill`.
 - **Game feel:** hit-stop and shake values are in `GAME.feel` (small hits 2 art px, heavy 3; each shake
   lasts at least 120 ms, holds full strength for its first ~40% and alternates direction). XP orbs pop
   out and bounce for `GAME.xp.popMs` (1 s, `bounce`/`bounceFriction`), then fly straight to the wizard

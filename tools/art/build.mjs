@@ -101,6 +101,33 @@ const S = (fn, list) => list.map((p) => fn(p));
   const goSwap = { [C.stone[1]]: "#3A1E2A", [C.stone[2]]: "#5A2A36", [C.stone[3]]: "#7E3E46", [C.stone[4]]: "#A85A52", [C.rune[1]]: C.fireOrange, [C.rune[0]]: "#A8321E", [C.rune[2]]: C.fireYellow, [C.moss[1]]: "#C7862F", [C.moss[2]]: C.fireYellow };
   sheet("golem_elite", Object.fromEntries(Object.entries(go).map(([k, v]) => [k, EN.elite(v, goSwap, C.fireOrange)])), { durations: EN.GOLEM_T, loops, origin: o64 });
 
+  // ---- v1.10.0 monsters
+  const bs = { idle: S(EN.slime, EN.BIGSLIME.idle), hop: S(EN.slime, EN.BIGSLIME.hop), hurt: S(EN.slime, EN.BIGSLIME.hurt), death: S(EN.slime, EN.BIGSLIME.death) };
+  const oBig = [24.5 / 48, 45 / 48];
+  sheet("bigslime", bs, { durations: EN.BIGSLIME_T, loops, origin: oBig });
+  sheet("bigslime_elite", Object.fromEntries(Object.entries(bs).map(([k, v]) => [k, EN.elite(v, slimeSwap, C.fireYellow)])), { durations: EN.BIGSLIME_T, loops, origin: oBig });
+
+  const imp = { fly: S(EN.imp, EN.IMP.fly), attack: S(EN.imp, EN.IMP.attack), hurt: S(EN.imp, EN.IMP.hurt) };
+  sheet("imp", imp, { durations: EN.IMP_T, loops, origin: [0.5, 0.5] });
+  const impSwap = { [C.imp[0]]: "#14204A", [C.imp[1]]: "#2A3E8E", [C.imp[2]]: "#3A7AD4", [C.imp[3]]: "#4DC8FF", [C.imp[4]]: "#B0ECFF", [C.impWing[0]]: "#1A1A4A", [C.impWing[1]]: "#3A4A9A" };
+  sheet("imp_elite", Object.fromEntries(Object.entries(imp).map(([k, v]) => [k, EN.elite(v, impSwap, C.iceCyan)])), { durations: EN.IMP_T, loops, origin: [0.5, 0.5] });
+  sheet("imp_shot", { spin: EN.impShot() }, { durations: { spin: [80, 80, 80, 80] } });
+
+  const be = { walk: S(EN.beetle, EN.BEETLE.walk), fuse: S(EN.beetle, EN.BEETLE.fuse), hurt: S(EN.beetle, EN.BEETLE.hurt) };
+  const oBeetle = [15.5 / 32, 27.5 / 32];
+  sheet("beetle", be, { durations: EN.BEETLE_T, loops: { ...loops, fuse: -1 }, origin: oBeetle });
+  const beSwap = { [C.beetle[1]]: "#6A3A12", [C.beetle[2]]: "#B8702A", [C.beetle[3]]: "#FFD36B" };
+  sheet("beetle_elite", Object.fromEntries(Object.entries(be).map(([k, v]) => [k, EN.elite(v, beSwap, C.fireYellow)])), { durations: EN.BEETLE_T, loops: { ...loops, fuse: -1 }, origin: oBeetle });
+
+  const knightSheets = (shield) => Object.fromEntries(Object.entries(EN.knightPoses(shield)).map(([k, v]) => [k, S(EN.skeleton, v)]));
+  const kn = knightSheets(true), knBare = knightSheets(false);
+  sheet("knight", kn, { durations: EN.SKEL_T, loops, origin: o48 });
+  sheet("knight_bare", knBare, { durations: EN.SKEL_T, loops, origin: o48 });
+  const knSwap = { ...skSwap, [C.steel[1]]: "#8A5A22", [C.steel[2]]: "#D9A441", [C.steel[3]]: "#FFE59A" };
+  sheet("knight_elite", Object.fromEntries(Object.entries(kn).map(([k, v]) => [k, EN.elite(v, knSwap, C.iceCyan)])), { durations: EN.SKEL_T, loops, origin: o48 });
+  sheet("knight_elite_bare", Object.fromEntries(Object.entries(knBare).map(([k, v]) => [k, EN.elite(v, knSwap, C.iceCyan)])), { durations: EN.SKEL_T, loops, origin: o48 });
+  EN.shieldBits().forEach((b, i) => image(`shield${i}`, b));
+
   sheet("boss", { idle: S(EN.boss, EN.BOSS.idle), charge: S(EN.boss, EN.BOSS.charge), hurt: S(EN.boss, EN.BOSS.hurt) },
     { durations: EN.BOSS_T, loops: { hurt: 0 }, origin: [0.5, 0.5] });
   const bp = EN.bossParts();

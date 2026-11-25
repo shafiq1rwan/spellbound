@@ -3,12 +3,13 @@
 What each Poki test measured, what changed because of it, and what to compare next. The goal is an
 average session of **5 minutes or more** (Poki's own Player Fit exit criterion is over 3 minutes).
 
-## Where things stand (14 November 2026)
+## Where things stand (25 November 2026)
 
 | Build | State |
 |---|---|
-| **v1.9.1** | Player-fit done: **500 gameplays, average 6:21**, the best so far (v1.7.8: 5:17). **Web Fit Test requested with this build, unchanged** |
-| **v1.9.3** | On `main`, not pushed yet: v1.9.2 plus the fix for a **freeze on the first level-up after TRY AGAIN** (in every build since v1.7.6, including v1.7.8 and v1.9.1 tested on Poki: any player who retried froze at their next level-up, which may have cut second runs and playtime short), a safety net so an error can never freeze the game again (reported as an `error` event), and the Settings TUTORIAL button removed. Zip: `release/spellbound-arena-v1.9.3.zip` |
+| **v1.9.1** | Player-fit done: **500 gameplays, average 6:21**, the best so far (v1.7.8: 5:17). ****Web Fit Test: not passed** (see below) |
+| **v1.10.0** | Working copy, not committed: v1.9.3 plus **four late-wave monsters** so long runs keep changing: Big Slime (wave 8, splits into 3), Fire Imp (12, ranged, immune to Fire), Bomb Beetle (14, explodes beside the wizard; popped early it blasts its neighbours), Shield Knight (16, shield blocks one hit). Each arrives with `NEW: <NAME>` and a tip; from wave 17 each wave features a different monster. To test with the new thumbnail |
+| **v1.9.3** | **Player-fit done: 500 gameplays, average 5:36** (v1.9.1: 6:21); no errors, early game unchanged, fewer long sessions (see below). v1.9.2 plus the fix for a **freeze on the first level-up after TRY AGAIN** (in every build since v1.7.6, including v1.7.8 and v1.9.1 tested on Poki: any player who retried froze at their next level-up, which may have cut second runs and playtime short), a safety net so an error can never freeze the game again (reported as an `error` event), and the Settings TUTORIAL button removed. Zip: `release/spellbound-arena-v1.9.3.zip` |
 | **v1.9.2** | Merged into `main` (16 November 2026): v1.9.1 plus the HUD kept clear of the phone camera and Poki's top-left button (seen in fullscreen on a Pixel 7a); top bar is now the WAVE | timer plate centred with the hearts under it, pause at the right. Also: the menu skull matches the other icons. Zip: `release/spellbound-arena-v1.9.2.zip`. Superseded by v1.9.3 |
 | **v1.7.8** | Player-fit done: 500 players, average 5:17. v1.9.x is built on it |
 | **v1.8.2** | Player-fit done: 500 players, average 4:50. Lost to v1.7.8, so v1.8.0–1.8.2 are **dropped** |
@@ -18,7 +19,21 @@ average session of **5 minutes or more** (Poki's own Player Fit exit criterion i
 Poki Review; failing means back to playtesting and Player Fit, and the test can be requested again with a
 new version. The thumbnail can't change while it runs (`output/poki/`).
 
-**Next, only if Web Fit passes** (one batch per test, as before):
+**Web Fit Test result, v1.9.1 (received 25 November 2026): not passed.** About 3,000 plays in the first
+week (Poki's "Plays" also counts resumes).
+
+| Metric | v1.9.1 | Poki minimum (depends on genre) |
+|---|---|---|
+| Conversion to play | **62.6%** | about 59.7%: **passed** |
+| Average playtime | **6:32** | about 6:43: **11 seconds short** |
+| CTR from categories | 0.11% | not given |
+
+Poki's reply: "not able to move forward with this game at this time". Only playtime missed. The build had
+the freeze on the first level-up after TRY AGAIN (fixed in v1.9.3), which ended second runs early. The
+low number of plays fits a thumbnail that few people click (CTR has no benchmark yet); a brighter
+thumbnail with a big wizard and a horde is drafted in `output/poki/thumbnail-prompt-v2.txt`.
+
+**Next, if Web Fit passes** (one batch per test, as before):
 - **Retry hooks** (roadmap step A): coins, the Spellbook shop, a goal on the game-over screen. Second runs
   are flat at 23%, and TRY AGAIN fell to 58% of game overs.
 - **Or a drawing pass:** join a triangle drawn in two or three strokes, and add events that say why each
@@ -121,6 +136,38 @@ More pressure in the first waves cost more players than the extra action gained.
 v1.8.0–1.8.2 and build on v1.7.8. Early-game difficulty is a strong lever, and it works in the
 direction of *easier*.
 
+### v1.9.3 player-fit (500 gameplays, average 5:36)
+
+v1.9.1 plus the v1.9.2 HUD (plate centred, hearts under it, HUD clear of the camera on phones) and the
+v1.9.3 freeze fix. Nothing that changes how the game plays.
+
+| Metric | v1.9.1 | v1.9.3 | |
+|---|---|---|---|
+| Average playtime | 6:21 | **5:36** | ❌ |
+| `error` events | (not tracked) | **none** | ✅ no hidden bug |
+| Tutorial completed | 95% | 92% (415 of 452) | ➖ |
+| `tutorial` `fail-1` | 52% | 50% (228 of 452) | ➖ |
+| Wave 1 completion | 85%, 18 deaths | 85% (382 of 449), 22 deaths | ➖ |
+| Wave 2 completion | 82%, 26 deaths | **86%** (328 of 381), 22 deaths | ✅ |
+| Wave 3 / 4 completion | 86% / 87% | 85% / 89% | ➖ |
+| Reached wave 4 | 55% (283 of 516) | 56% (271 of 486) | ➖ |
+| Reached wave 10 | 28% | 25% (122 of 486) | ⚠️ |
+| Survived 5 / 10 minutes | 33% / 17% | 31% / **13%** (149, 61 of 486) | ⚠️ |
+| Game overs | 24% of runs (125) | 22% (109) | ➖ |
+| TRY AGAIN, share of game overs | 58% | 60% (65 of 109) | ➖ |
+| Second run started | 23% | **19%** (90 of 486) | ⚠️ |
+| Third run / 4th / 5th+ | (not recorded) | 29 / 14 / 9 | runs after a retry now go on |
+
+- **The first four waves are the same or better**; the drop is all in the long tail: about 27 fewer
+  players reached 10 minutes, and the few dozen long sessions make much of the average (27 players x
+  10+ minutes / 500 is about 30–35 s of the 45 s).
+- **Possible causes, unresolved:** (1) chance in the long tail (each difference is under 2 standard
+  errors), though v1.9.1 scored 6:21 and 6:32 in two separate tests; (2) v1.9.1's time may have been
+  inflated by frozen games left open (every second run froze at its first level-up; ask Poki whether an
+  open, frozen tab counts as playtime); (3) the HUD, least likely: it only moved the hearts and timer.
+- Deaths: slime 53, skeleton 28, bat 21, golem 12, boss beam 9. REVIVE: 4 of 109 game overs.
+- Pause pressed in 67 of 486 runs (14%), quit to menu 23.
+
 ### v1.9.1 player-fit (500 gameplays, average 6:21)
 
 Built on v1.7.8 with drawing rescues, no fizzle on cooldown, slimes-only wave 2 (v1.9.0) and screen shake
@@ -174,9 +221,10 @@ off by default (v1.9.1). The playtime-by-minute chart wasn't collected for this 
 | ~~1.8.0~~ | Enemies spawn on screen behind a 0.9 s portal, at least 140 px away (dropped) | in v1.8.2 |
 | ~~1.8.1~~ | Own spawn rift and level-up pillar (dropped) | in v1.8.2 |
 | ~~1.8.2~~ | More monsters at a time, from several directions at once (dropped) | Player-fit, 500 players: 4:50 |
-| 1.9.3 | Fix: freeze on the first level-up after TRY AGAIN (since v1.7.6). Errors inside a frame no longer freeze the game and are reported (`error` event). Settings TUTORIAL button removed | Next to upload |
+| 1.10.0 | New monsters every couple of waves after wave 6: Big Slime (8), Fire Imp (12), Bomb Beetle (14), Shield Knight (16), each introduced with a banner and a tip (`enemy` `new-*` events); endless waves feature a different monster each | Next to upload |
+| 1.9.3 | Fix: freeze on the first level-up after TRY AGAIN (since v1.7.6). Errors inside a frame no longer freeze the game and are reported (`error` event). Settings TUTORIAL button removed | **Player-fit, 500 gameplays: 5:36** |
 | 1.9.2 | Phones: HUD clear of the camera cut-out and Poki's top-left button; top bar: WAVE | timer plate centred, hearts under it, pause at the right (all devices) | On `main` |
-| 1.9.1 | Screen shake off by default (also full-screen flashes and hit-stop; Settings → SCREEN SHAKE turns it on). `settings` `screen-shake-on` shows how many turn it back on | **Player-fit, 500 gameplays: 6:21.** Web Fit requested |
+| 1.9.1 | Screen shake off by default (also full-screen flashes and hit-stop; Settings → SCREEN SHAKE turns it on). `settings` `screen-shake-on` shows how many turn it back on | **Player-fit, 500 gameplays: 6:21. Web Fit: C2P 62.6%, playtime 6:32 (minimum about 6:43), not passed** |
 | 1.9.0 | **Built on v1.7.8.** Overdrawn triangles read as their first lap and open ones closed (`rescue-lap`/`rescue-close` events); a rune drawn on cooldown no longer fizzles or resets the combo; wave 2 is slimes only, bats debut in wave 3 at half weight | in v1.9.1 |
 
 ## Next lever: the retry rate

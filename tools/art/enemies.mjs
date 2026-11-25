@@ -10,10 +10,10 @@ const SLIME_PAL = {
   K: C.slime[0], G: C.slime[1], g: C.slime[2], l: C.slime[3], w: C.slime[4],
   e: C.outline, p: C.blush, L: C.leaf[1], N: C.leaf[0], m: "#0F2A18",
 };
-/** w: half width, h: height, lift: px above ground, face: normal|hurt|dead */
-export function slime({ w = 9, h = 13, lift = 0, face = "normal", leaf = 0, lean = 0 } = {}) {
-  const im = new Img(32, 32).palette(SLIME_PAL);
-  const cx = 16, ground = 28 - lift;
+/** w: half width, h: height, lift: px above ground, face: normal|hurt|dead; size: canvas (48 for the Big Slime) */
+export function slime({ w = 9, h = 13, lift = 0, face = "normal", leaf = 0, lean = 0, size = 32 } = {}) {
+  const im = new Img(size, size).palette(SLIME_PAL);
+  const cx = size / 2, ground = size - 4 - lift;
   const top = ground - h;
   for (let y = Math.floor(top) - 1; y <= ground; y++)
     for (let x = cx - Math.ceil(w) - 2; x <= cx + Math.ceil(w) + 2; x++) {
@@ -71,6 +71,11 @@ export const SLIME = {
   death: [{ w: 13, h: 9, face: "dead", leaf: 1 }, { w: 14.5, h: 5, face: "dead" }, { w: 14, h: 3, face: "none" }],
 };
 export const SLIME_T = { idle: [160, 160, 160, 160], hop: [110, 80, 110, 90, 100, 120], hurt: [70, 90], death: [70, 80, 120] };
+
+// Big Slime (v1.10.0): the same slime at about 1.5x on a 48 px canvas; splits into three slimes when popped
+const big = (list) => list.map((p) => ({ ...p, size: 48, w: (p.w ?? 9) * 1.5, h: (p.h ?? 13) * 1.45, lift: (p.lift ?? 0) * 1.3 }));
+export const BIGSLIME = { idle: big(SLIME.idle), hop: big(SLIME.hop), hurt: big(SLIME.hurt), death: big(SLIME.death) };
+export const BIGSLIME_T = { idle: [200, 200, 200, 200], hop: [150, 110, 150, 120, 130, 160], hurt: [80, 100], death: [80, 90, 130] };
 
 // =================================================================== BAT
 const BAT_PAL = {
@@ -135,9 +140,10 @@ const SK_PAL = {
   s: "#0B0C1E", g: C.ghostEye[0], G: C.ghostEye[1],
   a: C.rust[0], b: "#7E7A8C", c: "#B9B4C4", h: "#4A2E25", x: C.rust[1],
   u: C.cloth[0], U: C.cloth[1], v: C.cloth[2],
+  S: C.steel[0], T: C.steel[1], Y: C.steel[2], Z: C.steel[3], E: C.violet, L: C.lavender,
 };
-/** pose: { step: -1|0|1, bob, lean, swordA, tilt, lunge } */
-export function skeleton({ step = 0, bob = 0, lean = 0, swordA = 0.5, tilt = 0, lunge = 0, eye = "g" } = {}) {
+/** pose: { step: -1|0|1, bob, lean, swordA, tilt, lunge }; deco(im, geometry) draws armour before the outline */
+export function skeleton({ step = 0, bob = 0, lean = 0, swordA = 0.5, tilt = 0, lunge = 0, eye = "g", deco = null } = {}) {
   const im = new Img(48, 48).palette(SK_PAL);
   const cx = 23 + lunge, g = 44;
   // legs (shuffle)
@@ -190,10 +196,173 @@ export function skeleton({ step = 0, bob = 0, lean = 0, swordA = 0.5, tilt = 0, 
   im.px(sx + 5, sy + 10, "s").px(sx + 7, sy + 10, "s").px(sx + 9, sy + 10, "s");
   // crack
   im.px(sx + 3, sy + 1, "1").px(sx + 4, sy + 2, "1").px(sx + 4, sy + 3, "0");
+  deco?.(im, { sx, sy, bx, by, cx, ly });
   im.outline("k");
   if (tilt) return im.rotated(tilt * 0.08);
   return im;
 }
+
+// =================================================================== SHIELD KNIGHT (v1.10.0)
+/** a skeleton in a steel helmet with a violet plume; `shield` adds the big kite shield that blocks one hit */
+function knightDeco(shield) {
+  return (im, { sx, sy, bx, by }) => {
+    // rounded steel helmet with a nose guard, eyes left visible
+    im.rect(sx, sy - 2, 13, 5, "T");
+    im.hline(sx + 2, sy - 3, 9, "T");
+    im.hline(sx + 3, sy - 3, 5, "Y");
+    im.rect(sx + 1, sy - 2, 5, 1, "Y");
+    im.px(sx + 1, sy - 1, "Y");
+    im.rect(sx + 10, sy - 2, 3, 5, "S");
+    im.hline(sx, sy + 3, 13, "S");
+    im.vline(sx + 6, sy + 3, 4, "T");
+    im.px(sx + 6, sy + 3, "Y");
+    // plume sweeping back from the crown
+    im.poly([sx + 4, sy - 3, sx + 9, sy - 3, sx + 6, sy - 6, sx + 1, sy - 8, sx - 1, sy - 6, sx + 2, sy - 5], "E");
+    im.line(sx + 1, sy - 7, sx + 6, sy - 4, "L");
+    if (!shield) return;
+    // kite shield in front of the ribs
+    const x0 = bx - 7, y0 = by - 1;
+    im.poly([x0, y0, x0 + 10, y0, x0 + 10, y0 + 7, x0 + 5, y0 + 13, x0, y0 + 7], "T");
+    im.poly([x0 + 1, y0 + 1, x0 + 9, y0 + 1, x0 + 9, y0 + 7, x0 + 5, y0 + 11.5, x0 + 1, y0 + 7], "Y");
+    im.poly([x0 + 6, y0 + 1, x0 + 9, y0 + 1, x0 + 9, y0 + 7, x0 + 6, y0 + 10.5], "T");
+    im.hline(x0 + 1, y0, 9, "Z");
+    // violet star emblem
+    im.vline(x0 + 5, y0 + 2, 6, "E").hline(x0 + 3, y0 + 4, 5, "E").px(x0 + 5, y0 + 4, "Z");
+  };
+}
+const kn = (list, shield) => list.map((p) => ({ ...p, deco: knightDeco(shield) }));
+/** the skeleton's poses with armour; `shield: false` is the knight after its shield breaks */
+export const knightPoses = (shield) => Object.fromEntries(Object.entries(SKEL).map(([k, v]) => [k, kn(v, shield)]));
+export function shieldBits() {
+  const pal = { k: K, T: C.steel[1], Y: C.steel[2], E: C.violet };
+  const a = new Img(9, 9).palette(pal);
+  a.poly([0.5, 0.5, 7.5, 0.5, 7.5, 4.5, 4, 7.5, 0.5, 4.5], "Y").vline(4, 2, 3, "E");
+  a.outline("k");
+  const b = new Img(7, 7).palette(pal);
+  b.poly([0.5, 1.5, 5.5, 0.5, 4.5, 5.5], "T");
+  b.outline("k");
+  return [a, b];
+}
+
+// =================================================================== FIRE IMP (v1.10.0)
+const IMP_PAL = {
+  k: K, 0: C.imp[0], 1: C.imp[1], 2: C.imp[2], 3: C.imp[3], 4: C.imp[4],
+  h: C.bone[2], H: C.bone[3], e: C.fireYellow, E: "#FFFFFF", w: C.impWing[0], W: C.impWing[1],
+  f: C.fireOrange, F: C.fireYellow, m: "#2A0A14",
+};
+/** wing: -1 up .. 1 down; arm: 0 rest, 1 raised with a fireball, 2 thrown; face: normal|hurt */
+export function imp({ wing = 0, bob = 0, arm = 0, face = "normal" } = {}) {
+  const im = new Img(32, 32).palette(IMP_PAL);
+  const cx = 15.5, cy = 16 + bob;
+  // little bat wings behind the body
+  const half = new Img(32, 32).palette(IMP_PAL);
+  const wy = cy - 2;
+  const tipY = wing < 0 ? wy - 8 : wing > 0 ? wy + 1 : wy - 4;
+  half.poly([cx - 3, wy, cx - 9, tipY, cx - 11, tipY + 3, cx - 8, wy + 2, cx - 6, wy + 4, cx - 3, wy + 3], "w");
+  half.line(cx - 3, wy, cx - 9, tipY, "W");
+  half.mirrorX(16);
+  im.stamp(half, 0, 0);
+  // pointed tail with a flame tip
+  im.line(cx + 3, cy + 5, cx + 7, cy + 8, "1").line(cx + 7, cy + 8, cx + 9, cy + 6, "1");
+  im.px(cx + 10, cy + 5, "f").px(cx + 10, cy + 4, "F").px(cx + 11, cy + 5, "f");
+  // round body + belly
+  im.ellipse(cx, cy + 1, 5.5, 5.5, "2");
+  im.ellipse(cx - 1.5, cy - 0.5, 3, 2.6, "3");
+  im.ellipse(cx + 0.5, cy + 3.5, 2.6, 1.6, "4");
+  im.ellipse(cx + 3, cy + 3, 2, 2.5, "1");
+  // horns
+  im.poly([cx - 4.5, cy - 3, cx - 6.5, cy - 9, cx - 2, cy - 4.5], "h");
+  im.poly([cx + 5.5, cy - 3, cx + 7.5, cy - 9, cx + 3, cy - 4.5], "h");
+  im.px(cx - 6, cy - 8, "H").px(cx + 7, cy - 8, "H");
+  // face
+  const ey = Math.round(cy - 1);
+  if (face === "normal") {
+    im.rect(Math.round(cx - 3), ey, 2, 2, "e").px(Math.round(cx - 3), ey, "E");
+    im.rect(Math.round(cx + 1), ey, 2, 2, "e").px(Math.round(cx + 1), ey, "E");
+    im.hline(Math.round(cx - 2), ey + 3, 4, "m").px(Math.round(cx - 1), ey + 4, "E");
+  } else {
+    im.px(Math.round(cx - 3), ey, "e").px(Math.round(cx - 2), ey + 1, "e");
+    im.px(Math.round(cx + 2), ey, "e").px(Math.round(cx + 1), ey + 1, "e");
+    im.rect(Math.round(cx - 1), ey + 3, 2, 2, "m");
+  }
+  // arms: raised with a fireball, thrown forward, or at rest
+  if (arm === 1) {
+    im.line(cx + 4, cy, cx + 6, cy - 6, "2");
+    im.circ(cx + 6.5, cy - 9, 2.5, "f");
+    im.circ(cx + 6.5, cy - 9, 1.2, "F");
+    im.px(cx + 6, cy - 10, "E");
+  } else if (arm === 2) {
+    im.line(cx + 4, cy, cx + 9, cy - 1, "2");
+  } else {
+    im.line(cx + 4, cy + 1, cx + 6, cy + 4, "2");
+    im.line(cx - 4, cy + 1, cx - 6, cy + 4, "2");
+  }
+  im.outline("k");
+  return im;
+}
+export const IMP = {
+  fly: [{ wing: -1, bob: 1 }, { wing: 0, bob: 0 }, { wing: 1, bob: -1 }, { wing: 0, bob: 0 }],
+  attack: [{ wing: -1, arm: 1, bob: -1 }, { wing: 1, arm: 2, bob: 0 }],
+  hurt: [{ wing: 1, face: "hurt", bob: 1 }],
+};
+export const IMP_T = { fly: [90, 80, 90, 80], attack: [400, 200], hurt: [140] };
+/** the imp's slow fireball: 4 flickering frames, 14 px */
+export function impShot() {
+  return [0, 1, 2, 3].map((i) => {
+    const o = new Img(14, 14).palette(IMP_PAL);
+    o.circ(6.5, 6.5, 4.5, "1");
+    o.circ(6.5, 6.5, 3.5, "f");
+    o.circ(6 + (i % 2), 6 - (i > 1 ? 1 : 0), 2, "F");
+    o.px(5 + (i % 2), 5, "E");
+    o.outline("k");
+    return o;
+  });
+}
+
+// =================================================================== BOMB BEETLE (v1.10.0)
+const BEETLE_PAL = {
+  k: K, 0: C.beetle[0], 1: C.beetle[1], 2: C.beetle[2], 3: C.beetle[3],
+  b: C.bomb[0], B: C.bomb[1], n: C.bomb[2], r: C.wood[1], s: C.fireYellow, S: "#FFFFFF", o: C.fireOrange,
+  e: C.hpRed, R: "#FF2E4A", m: "#120A1E",
+};
+/** step: leg phase; lit: 0 fuse spark, 1 bomb glowing (about to blow), 2 bright flash */
+export function beetle({ step = 0, lit = 0, bob = 0, face = "normal" } = {}) {
+  const im = new Img(32, 32).palette(BEETLE_PAL);
+  const cx = 15.5, cy = 21 + bob;
+  // six legs
+  for (const [lx, d] of [[-5, step], [0, -step], [5, step]]) {
+    im.line(cx + lx - 1, cy + 2, cx + lx - 2 - d, cy + 6, "0");
+    im.line(cx + lx + 1, cy + 2, cx + lx + 2 + d, cy + 6, "0");
+  }
+  // shell
+  im.ellipse(cx, cy, 8, 5, "1");
+  im.ellipse(cx - 1, cy - 1, 6.5, 3.5, "2");
+  im.ellipse(cx - 3, cy - 2, 2.5, 1.3, "3");
+  im.vline(Math.round(cx), Math.round(cy - 4), 8, "0");
+  // head
+  im.ellipse(cx + 8, cy + 1, 3, 2.6, "1");
+  if (face === "normal") im.px(cx + 9, cy, "e").px(cx + 10, cy, "R");
+  else im.px(cx + 9, cy, "m").px(cx + 10, cy + 1, "m");
+  im.px(cx + 11, cy - 2, "0").px(cx + 12, cy - 3, "0");
+  // bomb strapped to the back
+  const bx = cx - 1, by = cy - 8;
+  const body = lit >= 2 ? "S" : lit === 1 ? "R" : "B";
+  im.circ(bx, by, 4, lit >= 1 ? "e" : "b");
+  im.circ(bx, by, 3, body);
+  im.px(bx - 1.5, by - 1.5, lit >= 1 ? "S" : "n").px(bx - 2, by - 0.5, "n");
+  im.rect(bx - 1, by - 5, 3, 1, "n");
+  // fuse + spark
+  im.line(bx + 1, by - 5, bx + 3, by - 8, "r");
+  im.px(bx + 3, by - 9, "s").px(bx + 4, by - 9, "o").px(bx + 3, by - 10, lit ? "S" : "o");
+  im.outline("k");
+  return im;
+}
+export const BEETLE = {
+  walk: [{ step: 1 }, { step: 0, bob: -1 }, { step: -1 }, { step: 0, bob: -1 }],
+  fuse: [{ lit: 1 }, { lit: 2, bob: -1 }],
+  hurt: [{ face: "hurt", bob: 1 }],
+};
+export const BEETLE_T = { walk: [80, 80, 80, 80], fuse: [90, 90], hurt: [120] };
 export const SKEL = {
   idle: [{ bob: 0 }, { bob: 1, swordA: 0.55 }],
   walk: [{ step: -1, bob: 0 }, { step: 0, bob: 1 }, { step: 1, bob: 0 }, { step: 0, bob: 1 }],

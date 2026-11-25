@@ -1,6 +1,6 @@
 import { ENEMIES, type EnemyKind } from "./enemies";
 
-type MobKind = Exclude<EnemyKind, "boss">;
+export type MobKind = Exclude<EnemyKind, "boss">;
 
 export interface WaveDef {
   durationMs: number;
@@ -41,10 +41,39 @@ const AUTHORED: Omit<WaveDef, "pressure">[] = [
   { durationMs: 38000, weights: { slime: 2, bat: 2, skeleton: 2 }, maxAlive: 14, group: [1, 3], elites: 1, hpMul: 1.06 },
   { durationMs: 38000, weights: { slime: 2, bat: 2, skeleton: 2, golem: 0.4 }, maxAlive: 16, group: [1, 3], elites: 1, hpMul: 1.1 },
   { durationMs: 40000, weights: { slime: 2, bat: 2.5, skeleton: 2, golem: 0.6 }, maxAlive: 19, group: [2, 3], elites: 1, hpMul: 1.14 },
-  { durationMs: 40000, weights: { slime: 2, bat: 3, skeleton: 2.5, golem: 0.8 }, maxAlive: 22, group: [2, 3], elites: 2, hpMul: 1.18 },
-  { durationMs: 42000, weights: { slime: 2, bat: 3, skeleton: 3, golem: 1 }, maxAlive: 25, group: [2, 4], elites: 2, hpMul: 1.22 },
+  { durationMs: 40000, weights: { slime: 1.5, bat: 3, skeleton: 2.5, golem: 0.8, bigslime: 3 }, maxAlive: 22, group: [2, 3], elites: 2, hpMul: 1.18 },
+  { durationMs: 42000, weights: { slime: 2, bat: 3, skeleton: 3, golem: 1, bigslime: 1 }, maxAlive: 25, group: [2, 4], elites: 2, hpMul: 1.22 },
   { durationMs: 30000, weights: { slime: 2, bat: 2 }, maxAlive: 7, group: [1, 2], elites: 0, boss: true, hpMul: 1.25 },
 ];
+
+/**
+ * v1.10.0: a new monster every couple of waves after the golem (wave 6), so long runs keep changing: waves
+ * 1-7 are unchanged, then the Big Slime (8), the Guardian (10), the Fire Imp (12), the Bomb Beetle (14) and
+ * the Shield Knight (16). The wave that brings one in features it (weight 3) and opens with it.
+ */
+export const NEW_MONSTERS: Partial<Record<number, MobKind>> = { 8: "bigslime", 12: "imp", 14: "beetle", 16: "knight" };
+export const MONSTER_INFO: Partial<Record<MobKind, { name: string; tip: string }>> = {
+  bigslime: { name: "BIG SLIME", tip: "Big Slimes split into three little slimes when popped!" },
+  imp: { name: "FIRE IMP", tip: "Fire can't hurt Fire Imps. Use Ice, Lightning or Arcane!" },
+  beetle: { name: "BOMB BEETLE", tip: "Pop Bomb Beetles early and they blast the monsters around them!" },
+  knight: { name: "SHIELD KNIGHT", tip: "Shield Knights block the first hit. Break the shield, then strike!" },
+};
+/** endless waves: each newer monster joins the mix from its wave on, with this weight */
+const LATE: [MobKind, number, number][] = [["bigslime", 8, 1], ["imp", 12, 0.8], ["beetle", 14, 0.9], ["knight", 16, 1]];
+/** from wave 17 every monster is known: each wave features a different one, so no two waves in a row look alike */
+const FEATURED: MobKind[] = ["imp", "beetle", "knight", "bigslime", "golem", "skeleton", "bat"];
+
+function endlessWeights(wave: number, base: WaveDef["weights"]): WaveDef["weights"] {
+  const w: WaveDef["weights"] = { ...base };
+  for (const [k, from, weight] of LATE) if (wave >= from) w[k] = Math.max(w[k] ?? 0, weight);
+  const intro = NEW_MONSTERS[wave];
+  if (intro) w[intro] = 3;
+  else if (wave >= 17) {
+    const f = FEATURED[(wave - 17) % FEATURED.length];
+    w[f] = (w[f] ?? 1) * 2.2;
+  }
+  return w;
+}
 
 export function waveDef(wave: number): WaveDef {
   if (wave <= AUTHORED.length) {
@@ -58,6 +87,7 @@ export function waveDef(wave: number): WaveDef {
   const base = AUTHORED[5 + ((loop - 1) % 4)];
   return {
     ...base,
+    weights: endlessWeights(wave, base.weights),
     pressure: pressureFor(wave),
     maxAlive: Math.min(30, Math.round(base.maxAlive + loop * 0.8)),
     elites: base.elites + Math.floor(loop / 4),
@@ -69,7 +99,9 @@ export function waveDef(wave: number): WaveDef {
 export function avgSpawnHp(d: WaveDef) {
   const ws = Object.entries(d.weights) as [MobKind, number][];
   const total = ws.reduce((a, [, w]) => a + w, 0);
-  return (ws.reduce((a, [k, w]) => a + ENEMIES[k].hp * w, 0) / total) * d.hpMul;
+  // a Big Slime brings its three slimes with it
+  const hp = (k: MobKind) => ENEMIES[k].hp + (ENEMIES[k].split ? ENEMIES[k].split!.n * ENEMIES[ENEMIES[k].split!.kind].hp : 0);
+  return (ws.reduce((a, [k, w]) => a + hp(k) * w, 0) / total) * d.hpMul;
 }
 
 /** milliseconds between spawn events so that HP arrives at `pressure` per second */

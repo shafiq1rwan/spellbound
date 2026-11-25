@@ -1,0 +1,52 @@
+Spellbound Arena — Poki thumbnail v2 prompt (draft, not generated yet)
+
+Why v2: v1 reads as a calm scene on a dark tile (small wizard in a corner, one cute slime). Popular Poki
+thumbnails use a very large character, a bright background and a glimpse of the gameplay. v2 keeps the same
+wizard, slimes and pixel-art style, and changes the staging: big hero, bright glow, a crowd of enemies, and
+the drawn rune as the hook. Keep v1 for comparison; Poki can A/B thumbnails only between tests.
+
+Use case: ads-marketing
+Asset type: final square static thumbnail for Poki for the actual pixel-art game Spellbound Arena.
+Primary request: Create a bold, bright, instantly readable 1:1 full-bleed game thumbnail that says "draw a
+rune, unleash magic, survive the horde" in one glance at 94px. Match the game's pixel-art character identity.
+Input images: wizard_idle.png (reference for the exact default wizard, show ONE wizard), slime.png (reference
+for the green slime), a gameplay screenshot (reference for palette and the orange triangle stroke, NOT a UI
+to copy).
+
+Subject: the wizard is HUGE: head, hat and shoulders fill roughly 55–65% of the image height, placed
+lower-center, three-quarter view, leaning forward in a confident power pose, staff thrust toward the upper
+right. Bent pointed purple hat with gold band and gold glint, purple robe with gold trim, black face in
+shadow with two large glowing cyan square eyes (the eyes are the expressive focal point; slightly narrowed,
+determined). Staff capped with a blazing orange crystal. No human face, beard or nose.
+
+Action (what the game is about): above the staff, a large glowing orange triangle rune is being drawn: two
+sides finished and bright, the third side still being traced, with a sparkling bright tip at the end of the
+stroke so it reads as hand-drawn. From the triangle, a big yellow-white cored fireball bursts toward the
+enemies.
+
+Enemies: a crowd of 6–9 green leaf-topped slimes (plus 1–2 of the game's bats; add bat.png as a reference) pouring in from the upper right and
+the edges, varied sizes, the nearest two large and alarmed with wide eyes, the rest smaller behind them, so
+the danger and the "horde" are obvious. The front slime is about to be hit by the fireball.
+
+Background: BRIGHT and saturated, not dark: a radiant burst of warm gold-to-magenta magical light behind the
+wizard's hat, fading to a vivid violet-blue sky-glow at the edges, over a simplified light-stone arena floor
+with a glowing rune circle under the wizard. High contrast between the purple wizard and the light glow
+behind the wizard (thin bright rimlight on the wizard's silhouette).
+
+Style: polished chunky pixel art, crisp visible pixel clusters, hue-shifted shading, dark pixel outlines,
+faithful to the game rather than smooth 3D/anime. Key-art staging: bigger, cleaner and brighter than
+gameplay.
+
+Composition: three readable shapes only: the big wizard (bottom-left/center), the orange triangle + fireball
+(center-right), the slime horde (top-right). Strong diagonal from staff through triangle to the horde.
+Essential elements inside the central 80% so corner rounding doesn't clip them. Check it at 94px: the
+wizard's hat and eyes, the triangle and the green crowd must all still read.
+
+Text: none.
+Constraints: square, at least 1024x1024, opaque, edge-to-edge. No words, title, letters, numbers, logo,
+watermark, border, padding, rounded corners, HUD, health bars, buttons, arrows, cursor or hand overlay,
+split panels, bosses, unrelated enemies or powers, photorealism, smooth vector look, misleading 3D.
+
+Variant B (optional, same prompt with these changes): wizard centered and facing the viewer, triangle rune
+blazing directly above the hat, slimes closing in from BOTH sides in a ring, background a bright radial
+gold/pink burst. Reads as "surrounded, and about to blast them all".

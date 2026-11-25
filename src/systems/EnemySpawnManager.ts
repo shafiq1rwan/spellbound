@@ -1,10 +1,10 @@
 // Waves: spawns just outside the visible camera rect (consistent relative to the viewport),
 // never too close to the wizard, honours spawn caps and eases off while the player is drawing.
 import { GAME } from "../config/game";
-import { waveDef, spawnIntervalMs, type WaveDef } from "../config/waves";
+import { waveDef, spawnIntervalMs, NEW_MONSTERS, MONSTER_INFO, type WaveDef, type MobKind } from "../config/waves";
 import { PAL } from "../config/palette";
 import { SPELLS, SPELL_ORDER } from "../config/spells";
-import type { EnemyKind } from "../config/enemies";
+import { ENEMIES, type EnemyKind } from "../config/enemies";
 import { Audio } from "../core/Audio";
 import { bus, EV } from "../core/bus";
 import { Analytics, cap } from "../core/Analytics";
@@ -24,6 +24,9 @@ export class EnemySpawnManager {
   private breakT = Number.POSITIVE_INFINITY;
   bossAlive = false;
   enabled = true;
+  /** v1.10.0: the monster this wave introduces opens the wave (first spawn), once per run */
+  private introKind?: MobKind;
+  private introduced = new Set<MobKind>();
 
   constructor(g: GameScene) {
     this.g = g;
@@ -46,7 +49,21 @@ export class EnemySpawnManager {
       Analytics.track("rune", SPELLS[unlock].rune, "visible", "run");
       bus.emit(EV.UNLOCK, unlock);
     } else {
-      bus.emit(EV.WAVE_BANNER, `WAVE ${n}`, this.def.boss ? "A GUARDIAN STIRS..." : this.def.elites ? "ELITES APPROACH" : "", this.def.boss ? PAL.pink : PAL.gold);
+      const intro = NEW_MONSTERS[n];
+      const info = intro && !this.introduced.has(intro) ? MONSTER_INFO[intro] : undefined;
+      if (intro && info) {
+        this.introduced.add(intro);
+        this.introKind = intro;
+        bus.emit(EV.WAVE_BANNER, `WAVE ${n}`, `NEW: ${info.name}`, PAL.fireOrange);
+        Analytics.track("enemy", `new-${intro}`, "reached", "run");
+        // the tip once the monster is on screen; a level-up clears hints, so wait for the cards to close
+        const tip = () => {
+          if (this.g.over) return;
+          if (this.g.levelingUp) this.g.time.delayedCall(700, tip);
+          else bus.emit(EV.HINT, info.tip, 4500);
+        };
+        this.g.time.delayedCall(2600, tip);
+      } else bus.emit(EV.WAVE_BANNER, `WAVE ${n}`, this.def.boss ? "A GUARDIAN STIRS..." : this.def.elites ? "ELITES APPROACH" : "", this.def.boss ? PAL.pink : PAL.gold);
     }
     if (this.def.boss) {
       this.g.time.delayedCall(1800, () => {
@@ -84,8 +101,16 @@ export class EnemySpawnManager {
     return e;
   }
 
-  private pickKind(): Exclude<EnemyKind, "boss"> {
-    const ws = Object.entries(this.def.weights) as [Exclude<EnemyKind, "boss">, number][];
+  /** `queued`: kinds already picked for this spawn group (they appear 140 ms apart, so not alive yet) */
+  private pickKind(queued: MobKind[] = []): Exclude<EnemyKind, "boss"> {
+    // kinds at their own cap (the Fire Imp) sit this spawn out
+    const full = (k: MobKind) => {
+      const cap = ENEMIES[k].maxAlive;
+      return cap !== undefined && this.g.enemies.filter((e) => e.alive && e.kind === k).length + queued.filter((q) => q === k).length >= cap;
+    };
+    let ws = Object.entries(this.def.weights) as [Exclude<EnemyKind, "boss">, number][];
+    if (ws.some(([k]) => full(k))) ws = ws.filter(([k]) => !full(k));
+    if (!ws.length) return "slime";
     const total = ws.reduce((a, [, w]) => a + w, 0);
     let r = Math.random() * total;
     for (const [k, w] of ws) { r -= w; if (r <= 0) return k; }
@@ -122,13 +147,16 @@ export class EnemySpawnManager {
     const [g0, g1] = this.def.group;
     const n = Math.min(this.def.maxAlive - alive, g0 + Math.floor(Math.random() * (g1 - g0 + 1)));
     const p = this.edgePoint();
-    const kind = this.pickKind();
+    const kind = this.introKind ?? this.pickKind();
+    this.introKind = undefined;
+    const queued: MobKind[] = [kind];
     for (let i = 0; i < n; i++) {
       // elites are guaranteed: spread across the wave once the first 30% has passed
       const due = this.def.elites - this.elitesLeft < Math.floor((this.waveT / this.def.durationMs - 0.3) / 0.7 * this.def.elites) + 1;
       const elite = this.elitesLeft > 0 && this.waveT > this.def.durationMs * 0.3 && i === 0 && due;
       if (elite) this.elitesLeft--;
-      const k = i === 0 ? kind : this.pickKind();
+      const k = i === 0 ? kind : this.pickKind(queued);
+      if (i > 0) queued.push(k);
       this.g.time.delayedCall(i * 140, () => !this.g.over && this.spawnAt(k, p.x + (Math.random() - 0.5) * 22, p.y + (Math.random() - 0.5) * 22, elite));
     }
   }

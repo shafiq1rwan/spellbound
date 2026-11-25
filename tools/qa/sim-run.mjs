@@ -22,6 +22,10 @@ await p.evaluate(({ castMs, miss, smart }) => {
   const game = window.__game;
   const log = (window.__sim = { waves: {}, events: [] });
   let lastWave = 0;
+  // hearts lost, by what hit the wizard
+  const g0 = game.scene.getScene("Game"), hurt = g0.damagePlayer.bind(g0);
+  log.hits = {};
+  g0.damagePlayer = (n, x, y, ig, src) => { const r = hurt(n, x, y, ig, src); if (r) log.hits[src] = (log.hits[src] ?? 0) + n; return r; };
   setInterval(() => {
     const g = game.scene.getScene("Game");
     if (!g || !g.sys.isActive() || g.over) return;
@@ -41,6 +45,8 @@ await p.evaluate(({ castMs, miss, smart }) => {
     else if (ready("lightning") && ts.length >= 2) id = "lightning";
     else if (ready("nova") && near(40) >= 1) id = "nova";
     const t = ts.reduce((a, c) => (Math.hypot(c.x - w.x, c.y - w.y) < Math.hypot(a.x - w.x, a.y - w.y) ? c : a));
+    // v1.10.0: a player who has read the tip doesn't throw Fire at a Fire Imp
+    if (smart && id === "fireball" && t.kind === "imp") id = ["lightning", "arcane", "nova"].find(ready) ?? id;
     g.spells.cast(id, t.x, t.y - t.height);
   }, castMs);
   // pick upgrade cards like a player would (after the input delay)
@@ -66,7 +72,8 @@ while ((Date.now() - t0) / 1000 < maxSec) {
   last = line;
   if (s.over) break;
 }
-const fin = await p.evaluate(() => { const g = window.__game.scene.getScene("Game"); return { over: g.over, wave: g.wave, t: Math.round(g.stats.timeMs / 1000), kills: g.stats.kills, lvl: g.xp.level, waves: window.__sim.waves }; });
+const fin = await p.evaluate(() => { const g = window.__game.scene.getScene("Game"); return { over: g.over, wave: g.wave, t: Math.round(g.stats.timeMs / 1000), kills: g.stats.kills, lvl: g.xp.level, waves: window.__sim.waves, hits: window.__sim.hits }; });
 console.log(`\nRESULT: ${fin.over ? "died" : "alive"} in wave ${fin.wave} at ${fin.t}s, level ${fin.lvl}, ${fin.kills} kills`);
+console.log("hearts lost to:", Object.entries(fin.hits).sort((a, b) => b[1] - a[1]).map(([k, v]) => `${k} ${v}`).join(", "));
 console.log("wave starts (time s, hearts):", Object.entries(fin.waves).map(([w, v]) => `W${w}@${v.t}s/${v.hp}♥`).join("  "));
 await b.close();

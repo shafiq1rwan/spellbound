@@ -723,6 +723,590 @@
     0.9453125
    ]
   },
+  "bigslime": {
+   "file": "bigslime.png",
+   "fw": 48,
+   "fh": 48,
+   "anims": {
+    "idle": {
+     "frames": [
+      0,
+      1,
+      2,
+      3
+     ],
+     "durations": [
+      200,
+      200,
+      200,
+      200
+     ],
+     "repeat": -1
+    },
+    "hop": {
+     "frames": [
+      4,
+      5,
+      6,
+      7,
+      8,
+      9
+     ],
+     "durations": [
+      150,
+      110,
+      150,
+      120,
+      130,
+      160
+     ],
+     "repeat": 0
+    },
+    "hurt": {
+     "frames": [
+      10,
+      11
+     ],
+     "durations": [
+      80,
+      100
+     ],
+     "repeat": 0
+    },
+    "death": {
+     "frames": [
+      12,
+      13,
+      14
+     ],
+     "durations": [
+      80,
+      90,
+      130
+     ],
+     "repeat": 0
+    }
+   },
+   "origin": [
+    0.5104166666666666,
+    0.9375
+   ]
+  },
+  "bigslime_elite": {
+   "file": "bigslime_elite.png",
+   "fw": 48,
+   "fh": 48,
+   "anims": {
+    "idle": {
+     "frames": [
+      0,
+      1,
+      2,
+      3
+     ],
+     "durations": [
+      200,
+      200,
+      200,
+      200
+     ],
+     "repeat": -1
+    },
+    "hop": {
+     "frames": [
+      4,
+      5,
+      6,
+      7,
+      8,
+      9
+     ],
+     "durations": [
+      150,
+      110,
+      150,
+      120,
+      130,
+      160
+     ],
+     "repeat": 0
+    },
+    "hurt": {
+     "frames": [
+      10,
+      11
+     ],
+     "durations": [
+      80,
+      100
+     ],
+     "repeat": 0
+    },
+    "death": {
+     "frames": [
+      12,
+      13,
+      14
+     ],
+     "durations": [
+      80,
+      90,
+      130
+     ],
+     "repeat": 0
+    }
+   },
+   "origin": [
+    0.5104166666666666,
+    0.9375
+   ]
+  },
+  "imp": {
+   "file": "imp.png",
+   "fw": 32,
+   "fh": 32,
+   "anims": {
+    "fly": {
+     "frames": [
+      0,
+      1,
+      2,
+      3
+     ],
+     "durations": [
+      90,
+      80,
+      90,
+      80
+     ],
+     "repeat": -1
+    },
+    "attack": {
+     "frames": [
+      4,
+      5
+     ],
+     "durations": [
+      400,
+      200
+     ],
+     "repeat": 0
+    },
+    "hurt": {
+     "frames": [
+      6
+     ],
+     "durations": [
+      140
+     ],
+     "repeat": 0
+    }
+   },
+   "origin": [
+    0.5,
+    0.5
+   ]
+  },
+  "imp_elite": {
+   "file": "imp_elite.png",
+   "fw": 32,
+   "fh": 32,
+   "anims": {
+    "fly": {
+     "frames": [
+      0,
+      1,
+      2,
+      3
+     ],
+     "durations": [
+      90,
+      80,
+      90,
+      80
+     ],
+     "repeat": -1
+    },
+    "attack": {
+     "frames": [
+      4,
+      5
+     ],
+     "durations": [
+      400,
+      200
+     ],
+     "repeat": 0
+    },
+    "hurt": {
+     "frames": [
+      6
+     ],
+     "durations": [
+      140
+     ],
+     "repeat": 0
+    }
+   },
+   "origin": [
+    0.5,
+    0.5
+   ]
+  },
+  "imp_shot": {
+   "file": "imp_shot.png",
+   "fw": 14,
+   "fh": 14,
+   "anims": {
+    "spin": {
+     "frames": [
+      0,
+      1,
+      2,
+      3
+     ],
+     "durations": [
+      80,
+      80,
+      80,
+      80
+     ],
+     "repeat": -1
+    }
+   },
+   "origin": [
+    0.5,
+    0.5
+   ]
+  },
+  "beetle": {
+   "file": "beetle.png",
+   "fw": 32,
+   "fh": 32,
+   "anims": {
+    "walk": {
+     "frames": [
+      0,
+      1,
+      2,
+      3
+     ],
+     "durations": [
+      80,
+      80,
+      80,
+      80
+     ],
+     "repeat": -1
+    },
+    "fuse": {
+     "frames": [
+      4,
+      5
+     ],
+     "durations": [
+      90,
+      90
+     ],
+     "repeat": -1
+    },
+    "hurt": {
+     "frames": [
+      6
+     ],
+     "durations": [
+      120
+     ],
+     "repeat": 0
+    }
+   },
+   "origin": [
+    0.484375,
+    0.859375
+   ]
+  },
+  "beetle_elite": {
+   "file": "beetle_elite.png",
+   "fw": 32,
+   "fh": 32,
+   "anims": {
+    "walk": {
+     "frames": [
+      0,
+      1,
+      2,
+      3
+     ],
+     "durations": [
+      80,
+      80,
+      80,
+      80
+     ],
+     "repeat": -1
+    },
+    "fuse": {
+     "frames": [
+      4,
+      5
+     ],
+     "durations": [
+      90,
+      90
+     ],
+     "repeat": -1
+    },
+    "hurt": {
+     "frames": [
+      6
+     ],
+     "durations": [
+      120
+     ],
+     "repeat": 0
+    }
+   },
+   "origin": [
+    0.484375,
+    0.859375
+   ]
+  },
+  "knight": {
+   "file": "knight.png",
+   "fw": 48,
+   "fh": 48,
+   "anims": {
+    "idle": {
+     "frames": [
+      0,
+      1
+     ],
+     "durations": [
+      300,
+      300
+     ],
+     "repeat": -1
+    },
+    "walk": {
+     "frames": [
+      2,
+      3,
+      4,
+      5
+     ],
+     "durations": [
+      130,
+      130,
+      130,
+      130
+     ],
+     "repeat": -1
+    },
+    "attack": {
+     "frames": [
+      6,
+      7,
+      8
+     ],
+     "durations": [
+      260,
+      90,
+      200
+     ],
+     "repeat": 0
+    },
+    "hurt": {
+     "frames": [
+      9
+     ],
+     "durations": [
+      140
+     ],
+     "repeat": 0
+    }
+   },
+   "origin": [
+    0.5,
+    0.9270833333333334
+   ]
+  },
+  "knight_bare": {
+   "file": "knight_bare.png",
+   "fw": 48,
+   "fh": 48,
+   "anims": {
+    "idle": {
+     "frames": [
+      0,
+      1
+     ],
+     "durations": [
+      300,
+      300
+     ],
+     "repeat": -1
+    },
+    "walk": {
+     "frames": [
+      2,
+      3,
+      4,
+      5
+     ],
+     "durations": [
+      130,
+      130,
+      130,
+      130
+     ],
+     "repeat": -1
+    },
+    "attack": {
+     "frames": [
+      6,
+      7,
+      8
+     ],
+     "durations": [
+      260,
+      90,
+      200
+     ],
+     "repeat": 0
+    },
+    "hurt": {
+     "frames": [
+      9
+     ],
+     "durations": [
+      140
+     ],
+     "repeat": 0
+    }
+   },
+   "origin": [
+    0.5,
+    0.9270833333333334
+   ]
+  },
+  "knight_elite": {
+   "file": "knight_elite.png",
+   "fw": 48,
+   "fh": 48,
+   "anims": {
+    "idle": {
+     "frames": [
+      0,
+      1
+     ],
+     "durations": [
+      300,
+      300
+     ],
+     "repeat": -1
+    },
+    "walk": {
+     "frames": [
+      2,
+      3,
+      4,
+      5
+     ],
+     "durations": [
+      130,
+      130,
+      130,
+      130
+     ],
+     "repeat": -1
+    },
+    "attack": {
+     "frames": [
+      6,
+      7,
+      8
+     ],
+     "durations": [
+      260,
+      90,
+      200
+     ],
+     "repeat": 0
+    },
+    "hurt": {
+     "frames": [
+      9
+     ],
+     "durations": [
+      140
+     ],
+     "repeat": 0
+    }
+   },
+   "origin": [
+    0.5,
+    0.9270833333333334
+   ]
+  },
+  "knight_elite_bare": {
+   "file": "knight_elite_bare.png",
+   "fw": 48,
+   "fh": 48,
+   "anims": {
+    "idle": {
+     "frames": [
+      0,
+      1
+     ],
+     "durations": [
+      300,
+      300
+     ],
+     "repeat": -1
+    },
+    "walk": {
+     "frames": [
+      2,
+      3,
+      4,
+      5
+     ],
+     "durations": [
+      130,
+      130,
+      130,
+      130
+     ],
+     "repeat": -1
+    },
+    "attack": {
+     "frames": [
+      6,
+      7,
+      8
+     ],
+     "durations": [
+      260,
+      90,
+      200
+     ],
+     "repeat": 0
+    },
+    "hurt": {
+     "frames": [
+      9
+     ],
+     "durations": [
+      140
+     ],
+     "repeat": 0
+    }
+   },
+   "origin": [
+    0.5,
+    0.9270833333333334
+   ]
+  },
   "boss": {
    "file": "boss.png",
    "fw": 96,
@@ -1505,6 +2089,8 @@
   }
  },
  "images": {
+  "shield0": "shield0.png",
+  "shield1": "shield1.png",
   "boss_hand": "boss_hand.png",
   "boss_frag0": "boss_frag0.png",
   "boss_frag1": "boss_frag1.png",

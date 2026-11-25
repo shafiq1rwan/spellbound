@@ -1,0 +1,17 @@
+Spellbound Arena — Poki thumbnail v3
+
+Use case: ads-marketing
+Asset type: final square static game thumbnail for Poki.
+Primary request: Create a bright, high-contrast pixel-art thumbnail that reads instantly at 94 × 94 px. Communicate the game's core fantasy in one frame: a tiny rune-drawing wizard unleashes fire at an approaching slime.
+
+Reference images: use wizard_idle.png only for the exact playable wizard identity and pixel-art palette; show one wizard. Use slime.png only for the game's slime identity; show one main slime. Use the current thumbnail only as a style and world reference, not as a composition to preserve.
+
+Composition: bold close-up face-off, cropped full bleed. The wizard fills the left half, seen from the chest up; make the bent purple hat, gold band, and two large cyan square eyes unmistakable. One large bright green leaf-topped slime fills the right half, with expressive eyes and a readable leaf. Keep both faces large and inside the central 80% of the square. Put a single orange hand-drawn triangle rune between them, smaller than either face, with a white-hot fireball traveling from the wizard through the rune toward the slime. Freeze the action a split second before impact. Make the fireball trail a clear diagonal that connects the three shapes.
+
+Background: bright saturated gold-to-magenta magical burst directly behind the faces, fading to violet at the outer edges. Keep the background simple and luminous so purple wizard, green slime, orange rune, and white-yellow fireball separate cleanly. Add a few chunky square sparks only.
+
+Style: polished chunky pixel art with crisp square pixel clusters, limited hue-shifted ramps, dark pixel outlines, and the game's cute mysterious tone. Preserve the wizard's shadowed face, purple robe and hat, gold trim, cyan eyes; preserve the slime's green body and leaf. At thumbnail size prioritize the two faces and the fireball trajectory.
+
+Constraints: exact 1:1 square, opaque, edge-to-edge, at least 1024 × 1024. No title, text, letters, numbers, logo, watermark, border, padding, rounded corners, HUD, health bars, buttons, arrows, cursor, hand overlay, split panels, extra characters, enemy crowd, boss, unrelated spell, photorealism, smooth vector style, 3D rendering, tiny details, or dark low-contrast background.
+
+Success check: downscaled to 94 × 94 px, the wizard's cyan eyes, one big slime, and the connected triangle/fireball action are all immediately readable.
