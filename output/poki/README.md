@@ -1,8 +1,12 @@
 # Spellbound Arena — Poki thumbnail
 
-Recommended upload: `spellbound-arena-thumbnail-1024-v1.png`.
+Recommended upload (25 November 2026): `spellbound-arena-thumbnail-1024-v4.png`
+(alternate size `spellbound-arena-thumbnail-628-v4.png`). v4 is a close-up face-off: the wizard's
+hood and staff bottom-left, the glowing fire triangle in the middle, a big surprised slime top-right,
+on a bright blue arena floor. It replaces v1 after the Web Fit test (3k plays in a week, 0.11% CTR
+from categories); compare its CTR with v1's in the next test.
 
-Alternate upload size: `spellbound-arena-thumbnail-628-v1.png`.
+Previous: `spellbound-arena-thumbnail-1024-v1.png` / `-628-v1.png` (described below).
 The master preserves the generated image; the 94px export is a small-tile review preview.
 
 Created with the built-in image generation tool, using the project's wizard, slime, and gameplay screenshots as visual references. The complete generation prompt is in `thumbnail-prompt-v1.txt`.
